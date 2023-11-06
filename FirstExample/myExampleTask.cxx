@@ -15,6 +15,7 @@
 
 #include "Framework/runDataProcessing.h"
 #include "Framework/AnalysisTask.h"
+#include "Common/DataModel/TrackSelectionTables.h"
 
 using namespace o2;
 using namespace o2::framework;
@@ -33,11 +34,15 @@ struct myExampleTask {
     // create histograms
     histos.add("etaHistogram", "etaHistogram", kTH1F, {axisEta});
     histos.add("ptHistogram", "ptHistogram", kTH1F, {axisPt});
+    histos.add("hEventCounter", "hEventCounter", kTH1F, {{1, 0., 1.}});
   }
 
-  void process(aod::TracksIU const& tracks)
+  void process(aod::Collision const& collision, soa::Join<aod::Tracks, aod::TracksExtra, aod::TracksDCA> const& tracks)
   {
+    histos.fill(HIST("hEventCounter"), 0.5);
     for (auto& track : tracks) {
+      if( track.tpcNClsCrossedRows() < 70 ) continue; //badly tracked
+      if( fabs(track.dcaXY()) > 0.2) continue; //doesn’t point to primary vertex
       histos.fill(HIST("etaHistogram"), track.eta());
       histos.fill(HIST("ptHistogram"), track.pt());
     }
