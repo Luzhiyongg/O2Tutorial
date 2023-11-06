@@ -23,6 +23,7 @@ using namespace o2::framework;
 using namespace o2::framework::expressions;
 
 #include "Framework/runDataProcessing.h"
+#include "Framework/ASoAHelpers.h" // For Filter
 
 struct DerivedBasicConsumer {
   /// Function to aid in calculating delta-phi
@@ -40,6 +41,9 @@ struct DerivedBasicConsumer {
     return deltaPhi;
   }
 
+  //Filter
+  Filter collZfilter = nabs(aod::collision::posZ)<10.0f;
+
   // Histogram registry: an object to hold your histograms
   HistogramRegistry histos{"histos", {}, OutputObjHandlingPolicy::AnalysisObject};
 
@@ -47,12 +51,16 @@ struct DerivedBasicConsumer {
   {
     // define axes you want to use
     const AxisSpec axisCounter{1, 0, +1, ""};
+    const AxisSpec axisVertexZ{300, -15, +15, "z (cm)"};
+
     histos.add("eventCounter", "eventCounter", kTH1F, {axisCounter});
+    histos.add("VertexZ", "VertexZ", kTH1F, {axisVertexZ});
   }
 
-  void process(aod::DrCollision const& collision)
+  void process(soa::Filtered<aod::DrCollisions>::iterator const& collision, aod::DrTracks const& tracks)
   {
     histos.fill(HIST("eventCounter"), 0.5);
+    histos.fill(HIST("VertexZ"), collision.posZ());
   }
 };
 
