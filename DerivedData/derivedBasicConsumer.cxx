@@ -41,8 +41,14 @@ struct DerivedBasicConsumer {
     return deltaPhi;
   }
 
+  SliceCache cache;
+
   //Filter
   Filter collZfilter = nabs(aod::collision::posZ)<10.0f;
+
+  //Partition
+  Partition<aod::DrTracks> associatedTracks = aod::exampleTrackSpace::pt < 6.0f && aod::exampleTrackSpace::pt > 4.0f;
+  Partition<aod::DrTracks> triggerTracks = aod::exampleTrackSpace::pt > 6.0f;
 
   // Histogram registry: an object to hold your histograms
   HistogramRegistry histos{"histos", {}, OutputObjHandlingPolicy::AnalysisObject};
@@ -52,15 +58,33 @@ struct DerivedBasicConsumer {
     // define axes you want to use
     const AxisSpec axisCounter{1, 0, +1, ""};
     const AxisSpec axisVertexZ{300, -15, +15, "z (cm)"};
+    const AxisSpec axisPt{100, 0., +10., "p_{T} (GeV/c)"};
+    const AxisSpec axisDeltaPhi{100, -0.5*TMath::Pi(), +1.5*TMath::Pi(), "#Delta#phi"};
+    const AxisSpec axisDeltaEta{100, -1.0, +1.0, "#Delta#eta"};
 
     histos.add("eventCounter", "eventCounter", kTH1F, {axisCounter});
     histos.add("VertexZ", "VertexZ", kTH1F, {axisVertexZ});
+    histos.add("ptAssoHistogram", "ptAssoHistogram", kTH1F, {axisPt});
+    histos.add("ptTrigHistogram", "ptTrigHistogram", kTH1F, {axisPt});
+    histos.add("ptHistogram", "ptHistogram", kTH1F, {axisPt});
+
   }
 
   void process(soa::Filtered<aod::DrCollisions>::iterator const& collision, aod::DrTracks const& tracks)
   {
     histos.fill(HIST("eventCounter"), 0.5);
     histos.fill(HIST("VertexZ"), collision.posZ());
+
+    for (auto& track : tracks){
+      histos.fill(HIST("ptHistogram"), track.pt());
+    }
+
+    auto assoTracksThisCollision = associatedTracks->sliceByCached(aod::exampleTrackSpace::drCollisionId, collision.globalIndex(), cache);
+    auto trigTracksThisCollision = triggerTracks->sliceByCached(aod::exampleTrackSpace::drCollisionId, collision.globalIndex(), cache);
+    for (auto& track : assoTracksThisCollision)
+      histos.fill(HIST("ptAssoHistogram"), track.pt());
+    for (auto& track : trigTracksThisCollision)
+      histos.fill(HIST("ptTrigHistogram"), track.pt());
   }
 };
 
