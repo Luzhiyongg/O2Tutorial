@@ -22,12 +22,13 @@ using namespace o2::framework;
 struct myExampleTask {
   // Histogram registry: an object to hold your histograms
   HistogramRegistry histos{"histos", {}, OutputObjHandlingPolicy::AnalysisObject};
+  Configurable<int> nBinsPt{"nBinsPt", 100, "N bins in pt histo"};
 
   void init(InitContext const&)
   {
     // define axes you want to use
     const AxisSpec axisEta{30, -1.5, +1.5, "#eta"};
-    const AxisSpec axisPt{100, 0., +10., "p_T (GeV/c)"};
+    const AxisSpec axisPt{nBinsPt, 0., +10., "p_T (GeV/c)"};
 
     // create histograms
     histos.add("etaHistogram", "etaHistogram", kTH1F, {axisEta});
