@@ -67,6 +67,8 @@ struct DerivedBasicConsumer {
     histos.add("ptAssoHistogram", "ptAssoHistogram", kTH1F, {axisPt});
     histos.add("ptTrigHistogram", "ptTrigHistogram", kTH1F, {axisPt});
     histos.add("ptHistogram", "ptHistogram", kTH1F, {axisPt});
+    histos.add("correlationFunction", "correlationFunction", kTH1F, {axisDeltaPhi});
+    histos.add("correlationFunction2d", "correlationFunction2d", kTH2F, {axisDeltaPhi, axisDeltaEta});
 
   }
 
@@ -85,6 +87,19 @@ struct DerivedBasicConsumer {
       histos.fill(HIST("ptAssoHistogram"), track.pt());
     for (auto& track : trigTracksThisCollision)
       histos.fill(HIST("ptTrigHistogram"), track.pt());
+
+    for (auto& [trigger, associated] :
+    combinations(o2::soa::CombinationsFullIndexPolicy(trigTracksThisCollision, assoTracksThisCollision))) {
+      histos.fill(HIST("correlationFunction"), ComputeDeltaPhi(trigger.phi(),associated.phi()));
+      histos.fill(HIST("correlationFunction2d"), ComputeDeltaPhi(trigger.phi(),associated.phi()),
+      trigger.eta() - associated.eta());
+    }
+    // //more faster then two level loop:
+    // for (auto& trigger : trigTracksThisCollision){
+    //   for (auto& associated : assoTracksThisCollision){
+    //     histos.fill(HIST("correlationFunction"), ComputeDeltaPhi(trigger.phi(),associated.phi()));
+    //   }
+    // }
   }
 };
 
