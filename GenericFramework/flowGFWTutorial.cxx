@@ -88,13 +88,31 @@ struct GfwTutorial {
     registry.add("c42", "", {HistType::kTProfile, {axisMultiplicity}});
     registry.add("c24", "", {HistType::kTProfile, {axisMultiplicity}});
     registry.add("c26", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("c22_gap04", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("c22_gap06", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("c22_gap08", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("c22_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
 
+    //eta region
     fGFW->AddRegion("full", -0.8, 0.8, 1, 1);
+    fGFW->AddRegion("refN04", -0.8, -0.2, 1, 1);//gap4 negative region
+    fGFW->AddRegion("refP04", 0.2, 0.8, 1, 1);//gap4 positve region
+    fGFW->AddRegion("refN06", -0.8, -0.3, 1, 1);//gap6 negative region
+    fGFW->AddRegion("refP06", 0.3, 0.8, 1, 1);//gap6 positve region
+    fGFW->AddRegion("refN08", -0.8, -0.4, 1, 1);
+    fGFW->AddRegion("refP08", 0.4, 0.8, 1, 1);
+    fGFW->AddRegion("refN10", -0.8, -0.5, 1, 1);
+    fGFW->AddRegion("refP10", 0.5, 0.8, 1, 1);
+
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {3 -3}", "ChFull32", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {4 -4}", "ChFull42", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 2 -2 -2}", "ChFull24", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 2 2 -2 -2 -2}", "CFull26", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {2} refP04 {-2}", "Ch04Gap22", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {2} refP06 {-2}", "Ch06Gap22", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {2} refP08 {-2}", "Ch08Gap22", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE));
     fGFW->CreateRegions();
   }
 
@@ -141,6 +159,10 @@ struct GfwTutorial {
     FillProfile(corrconfigs.at(2), HIST("c42"), cent);
     FillProfile(corrconfigs.at(3), HIST("c24"), cent);
     FillProfile(corrconfigs.at(4), HIST("c26"), cent);
+    FillProfile(corrconfigs.at(5), HIST("c22_gap04"), cent);
+    FillProfile(corrconfigs.at(6), HIST("c22_gap06"), cent);
+    FillProfile(corrconfigs.at(7), HIST("c22_gap08"), cent);
+    FillProfile(corrconfigs.at(8), HIST("c22_gap10"), cent);
   }
 };
 
