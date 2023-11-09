@@ -69,7 +69,7 @@ struct GfwTutorial {
   GFW* fGFW = new GFW();
   std::vector<GFW::CorrConfig> corrconfigs;
 
-  using aodCollisions = soa::Filtered<soa::Join<aod::Collisions, aod::EvSels, aod::CentRun2V0Ms>>;
+  using aodCollisions = soa::Filtered<soa::Join<aod::Collisions, aod::EvSels, aod::CentFT0Cs>>;
   using aodTracks = soa::Filtered<soa::Join<aod::Tracks, aod::TrackSelection, aod::TracksExtra>>;
 
   void init(InitContext const&)
@@ -138,17 +138,14 @@ struct GfwTutorial {
     int Ntot = tracks.size();
     if (Ntot < 1)
       return;
-    if (!collision.sel7())
-      return;
     float vtxz = collision.posZ();
     registry.fill(HIST("hVtxZ"), vtxz);
     registry.fill(HIST("hMult"), Ntot);
-    registry.fill(HIST("hCent"), collision.centRun2V0M());
+    registry.fill(HIST("hCent"),collision.centFT0C());
     fGFW->Clear();
-    const auto cent = collision.centRun2V0M();
+    const auto cent = collision.centFT0C();
     float weff = 1, wacc = 1;
     for (auto& track : tracks) {
-      double pt = track.pt();
       registry.fill(HIST("hPhi"), track.phi());
       registry.fill(HIST("hEta"), track.eta());
 
