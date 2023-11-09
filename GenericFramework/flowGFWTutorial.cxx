@@ -84,9 +84,13 @@ struct GfwTutorial {
     registry.add("hMult", "", {HistType::kTH1D, {{3000, 0.5, 3000.5}}});
     registry.add("hCent", "", {HistType::kTH1D, {{90, 0, 90}}});
     registry.add("c22", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("c32", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("c42", "", {HistType::kTProfile, {axisMultiplicity}});
 
     fGFW->AddRegion("full", -0.8, 0.8, 1, 1);
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {3 -3}", "ChFull32", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {4 -4}", "ChFull42", kFALSE));
     fGFW->CreateRegions();
   }
 
@@ -129,6 +133,8 @@ struct GfwTutorial {
 
     // Filling c22 with ROOT TProfile
     FillProfile(corrconfigs.at(0), HIST("c22"), cent);
+    FillProfile(corrconfigs.at(1), HIST("c32"), cent);
+    FillProfile(corrconfigs.at(2), HIST("c42"), cent);
   }
 };
 
