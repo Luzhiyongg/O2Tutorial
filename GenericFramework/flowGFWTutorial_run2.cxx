@@ -148,7 +148,6 @@ struct GfwTutorial {
     const auto cent = collision.centRun2V0M();
     float weff = 1, wacc = 1;
     for (auto& track : tracks) {
-      double pt = track.pt();
       registry.fill(HIST("hPhi"), track.phi());
       registry.fill(HIST("hEta"), track.eta());
 
