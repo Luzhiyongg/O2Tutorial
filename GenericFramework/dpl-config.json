@@ -7,48 +7,46 @@
         "start-value-enumeration": "0",
         "end-value-enumeration": "-1",
         "step-value-enumeration": "1",
-        "aod-file": "AO2D_LHC18q_converted.root"
+        "aod-file": "AO2D_LHC22s_apass5.root"
     },
     "internal-dpl-aod-spawner": "",
-    "collision-converter": {
-        "doNotSwap": "false",
-        "debug": "false",
-        "nbins": "1",
-        "tolerance": "0.00100000005"
-    },
     "bc-converter": "",
+    "internal-dpl-aod-index-builder": "",
     "timestamp-task": {
         "verbose": "false",
-        "rct-path": "RCT\/RunInformation",
+        "rct-path": "RCT\/Info\/RunInformation",
         "orbit-reset-path": "CTP\/Calib\/OrbitReset",
         "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
         "isRun2MC": "false"
     },
     "tracks-extra-converter": "",
-    "zdc-converter": "",
-    "internal-dpl-aod-index-builder": "",
-    "tracks-extra-spawner": "",
+    "track-propagation": {
+        "ccdb-url": "http:\/\/alice-ccdb.cern.ch",
+        "lutPath": "GLO\/Param\/MatLUT",
+        "geoPath": "GLO\/Config\/GeometryAligned",
+        "grpmagPath": "GLO\/Config\/GRPMagField",
+        "mVtxPath": "GLO\/Calib\/MeanVertex",
+        "minPropagationDistance": "83.0999985",
+        "processStandard": "true",
+        "processCovariance": "false"
+    },
     "bc-selection-task": {
         "triggerBcShift": "999",
         "ITSROFrameBorderMargin": "30",
-        "processRun2": "true",
-        "processRun3": "false"
+        "processRun2": "false",
+        "processRun3": "true"
     },
-    "track-extension": {
-        "compatibilityIU": "false",
-        "processRun2": "true",
-        "processRun3": "false"
-    },
+    "tracks-extra-spawner": "",
     "event-selection-task": {
         "syst": "PbPb",
         "muonSelection": "0",
         "customDeltaBC": "300",
         "isMC": "false",
-        "processRun2": "true",
-        "processRun3": "false"
+        "processRun2": "false",
+        "processRun3": "true"
     },
     "track-selection": {
-        "isRun3": "false",
+        "isRun3": "true",
         "produceTable": "-1",
         "produceFBextendedTable": "-1",
         "compatibilityIU": "false",
@@ -63,8 +61,8 @@
         "doVertexZeq": "1",
         "populateMultExtra": "true",
         "fractionOfEvents": "2",
-        "processRun2": "true",
-        "processRun3": "false"
+        "processRun2": "false",
+        "processRun3": "true"
     },
     "centrality-table": {
         "estRun2V0M": "-1",
@@ -84,8 +82,8 @@
         "genname": "",
         "doNotCrashOnNull": "false",
         "embedINELgtZEROselection": "false",
-        "processRun2": "true",
-        "processRun3": "false"
+        "processRun2": "false",
+        "processRun3": "true"
     },
     "gfw-tutorial": {
         "cfgCutVertex": "10",
@@ -152,7 +150,7 @@
                 "90"
             ]
         },
-        "ccdb-no-later-than": "1699523581719",
+        "ccdb-no-later-than": "1699531296505",
         "ccdb-url": "http:\/\/ccdb-test.cern.ch:8080"
     },
     "internal-dpl-aod-writer": "",
