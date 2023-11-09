@@ -92,6 +92,14 @@ struct GfwTutorial {
     registry.add("c22_gap06", "", {HistType::kTProfile, {axisMultiplicity}});
     registry.add("c22_gap08", "", {HistType::kTProfile, {axisMultiplicity}});
     registry.add("c22_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+    //pt differential flow
+    registry.add("d22_0_5", "", {HistType::kTProfile, {axisPt}});
+
+    //transfer to TAxis
+    o2::framework::AxisSpec axis = axisPt;
+    int nPtBins = axis.binEdges.size()-1;
+    double* PtBins= &(axis.binEdges)[0];
+    fPtAxis = new TAxis(nPtBins,PtBins);
 
     //eta region
     fGFW->AddRegion("full", -0.8, 0.8, 1, 1);
@@ -103,6 +111,10 @@ struct GfwTutorial {
     fGFW->AddRegion("refP08", 0.4, 0.8, 1, 1);
     fGFW->AddRegion("refN10", -0.8, -0.5, 1, 1);
     fGFW->AddRegion("refP10", 0.5, 0.8, 1, 1);
+    fGFW->AddRegion("refN", -0.8, -0.4, 1, 1);
+    fGFW->AddRegion("refP", 0.4, 0.8, 1, 1);
+    fGFW->AddRegion("poiN", -0.8, -0.4, 1+fPtAxis->GetNbins(), 2);// particle of interest
+    fGFW->AddRegion("olN", -0.8, -0.4, 1, 4);//overlap region
 
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {3 -3}", "ChFull32", kFALSE));
@@ -113,6 +125,8 @@ struct GfwTutorial {
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {2} refP06 {-2}", "Ch06Gap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {2} refP08 {-2}", "Ch08Gap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE));
+    //pt differential flow
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("poiN refN | olN {2} refP {-2}", "ChGap22", kTRUE));
     fGFW->CreateRegions();
   }
 
@@ -129,6 +143,14 @@ struct GfwTutorial {
         registry.fill(tarName, cent, val, dnx);
       return;
     }
+    if(cent < 0 || cent >= 5) return; //d22_0_5: only do pt differential in 0-5% centrality 
+    for(Int_t i=1;i<=fPtAxis->GetNbins();i++) {
+      dnx = fGFW->Calculate(corrconf,i-1,kTRUE).real();
+      if(dnx==0) continue;
+      val = fGFW->Calculate(corrconf,i-1,kFALSE).real()/dnx;
+      if(TMath::Abs(val)<1)
+        registry.fill(tarName,fPtAxis->GetBinCenter(i),val,dnx);
+    };
     return;
   }
 
