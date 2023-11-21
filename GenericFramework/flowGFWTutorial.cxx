@@ -25,6 +25,7 @@
 #include "GFWPowerArray.h"
 #include "GFW.h"
 #include "GFWCumulant.h"
+#include "FlowContainer.h"
 #include "TList.h"
 #include <TProfile.h>
 #include <TRandom3.h>
@@ -63,11 +64,14 @@ struct GfwTutorial {
   Configurable<std::string> url{"ccdb-url", "http://ccdb-test.cern.ch:8080", "url of the ccdb repository"};
 
   // Define output
+  OutputObj<FlowContainer> fFC{FlowContainer("FlowContainer")};
   HistogramRegistry registry{"registry"};
 
   // define global variables
   GFW* fGFW = new GFW();
   std::vector<GFW::CorrConfig> corrconfigs;
+  TAxis* fPtAxis;
+  TRandom3* fRndm = new TRandom3(0);
 
   using aodCollisions = soa::Filtered<soa::Join<aod::Collisions, aod::EvSels, aod::CentFT0Cs>>;
   using aodTracks = soa::Filtered<soa::Join<aod::Tracks, aod::TrackSelection, aod::TracksExtra>>;
@@ -94,6 +98,20 @@ struct GfwTutorial {
     registry.add("c22_gap08", "", {HistType::kTProfile, {axisMultiplicity}});
     registry.add("c22_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
 
+    o2::framework::AxisSpec axis = axisPt;
+    int nPtBins = axis.binEdges.size()-1;
+    double* PtBins= &(axis.binEdges)[0];
+    fPtAxis = new TAxis(nPtBins,PtBins);
+
+    TObjArray* oba = new TObjArray();
+    oba->Add(new TNamed("ChGap22", "ChGap22"));  
+    for(Int_t i=0;i<fPtAxis->GetNbins();i++)
+      oba->Add(new TNamed(Form("ChGap22_pt_%i",i+1),"ChGap22_pTDiff"));
+    fFC->SetName("FlowContainer");
+    fFC->SetXAxis(fPtAxis);
+    fFC->Initialize(oba, axisMultiplicity, cfgNbootstrap);
+    delete oba;
+
     //eta region
     fGFW->AddRegion("full", -0.8, 0.8, 1, 1);
     fGFW->AddRegion("refN04", -0.8, -0.2, 1, 1);//gap4 negative region
@@ -104,6 +122,10 @@ struct GfwTutorial {
     fGFW->AddRegion("refP08", 0.4, 0.8, 1, 1);
     fGFW->AddRegion("refN10", -0.8, -0.5, 1, 1);
     fGFW->AddRegion("refP10", 0.5, 0.8, 1, 1);
+    fGFW->AddRegion("refP", 0.4, 0.8, 1, 1);
+    fGFW->AddRegion("refN", -0.8, -0.4, 1, 1);
+    fGFW->AddRegion("poiN", -0.8, -0.4, 1+fPtAxis->GetNbins(), 2);
+    fGFW->AddRegion("olN", -0.8, -0.4, 1, 4);
 
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {3 -3}", "ChFull32", kFALSE));
@@ -114,6 +136,8 @@ struct GfwTutorial {
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {2} refP06 {-2}", "Ch06Gap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {2} refP08 {-2}", "Ch08Gap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN {2} refP {-2}", "ChGap22", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("poiN refN | olN {2} refP {-2}", "ChGap22", kTRUE));
     fGFW->CreateRegions();
   }
 
@@ -133,11 +157,35 @@ struct GfwTutorial {
     return;
   }
 
+   void FillFC(const GFW::CorrConfig& corrconf, const double& cent, const double& rndm)
+  {
+    double dnx, val;
+    dnx = fGFW->Calculate(corrconf, 0, kTRUE).real();
+    if (dnx == 0)
+      return;
+    if (!corrconf.pTDif) {
+      val = fGFW->Calculate(corrconf, 0, kFALSE).real() / dnx;
+      if (TMath::Abs(val) < 1)
+        fFC->FillProfile(corrconf.Head.c_str(), cent, val, dnx, rndm);
+      return;
+    }
+    for (Int_t i = 1; i <= fPtAxis->GetNbins(); i++) {
+      dnx = fGFW->Calculate(corrconf, i - 1, kTRUE).real();
+      if (dnx == 0)
+        continue;
+      val = fGFW->Calculate(corrconf, i - 1, kFALSE).real() / dnx;
+      if (TMath::Abs(val) < 1)
+        fFC->FillProfile(Form("%s_pt_%i", corrconf.Head.c_str(), i), cent, val, dnx, rndm);
+    }
+    return;
+  }
+
   void process(aodCollisions::iterator const& collision, aod::BCsWithTimestamps const&, aodTracks const& tracks)
   {
     int Ntot = tracks.size();
     if (Ntot < 1)
       return;
+    float l_Random = fRndm->Rndm();
     float vtxz = collision.posZ();
     registry.fill(HIST("hVtxZ"), vtxz);
     registry.fill(HIST("hMult"), Ntot);
@@ -146,10 +194,15 @@ struct GfwTutorial {
     const auto cent = collision.centFT0C();
     float weff = 1, wacc = 1;
     for (auto& track : tracks) {
+      double pt = track.pt();
       registry.fill(HIST("hPhi"), track.phi());
       registry.fill(HIST("hEta"), track.eta());
 
-      fGFW->Fill(track.eta(), 1, track.phi(), wacc * weff, 1);
+      bool WithinPtPOI = (cfgCutPtPOIMin<pt) && (pt<cfgCutPtPOIMax); //within POI pT range
+      bool WithinPtRef  = (cfgCutPtMin<pt) && (pt<cfgCutPtMax);  //within RF pT range
+      if(WithinPtRef) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 1);
+      if(WithinPtPOI) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 2);
+      if(WithinPtPOI && WithinPtRef) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 4);
     }
 
     // Filling c22 with ROOT TProfile
@@ -162,6 +215,11 @@ struct GfwTutorial {
     FillProfile(corrconfigs.at(6), HIST("c22_gap06"), cent);
     FillProfile(corrconfigs.at(7), HIST("c22_gap08"), cent);
     FillProfile(corrconfigs.at(8), HIST("c22_gap10"), cent);
+
+    //Filling Flow Container
+    for (uint l_ind = 0; l_ind < corrconfigs.size(); l_ind++) {
+      FillFC(corrconfigs.at(l_ind), cent, l_Random);
+    }
   }
 };
 
