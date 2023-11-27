@@ -232,6 +232,21 @@ struct GfwTutorial {
     return;
   }
 
+  void FillpTvnProfile(const GFW::CorrConfig& corrconf, const float& pt, const ConstStr<chars...>& tarName, const double& cent)
+  {
+    double dnx, val;
+    dnx = fGFW->Calculate(corrconf, 0, kTRUE).real();
+    if (dnx == 0)
+      return;
+    if (!corrconf.pTDif) {
+      val = fGFW->Calculate(corrconf, 0, kFALSE).real() / dnx;
+      if (TMath::Abs(val) < 1)
+        registry.fill(tarName, cent, val*pt, dnx);
+      return;
+    }
+    return;
+  }
+
    void FillFC(const GFW::CorrConfig& corrconf, const double& cent, const double& rndm)
   {
     double dnx, val;
@@ -268,18 +283,26 @@ struct GfwTutorial {
     fGFW->Clear();
     const auto cent = collision.centFT0C();
     float weff = 1, wacc = 1;
+    float weffEvent=0, waccEvent=0;
+    int TrackNum=0;
     for (auto& track : tracks) {
       double pt = track.pt();
-      registry.fill(HIST("hPhi"), track.phi());
-      registry.fill(HIST("hEta"), track.eta());
-
       bool WithinPtPOI = (cfgCutPtPOIMin<pt) && (pt<cfgCutPtPOIMax); //within POI pT range
       bool WithinPtRef  = (cfgCutPtMin<pt) && (pt<cfgCutPtMax);  //within RF pT range
-      if(WithinPtRef) registry.fill(HIST("hPt"), pt);
+      if(WithinPtRef) {
+        registry.fill(HIST("hPhi"), track.phi());
+        registry.fill(HIST("hEta"), track.eta());
+        registry.fill(HIST("hPt"), pt);
+        weffEvent+=weff;
+        waccEvent+=wacc;
+        TrackNum++;
+      }
       if(WithinPtRef) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 1);
       if(WithinPtPOI) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 2);
       if(WithinPtPOI && WithinPtRef) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 4);
     }
+    weffEvent = weffEvent/TrackNum;
+    waccEvent = waccEvent/TrackNum;
 
     // Filling c22 with ROOT TProfile
     // FillProfile(corrconfigs.at(0), HIST("c22"), cent);
