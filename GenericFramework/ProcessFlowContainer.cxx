@@ -10,15 +10,21 @@
 void ProcessFlowContainer(){
     TFile* f = new TFile("AnalysisResults.root","READ");
     FlowContainer* fc = (FlowContainer*)f->Get("gfw-tutorial/FlowContainer");
-    fc->SetIDName("ChGap");
+    // fc->SetIDName("ChGap");
     // fc->SetPropagateErrors(kTRUE);
-    TH1D* hV22 = (TH1D*)fc->GetVN2VsMulti(2);
-    // TH1D* hV22 = (TH1D*)fc->GetHistCorrXXVsMulti("ChGap22");
-    if(!hV22){
-        Printf("Can't get hV22");
-        return;
-    }
-    hV22->Draw();
+    // TH1D* hV22 = (TH1D*)fc->GetVN2VsMulti(2);
+    // TH1D* hV22 = (TH1D*)fc->GetHistCorrXXVsMulti("22");
+    // if(!hV22){
+    //     Printf("Can't get hV22");
+    //     return;
+    // }
+    // hV22->SetMarkerSize(1.0);
+    // hV22->SetMarkerStyle(kFullCircle);
+    // hV22->SetMarkerColor(kBlack);
+    // hV22->SetLineColor(kBlack);
+    // hV22->SetLineStyle(kSolid);
+    // Printf("Error: %f",hV22->GetBinError(2));
+    // hV22->Draw("E1");
     
     // TProfile2D* profiles = (TProfile2D*)fc->GetProfile();
     // profiles->Draw();
@@ -39,5 +45,20 @@ void ProcessFlowContainer(){
     //     return;
     // }
     // hV22pt->Draw();
+
+    fc->SetIDName("Ch04GapA");
+    // fc->SetPropagateErrors(kTRUE);
+    TH1D* hV22 = (TH1D*)fc->GetHistCorrXXVsMulti("422");
+    if(!hV22){
+        Printf("Can't get hV22");
+        return;
+    }
+    hV22->SetMarkerSize(1.0);
+    hV22->SetMarkerStyle(kFullCircle);
+    hV22->SetMarkerColor(kBlack);
+    hV22->SetLineColor(kBlack);
+    hV22->SetLineStyle(kSolid);
+    Printf("Error: %f",hV22->GetBinError(2));
+    hV22->Draw("E1");
     
 }

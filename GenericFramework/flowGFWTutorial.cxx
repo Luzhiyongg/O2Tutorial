@@ -52,6 +52,7 @@ struct GfwTutorial {
   ConfigurableAxis axisVertex{"axisVertex", {20, -10, 10}, "vertex axis for histograms"};
   ConfigurableAxis axisPhi{"axisPhi", {60, 0.0, constants::math::TwoPI}, "phi axis for histograms"};
   ConfigurableAxis axisEta{"axisEta", {40, -1., 1.}, "eta axis for histograms"};
+  ConfigurableAxis axisEta{"axisPtHist", {100, 0., 10.}, "pt axis for histograms"};
   ConfigurableAxis axisPt{"axisPt", {VARIABLE_WIDTH, 0.2, 0.25, 0.30, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.10, 1.20, 1.30, 1.40, 1.50, 1.60, 1.70, 1.80, 1.90, 2.00, 2.20, 2.40, 2.60, 2.80, 3.00}, "pt axis for histograms"};
   ConfigurableAxis axisMultiplicity{"axisMultiplicity", {VARIABLE_WIDTH, 0, 5, 10, 20, 30, 40, 50, 60, 70, 80, 90}, "centrality axis for histograms"};
 
@@ -85,28 +86,81 @@ struct GfwTutorial {
     // Add some output objects to the histogram registry
     registry.add("hPhi", "", {HistType::kTH1D, {axisPhi}});
     registry.add("hEta", "", {HistType::kTH1D, {axisEta}});
+    registry.add("hPt", "", {HistType::kTH1D, {axisPtHist}});
     registry.add("hVtxZ", "", {HistType::kTH1D, {axisVertex}});
     registry.add("hMult", "", {HistType::kTH1D, {{3000, 0.5, 3000.5}}});
     registry.add("hCent", "", {HistType::kTH1D, {{90, 0, 90}}});
-    registry.add("c22", "", {HistType::kTProfile, {axisMultiplicity}});
-    registry.add("c32", "", {HistType::kTProfile, {axisMultiplicity}});
-    registry.add("c42", "", {HistType::kTProfile, {axisMultiplicity}});
-    registry.add("c24", "", {HistType::kTProfile, {axisMultiplicity}});
-    registry.add("c26", "", {HistType::kTProfile, {axisMultiplicity}});
-    registry.add("c22_gap04", "", {HistType::kTProfile, {axisMultiplicity}});
-    registry.add("c22_gap06", "", {HistType::kTProfile, {axisMultiplicity}});
-    registry.add("c22_gap08", "", {HistType::kTProfile, {axisMultiplicity}});
-    registry.add("c22_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c22", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c32", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c42", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c24", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c26", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c22_gap04", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c22_gap06", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c22_gap08", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c22_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c32_gap04", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c32_gap06", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c32_gap08", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c32_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c42_gap04", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c42_gap06", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c42_gap08", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c42_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c422", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c422_gapA04", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c422_gapB04", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c422_gapA10", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c422_gapB10", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c3232", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c4242", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c3232_gap04", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c4242_gap04", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c24_gap04", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c3232_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c4242_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+    // registry.add("c24_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+
 
     o2::framework::AxisSpec axis = axisPt;
     int nPtBins = axis.binEdges.size()-1;
     double* PtBins= &(axis.binEdges)[0];
     fPtAxis = new TAxis(nPtBins,PtBins);
 
+    //add in FlowContainer to Get boostrap sample automatically
     TObjArray* oba = new TObjArray();
     oba->Add(new TNamed("ChGap22", "ChGap22"));  
     for(Int_t i=0;i<fPtAxis->GetNbins();i++)
       oba->Add(new TNamed(Form("ChGap22_pt_%i",i+1),"ChGap22_pTDiff"));
+    oba->Add(new TNamed("ChFull22", "ChFull22"));
+    oba->Add(new TNamed("ChFull32", "ChFull32"));
+    oba->Add(new TNamed("ChFull42", "ChFull42"));
+    oba->Add(new TNamed("ChFull24", "ChFull24"));
+    oba->Add(new TNamed("ChFull26", "ChFull26"));
+    oba->Add(new TNamed("Ch04Gap22", "Ch04Gap22"));
+    oba->Add(new TNamed("Ch06Gap22", "Ch06Gap22"));
+    oba->Add(new TNamed("Ch08Gap22", "Ch08Gap22"));
+    oba->Add(new TNamed("Ch10Gap22", "Ch10Gap22"));
+    oba->Add(new TNamed("Ch04Gap32", "Ch04Gap32"));
+    oba->Add(new TNamed("Ch06Gap32", "Ch06Gap32"));
+    oba->Add(new TNamed("Ch08Gap32", "Ch08Gap32"));
+    oba->Add(new TNamed("Ch10Gap32", "Ch10Gap32"));
+    oba->Add(new TNamed("Ch04Gap42", "Ch04Gap42"));
+    oba->Add(new TNamed("Ch06Gap42", "Ch06Gap42"));
+    oba->Add(new TNamed("Ch08Gap42", "Ch08Gap42"));
+    oba->Add(new TNamed("Ch10Gap42", "Ch10Gap42"));
+    oba->Add(new TNamed("Ch04GapA422", "Ch04GapA422"));
+    oba->Add(new TNamed("Ch04GapB422", "Ch04GapB422"));
+    oba->Add(new TNamed("Ch10GapA422", "Ch10GapA422"));
+    oba->Add(new TNamed("Ch10GapB422", "Ch10GapB422"));
+    oba->Add(new TNamed("ChFull3232", "ChFull3232"));
+    oba->Add(new TNamed("ChFull4242", "ChFull4242"));
+    oba->Add(new TNamed("Ch04Gap3232", "Ch04Gap3232"));
+    oba->Add(new TNamed("Ch04Gap4242", "Ch04Gap4242"));
+    oba->Add(new TNamed("Ch04Gap24", "Ch04Gap24"));
+    oba->Add(new TNamed("Ch10Gap3232", "Ch10Gap3232"));
+    oba->Add(new TNamed("Ch10Gap4242", "Ch10Gap4242"));
+    oba->Add(new TNamed("Ch10Gap24", "Ch10Gap24"));
     fFC->SetName("FlowContainer");
     fFC->SetXAxis(fPtAxis);
     fFC->Initialize(oba, axisMultiplicity, cfgNbootstrap);
@@ -131,13 +185,34 @@ struct GfwTutorial {
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {3 -3}", "ChFull32", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {4 -4}", "ChFull42", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 2 -2 -2}", "ChFull24", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 2 2 -2 -2 -2}", "CFull26", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 2 2 -2 -2 -2}", "ChFull26", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {2} refP04 {-2}", "Ch04Gap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {2} refP06 {-2}", "Ch06Gap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {2} refP08 {-2}", "Ch08Gap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {3} refP04 {-3}", "Ch04Gap32", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {3} refP06 {-3}", "Ch06Gap32", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {3} refP08 {-3}", "Ch08Gap32", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {3} refP10 {-3}", "Ch10Gap32", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {4} refP04 {-4}", "Ch04Gap42", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {4} refP06 {-4}", "Ch06Gap42", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {4} refP08 {-4}", "Ch08Gap42", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {4} refP10 {-4}", "Ch10Gap42", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN {2} refP {-2}", "ChGap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("poiN refN | olN {2} refP {-2}", "ChGap22", kTRUE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {4 -2 -2}", "ChFull422", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {-2 -2} refP04 {4}", "Ch04GapA422", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {4} refP04 {-2 -2}", "Ch04GapB422", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {-2 -2} refP10 {4}", "Ch10GapA422", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {4} refP10 {-2 -2}", "Ch10GapB422", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {3 2 -3 -2}", "ChFull3232", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {4 2 -4 -2}", "ChFull4242", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {3 2} refP04 {-3 -2}", "Ch04Gap3232", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {4 2} refP04 {-4 -2}", "Ch04Gap4242", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {2 2} refP04 {-2 -2}", "Ch04Gap24", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {3 2} refP10 {-3 -2}", "Ch10Gap3232", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {4 2} refP10 {-4 -2}", "Ch10Gap4242", kFALSE));
+    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {2 2} refP10 {-2 -2}", "Ch10Gap24", kFALSE));
     fGFW->CreateRegions();
   }
 
@@ -200,21 +275,26 @@ struct GfwTutorial {
 
       bool WithinPtPOI = (cfgCutPtPOIMin<pt) && (pt<cfgCutPtPOIMax); //within POI pT range
       bool WithinPtRef  = (cfgCutPtMin<pt) && (pt<cfgCutPtMax);  //within RF pT range
+      if(WithinPtRef) registry.fill(HIST("hPt"), pt);
       if(WithinPtRef) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 1);
       if(WithinPtPOI) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 2);
       if(WithinPtPOI && WithinPtRef) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 4);
     }
 
     // Filling c22 with ROOT TProfile
-    FillProfile(corrconfigs.at(0), HIST("c22"), cent);
-    FillProfile(corrconfigs.at(1), HIST("c32"), cent);
-    FillProfile(corrconfigs.at(2), HIST("c42"), cent);
-    FillProfile(corrconfigs.at(3), HIST("c24"), cent);
-    FillProfile(corrconfigs.at(4), HIST("c26"), cent);
-    FillProfile(corrconfigs.at(5), HIST("c22_gap04"), cent);
-    FillProfile(corrconfigs.at(6), HIST("c22_gap06"), cent);
-    FillProfile(corrconfigs.at(7), HIST("c22_gap08"), cent);
-    FillProfile(corrconfigs.at(8), HIST("c22_gap10"), cent);
+    // FillProfile(corrconfigs.at(0), HIST("c22"), cent);
+    // FillProfile(corrconfigs.at(1), HIST("c32"), cent);
+    // FillProfile(corrconfigs.at(2), HIST("c42"), cent);
+    // FillProfile(corrconfigs.at(3), HIST("c24"), cent);
+    // FillProfile(corrconfigs.at(4), HIST("c26"), cent);
+    // FillProfile(corrconfigs.at(5), HIST("c22_gap04"), cent);
+    // FillProfile(corrconfigs.at(6), HIST("c22_gap06"), cent);
+    // FillProfile(corrconfigs.at(7), HIST("c22_gap08"), cent);
+    // FillProfile(corrconfigs.at(8), HIST("c22_gap10"), cent);
+    // FillProfile(corrconfigs.at(11), HIST("c422"), cent);
+    // FillProfile(corrconfigs.at(12), HIST("c422_gapA04"), cent);
+    // FillProfile(corrconfigs.at(13), HIST("c422_gapB04"), cent);
+    // FillProfile(corrconfigs.at(kkk), HIST("c24_gap04"), cent);
 
     //Filling Flow Container
     for (uint l_ind = 0; l_ind < corrconfigs.size(); l_ind++) {
