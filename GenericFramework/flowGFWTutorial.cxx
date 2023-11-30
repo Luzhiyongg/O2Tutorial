@@ -90,6 +90,8 @@ struct GfwTutorial {
     registry.add("hVtxZ", "", {HistType::kTH1D, {axisVertex}});
     registry.add("hMult", "", {HistType::kTH1D, {{3000, 0.5, 3000.5}}});
     registry.add("hCent", "", {HistType::kTH1D, {{90, 0, 90}}});
+    registry.add("hMeanPt", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("hMeanPtWithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
     // registry.add("c22", "", {HistType::kTProfile, {axisMultiplicity}});
     // registry.add("c32", "", {HistType::kTProfile, {axisMultiplicity}});
     // registry.add("c42", "", {HistType::kTProfile, {axisMultiplicity}});
@@ -120,6 +122,10 @@ struct GfwTutorial {
     // registry.add("c3232_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
     // registry.add("c4242_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
     // registry.add("c24_gap10", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("c22_gap08_Weff", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("c22_gap08_trackMeanPt", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("PtVariance_partA_WithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("PtVariance_partB_WithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
 
 
     o2::framework::AxisSpec axis = axisPt;
@@ -149,6 +155,7 @@ struct GfwTutorial {
     oba->Add(new TNamed("Ch06Gap42", "Ch06Gap42"));
     oba->Add(new TNamed("Ch08Gap42", "Ch08Gap42"));
     oba->Add(new TNamed("Ch10Gap42", "Ch10Gap42"));
+    oba->Add(new TNamed("ChFull422", "ChFull422"));
     oba->Add(new TNamed("Ch04GapA422", "Ch04GapA422"));
     oba->Add(new TNamed("Ch04GapB422", "Ch04GapB422"));
     oba->Add(new TNamed("Ch10GapA422", "Ch10GapA422"));
@@ -232,17 +239,20 @@ struct GfwTutorial {
     return;
   }
 
-  template <char... chars>
-  void FillpTvnProfile(const GFW::CorrConfig& corrconf, const float& pt, const ConstStr<chars...>& tarName, const double& cent)
+  template <char... chars, char... chars2>
+  void FillpTvnProfile(const GFW::CorrConfig& corrconf, const double& sum_pt, const double& WeffEvent, const ConstStr<chars...>& vnWeff, const ConstStr<chars2...>& vnpT, const double& cent)
   {
+    double meanPt = sum_pt/WeffEvent;
     double dnx, val;
     dnx = fGFW->Calculate(corrconf, 0, kTRUE).real();
     if (dnx == 0)
       return;
     if (!corrconf.pTDif) {
       val = fGFW->Calculate(corrconf, 0, kFALSE).real() / dnx;
-      if (TMath::Abs(val) < 1)
-        registry.fill(tarName, cent, val*pt, dnx);
+      if (TMath::Abs(val) < 1){
+        registry.fill(vnWeff, cent, val, dnx*WeffEvent);
+        registry.fill(vnpT, cent, val*meanPt, dnx*WeffEvent);
+      }
       return;
     }
     return;
@@ -284,27 +294,59 @@ struct GfwTutorial {
     fGFW->Clear();
     const auto cent = collision.centFT0C();
     float weff = 1, wacc = 1;
-    float weffEvent=0, waccEvent=0;
+    double weffEvent=0, waccEvent=0;
     int TrackNum=0;
+    double ptSum=0., ptSum_Gap08=0.;
+    double weffEvent_WithinGap08=0., weffEventSquare_WithinGap08=0.;
+    double sum_ptSquare_wSquare_WithinGap08=0., sum_pt_wSquare_WithinGap08=0.;
+
     for (auto& track : tracks) {
       double pt = track.pt();
+      double eta = track.eta();
       bool WithinPtPOI = (cfgCutPtPOIMin<pt) && (pt<cfgCutPtPOIMax); //within POI pT range
       bool WithinPtRef  = (cfgCutPtMin<pt) && (pt<cfgCutPtMax);  //within RF pT range
+      bool WithinEtaGap08 = (eta >= -0.4) && (eta <= 0.4);
       if(WithinPtRef) {
         registry.fill(HIST("hPhi"), track.phi());
         registry.fill(HIST("hEta"), track.eta());
         registry.fill(HIST("hPt"), pt);
         weffEvent+=weff;
         waccEvent+=wacc;
+        ptSum+=weff*pt;
         TrackNum++;
+        if(WithinEtaGap08){
+          ptSum_Gap08 += weff*pt;
+          sum_pt_wSquare_WithinGap08 += weff*weff*pt;
+          sum_ptSquare_wSquare_WithinGap08 += weff*weff*pt*pt;
+          weffEvent_WithinGap08 += weff;
+          weffEventSquare_WithinGap08 += weff*weff;
+        }
       }
       if(WithinPtRef) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 1);
       if(WithinPtPOI) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 2);
       if(WithinPtPOI && WithinPtRef) fGFW->Fill(track.eta(), fPtAxis->FindBin(pt)-1, track.phi(), wacc * weff, 4);
     }
-    weffEvent = weffEvent/TrackNum;
-    waccEvent = waccEvent/TrackNum;
 
+    double WeffEvent_diff_WithGap08 = weffEvent_WithinGap08*weffEvent_WithinGap08 - weffEventSquare_WithinGap08;
+    //Filling TProfile
+    //MeanPt
+    registry.fill(HIST("hMeanPt"), cent, ptSum/weffEvent, weffEvent);
+    if(weffEvent_WithinGap08>1e-6)registry.fill(HIST("hMeanPtWithinGap08"), cent, ptSum_Gap08/weffEvent_WithinGap08, weffEvent_WithinGap08);
+    //v22-Pt
+    //c22_gap8 * pt_withGap8
+    if(weffEvent_WithinGap08>1e-6)FillpTvnProfile(corrconfigs.at(7), ptSum_Gap08, weffEvent_WithinGap08, HIST("c22_gap08_Weff"), HIST("c22_gap08_trackMeanPt"), cent);
+    //PtVariance
+    if(WeffEvent_diff_WithGap08>1e-6){
+      registry.fill(HIST("PtVariance_partA_WithinGap08"), cent, 
+        (ptSum_Gap08*ptSum_Gap08 - sum_ptSquare_wSquare_WithinGap08) / WeffEvent_diff_WithGap08, 
+        WeffEvent_diff_WithGap08);
+      registry.fill(HIST("PtVariance_partB_WithinGap08"), cent, 
+        (weffEvent_WithinGap08*ptSum_Gap08 - sum_pt_wSquare_WithinGap08) / WeffEvent_diff_WithGap08, 
+        WeffEvent_diff_WithGap08);
+    }
+    
+    
+    
     // Filling c22 with ROOT TProfile
     // FillProfile(corrconfigs.at(0), HIST("c22"), cent);
     // FillProfile(corrconfigs.at(1), HIST("c32"), cent);
