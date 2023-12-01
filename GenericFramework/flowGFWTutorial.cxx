@@ -127,6 +127,15 @@ struct GfwTutorial {
     registry.add("PtVariance_partA_WithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
     registry.add("PtVariance_partB_WithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
 
+    registry.add("BootstrapContainer00/hMeanPtWithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("BootstrapContainer00/c22_gap08_Weff", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("BootstrapContainer00/c22_gap08_trackMeanPt", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("BootstrapContainer00/PtVariance_partA_WithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
+    registry.add("BootstrapContainer00/PtVariance_partB_WithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
+
+    for(int i=1;i++;i<10){
+      registry.addClone("BootstrapContainer01/", Form("BootstrapContainer0%d/",i));
+    }
 
     o2::framework::AxisSpec axis = axisPt;
     int nPtBins = axis.binEdges.size()-1;
