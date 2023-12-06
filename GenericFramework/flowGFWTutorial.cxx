@@ -133,7 +133,7 @@ struct GfwTutorial {
     registry.add("BootstrapContainer00/PtVariance_partA_WithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
     registry.add("BootstrapContainer00/PtVariance_partB_WithinGap08", "", {HistType::kTProfile, {axisMultiplicity}});
 
-    for(int i=1;i++;i<10){
+    for(int i=1;i<10;i++){
       registry.addClone("BootstrapContainer00/", Form("BootstrapContainer0%d/",i));
     }
 
@@ -290,6 +290,29 @@ struct GfwTutorial {
     return;
   }
 
+  template <int SampleIndex>
+  void FillBootstrap(const double& cent, 
+  const double& ptSum_Gap08, 
+  const double& weffEvent_WithinGap08, 
+  const double& sum_pt_wSquare_WithinGap08, 
+  const double& sum_ptSquare_wSquare_WithinGap08, 
+  const double& WeffEvent_diff_WithGap08)
+  {
+    static constexpr std::string_view subDir[] = {"BootstrapContainer00/","BootstrapContainer01/","BootstrapContainer02/","BootstrapContainer03/","BootstrapContainer04/","BootstrapContainer05/","BootstrapContainer06/","BootstrapContainer07/","BootstrapContainer08/","BootstrapContainer09/"};
+
+    if(weffEvent_WithinGap08>1e-6)registry.fill(HIST(subDir[SampleIndex])+HIST("hMeanPtWithinGap08"), cent, ptSum_Gap08/weffEvent_WithinGap08, weffEvent_WithinGap08);
+    if(weffEvent_WithinGap08>1e-6)FillpTvnProfile(corrconfigs.at(7), ptSum_Gap08, weffEvent_WithinGap08, HIST(subDir[SampleIndex])+HIST("c22_gap08_Weff"), HIST(subDir[SampleIndex])+HIST("c22_gap08_trackMeanPt"), cent);
+    if(WeffEvent_diff_WithGap08>1e-6){
+      registry.fill(HIST(subDir[SampleIndex])+HIST("PtVariance_partA_WithinGap08"), cent, 
+        (ptSum_Gap08*ptSum_Gap08 - sum_ptSquare_wSquare_WithinGap08) / WeffEvent_diff_WithGap08, 
+        WeffEvent_diff_WithGap08);
+      registry.fill(HIST(subDir[SampleIndex])+HIST("PtVariance_partB_WithinGap08"), cent, 
+        (weffEvent_WithinGap08*ptSum_Gap08 - sum_pt_wSquare_WithinGap08) / WeffEvent_diff_WithGap08, 
+        WeffEvent_diff_WithGap08);
+    }
+    
+  }
+
   void process(aodCollisions::iterator const& collision, aod::BCsWithTimestamps const&, aodTracks const& tracks)
   {
     int Ntot = tracks.size();
@@ -356,17 +379,16 @@ struct GfwTutorial {
 
     //Filling Bootstrap samples
     int SampleIndex = (int)(cfgNbootstrap*l_Random);
-    if(weffEvent_WithinGap08>1e-6)registry.fill(HIST(Form("BootstrapContainer0%d/hMeanPtWithinGap08",SampleIndex)), cent, ptSum_Gap08/weffEvent_WithinGap08, weffEvent_WithinGap08);
-    if(weffEvent_WithinGap08>1e-6)FillpTvnProfile(corrconfigs.at(7), ptSum_Gap08, weffEvent_WithinGap08, HIST(Form("BootstrapContainer0%d/c22_gap08_Weff",SampleIndex)), HIST(Form("BootstrapContainer0%d/c22_gap08_trackMeanPt",SampleIndex)), cent);
-    if(WeffEvent_diff_WithGap08>1e-6){
-      registry.fill(HIST(Form("BootstrapContainer0%d/PtVariance_partA_WithinGap08",SampleIndex)), cent, 
-        (ptSum_Gap08*ptSum_Gap08 - sum_ptSquare_wSquare_WithinGap08) / WeffEvent_diff_WithGap08, 
-        WeffEvent_diff_WithGap08);
-      registry.fill(HIST(Form("BootstrapContainer0%d/PtVariance_partB_WithinGap08",SampleIndex)), cent, 
-        (weffEvent_WithinGap08*ptSum_Gap08 - sum_pt_wSquare_WithinGap08) / WeffEvent_diff_WithGap08, 
-        WeffEvent_diff_WithGap08);
-    }
-    
+    if(SampleIndex==0)FillBootstrap<0>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==1)FillBootstrap<1>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==2)FillBootstrap<2>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==3)FillBootstrap<3>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==4)FillBootstrap<4>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==5)FillBootstrap<5>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==6)FillBootstrap<6>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==7)FillBootstrap<7>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==8)FillBootstrap<8>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
+    else if(SampleIndex==9)FillBootstrap<9>(cent, ptSum_Gap08, weffEvent_WithinGap08, sum_pt_wSquare_WithinGap08, sum_ptSquare_wSquare_WithinGap08, WeffEvent_diff_WithGap08);
     
     
     // Filling c22 with ROOT TProfile
