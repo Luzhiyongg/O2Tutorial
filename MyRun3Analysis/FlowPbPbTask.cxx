@@ -104,7 +104,7 @@ struct FlowPbPbTask {
     fBootstrapContainer.setObject(fOutputList);
     // initial array
     BootstrapArray.resize(cfgNbootstrap);
-    for(int i=0; i< cfgNbootstrap; i++){
+    for (int i = 0; i < cfgNbootstrap; i++) {
       // currently we have 5 TProfiles in each sub dir
       BootstrapArray[i].resize(5);
     }
@@ -118,13 +118,13 @@ struct FlowPbPbTask {
       printf("Multiplicity axis does not exist");
       return;
     }
-    for(int i=0;i<cfgNbootstrap;i++){
-      BootstrapArray[i][0] = new TProfile(Form("hMeanPtWithinGap08_%d",i),Form("hMeanPtWithinGap08_%d",i),nMultiBins,&multiBins[0]);
-      BootstrapArray[i][1] = new TProfile(Form("c22_gap08_Weff_%d",i),Form("c22_gap08_Weff_%d",i),nMultiBins,&multiBins[0]);
-      BootstrapArray[i][2] = new TProfile(Form("c22_gap08_trackMeanPt_%d",i),Form("c22_gap08_trackMeanPt_%d",i),nMultiBins,&multiBins[0]);
-      BootstrapArray[i][3] = new TProfile(Form("PtVariance_partA_WithinGap08_%d",i),Form("PtVariance_partA_WithinGap08_%d",i),nMultiBins,&multiBins[0]);
-      BootstrapArray[i][4] = new TProfile(Form("PtVariance_partB_WithinGap08_%d",i),Form("PtVariance_partB_WithinGap08_%d",i),nMultiBins,&multiBins[0]);
-      for(int j=0;j<5;j++){
+    for (int i = 0; i < cfgNbootstrap; i++) {
+      BootstrapArray[i][0] = new TProfile(Form("hMeanPtWithinGap08_%d", i), Form("hMeanPtWithinGap08_%d", i), nMultiBins, &multiBins[0]);
+      BootstrapArray[i][1] = new TProfile(Form("c22_gap08_Weff_%d", i), Form("c22_gap08_Weff_%d", i), nMultiBins, &multiBins[0]);
+      BootstrapArray[i][2] = new TProfile(Form("c22_gap08_trackMeanPt_%d", i), Form("c22_gap08_trackMeanPt_%d", i), nMultiBins, &multiBins[0]);
+      BootstrapArray[i][3] = new TProfile(Form("PtVariance_partA_WithinGap08_%d", i), Form("PtVariance_partA_WithinGap08_%d", i), nMultiBins, &multiBins[0]);
+      BootstrapArray[i][4] = new TProfile(Form("PtVariance_partB_WithinGap08_%d", i), Form("PtVariance_partB_WithinGap08_%d", i), nMultiBins, &multiBins[0]);
+      for (int j = 0; j < 5; j++) {
         BootstrapArray[i][j]->Sumw2();
         fOutputList->Add(BootstrapArray[i][j]);
       }
@@ -282,30 +282,6 @@ struct FlowPbPbTask {
     return;
   }
 
-  template <int SampleIndex>
-  void FillBootstrap(const double& cent,
-                     const double& ptSum_Gap08,
-                     const double& weffEvent_WithinGap08,
-                     const double& sum_pt_wSquare_WithinGap08,
-                     const double& sum_ptSquare_wSquare_WithinGap08,
-                     const double& WeffEvent_diff_WithGap08)
-  {
-    static constexpr std::string_view subDir[] = {"BootstrapContainer00/", "BootstrapContainer01/", "BootstrapContainer02/", "BootstrapContainer03/", "BootstrapContainer04/", "BootstrapContainer05/", "BootstrapContainer06/", "BootstrapContainer07/", "BootstrapContainer08/", "BootstrapContainer09/"};
-
-    if (weffEvent_WithinGap08 > 1e-6)
-      registry.fill(HIST(subDir[SampleIndex]) + HIST("hMeanPtWithinGap08"), cent, ptSum_Gap08 / weffEvent_WithinGap08, weffEvent_WithinGap08);
-    if (weffEvent_WithinGap08 > 1e-6)
-      FillpTvnProfile(corrconfigs.at(7), ptSum_Gap08, weffEvent_WithinGap08, HIST(subDir[SampleIndex]) + HIST("c22_gap08_Weff"), HIST(subDir[SampleIndex]) + HIST("c22_gap08_trackMeanPt"), cent);
-    if (WeffEvent_diff_WithGap08 > 1e-6) {
-      registry.fill(HIST(subDir[SampleIndex]) + HIST("PtVariance_partA_WithinGap08"), cent,
-                    (ptSum_Gap08 * ptSum_Gap08 - sum_ptSquare_wSquare_WithinGap08) / WeffEvent_diff_WithGap08,
-                    WeffEvent_diff_WithGap08);
-      registry.fill(HIST(subDir[SampleIndex]) + HIST("PtVariance_partB_WithinGap08"), cent,
-                    (weffEvent_WithinGap08 * ptSum_Gap08 - sum_pt_wSquare_WithinGap08) / WeffEvent_diff_WithGap08,
-                    WeffEvent_diff_WithGap08);
-    }
-  }
-
   void process(aodCollisions::iterator const& collision, aod::BCsWithTimestamps const&, aodTracks const& tracks)
   {
     int Ntot = tracks.size();
@@ -378,17 +354,17 @@ struct FlowPbPbTask {
     // Filling Bootstrap Samples
     int SampleIndex = static_cast<int>(cfgNbootstrap * l_Random);
     if (weffEvent_WithinGap08 > 1e-6)
-        BootstrapArray[SampleIndex][0]->Fill(cent, ptSum_Gap08 / weffEvent_WithinGap08, weffEvent_WithinGap08);
-        // registry.fill(HIST(subDir[SampleIndex]) + HIST("hMeanPtWithinGap08"), cent, ptSum_Gap08 / weffEvent_WithinGap08, weffEvent_WithinGap08);
+      BootstrapArray[SampleIndex][0]->Fill(cent, ptSum_Gap08 / weffEvent_WithinGap08, weffEvent_WithinGap08);
+    // registry.fill(HIST(subDir[SampleIndex]) + HIST("hMeanPtWithinGap08"), cent, ptSum_Gap08 / weffEvent_WithinGap08, weffEvent_WithinGap08);
     if (weffEvent_WithinGap08 > 1e-6)
       FillpTvnProfile(corrconfigs.at(7), ptSum_Gap08, weffEvent_WithinGap08, BootstrapArray[SampleIndex][1], BootstrapArray[SampleIndex][2], cent);
     if (WeffEvent_diff_WithGap08 > 1e-6) {
-        BootstrapArray[SampleIndex][3]->Fill(cent,
-        (ptSum_Gap08 * ptSum_Gap08 - sum_ptSquare_wSquare_WithinGap08) / WeffEvent_diff_WithGap08,
-        WeffEvent_diff_WithGap08);
-        BootstrapArray[SampleIndex][4]->Fill(cent,
-        (weffEvent_WithinGap08 * ptSum_Gap08 - sum_pt_wSquare_WithinGap08) / WeffEvent_diff_WithGap08,
-        WeffEvent_diff_WithGap08);
+      BootstrapArray[SampleIndex][3]->Fill(cent,
+                                           (ptSum_Gap08 * ptSum_Gap08 - sum_ptSquare_wSquare_WithinGap08) / WeffEvent_diff_WithGap08,
+                                           WeffEvent_diff_WithGap08);
+      BootstrapArray[SampleIndex][4]->Fill(cent,
+                                           (weffEvent_WithinGap08 * ptSum_Gap08 - sum_pt_wSquare_WithinGap08) / WeffEvent_diff_WithGap08,
+                                           WeffEvent_diff_WithGap08);
     }
 
     // Filling Flow Container
