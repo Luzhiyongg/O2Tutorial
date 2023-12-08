@@ -374,7 +374,6 @@ struct FlowPbPbTask {
     int SampleIndex = static_cast<int>(cfgNbootstrap * l_Random);
     if (weffEvent_WithinGap08 > 1e-6)
       BootstrapArray[SampleIndex][0]->Fill(cent, ptSum_Gap08 / weffEvent_WithinGap08, weffEvent_WithinGap08);
-    // registry.fill(HIST(subDir[SampleIndex]) + HIST("hMeanPtWithinGap08"), cent, ptSum_Gap08 / weffEvent_WithinGap08, weffEvent_WithinGap08);
     if (weffEvent_WithinGap08 > 1e-6)
       FillpTvnProfile(corrconfigs.at(7), ptSum_Gap08, weffEvent_WithinGap08, BootstrapArray[SampleIndex][1], BootstrapArray[SampleIndex][2], cent);
     if (WeffEvent_diff_WithGap08 > 1e-6) {
