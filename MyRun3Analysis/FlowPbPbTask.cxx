@@ -241,6 +241,25 @@ struct FlowPbPbTask {
     return;
   }
 
+  template <char... chars, char... chars2>
+  void FillpTvnProfile(const GFW::CorrConfig& corrconf, const double& sum_pt, const double& WeffEvent, const ConstStr<chars...>& vnWeff, const ConstStr<chars2...>& vnpT, const double& cent)
+  {
+    double meanPt = sum_pt / WeffEvent;
+    double dnx, val;
+    dnx = fGFW->Calculate(corrconf, 0, kTRUE).real();
+    if (dnx == 0)
+      return;
+    if (!corrconf.pTDif) {
+      val = fGFW->Calculate(corrconf, 0, kFALSE).real() / dnx;
+      if (TMath::Abs(val) < 1) {
+        registry.fill(vnWeff, cent, val, dnx * WeffEvent);
+        registry.fill(vnpT, cent, val * meanPt, dnx * WeffEvent);
+      }
+      return;
+    }
+    return;
+  }
+
   void FillpTvnProfile(const GFW::CorrConfig& corrconf, const double& sum_pt, const double& WeffEvent, TProfile* vnWeff, TProfile* vnpT, const double& cent)
   {
     double meanPt = sum_pt / WeffEvent;

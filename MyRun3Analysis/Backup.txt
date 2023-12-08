@@ -77,25 +77,6 @@ So I back up some lines here for FlowPbPbTask.cxx
     // }
 
 
-      template <char... chars, char... chars2>
-    void FillpTvnProfile(const GFW::CorrConfig& corrconf, const double& sum_pt, const double& WeffEvent, const ConstStr<chars...>& vnWeff, const ConstStr<chars2...>& vnpT, const double& cent)
-    {
-      double meanPt = sum_pt / WeffEvent;
-      double dnx, val;
-      dnx = fGFW->Calculate(corrconf, 0, kTRUE).real();
-      if (dnx == 0)
-        return;
-      if (!corrconf.pTDif) {
-        val = fGFW->Calculate(corrconf, 0, kFALSE).real() / dnx;
-        if (TMath::Abs(val) < 1) {
-          registry.fill(vnWeff, cent, val, dnx * WeffEvent);
-          registry.fill(vnpT, cent, val * meanPt, dnx * WeffEvent);
-        }
-        return;
-      }
-      return;
-    }
-
     // Filling c22 with ROOT TProfile
     // FillProfile(corrconfigs.at(0), HIST("c22"), cent);
     // FillProfile(corrconfigs.at(1), HIST("c32"), cent);
