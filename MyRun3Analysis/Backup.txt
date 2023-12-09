@@ -1,6 +1,11 @@
 O2Physics code style refuse unused commented code,
 So I back up some lines here for FlowPbPbTask.cxx
 
+    // OutputObj<TList> fBootstrapContainer{"fBootstrapContainer", OutputObjHandlingPolicy::AnalysisObject, OutputObjSourceType::OutputObjSource};
+
+    // TList* fOutputList = new TList();
+    // fOutputList->SetOwner(true);
+    // fBootstrapContainer.setObject(fOutputList);
 
     // registry.add("c22", "", {HistType::kTProfile, {axisMultiplicity}});
     // registry.add("c32", "", {HistType::kTProfile, {axisMultiplicity}});
@@ -41,6 +46,28 @@ So I back up some lines here for FlowPbPbTask.cxx
 
     // for (int i = 1; i < 10; i++) {
     //   registry.addClone("BootstrapContainer00/", Form("BootstrapContainer0%d/", i));
+    // }
+
+    // // Store pointers of TProfiles
+    // o2::framework::AxisSpec axisMulti = axisMultiplicity;
+    // std::vector<double> multiBins = axisMulti.binEdges;
+    // int nMultiBins = axisMulti.nBins.value_or(0);
+    // if (nMultiBins <= 0)
+    //   nMultiBins = multiBins.size() - 1;
+    // if (nMultiBins <= 0) {
+    //   printf("Multiplicity axis does not exist");
+    //   return;
+    // }
+    // for (int i = 0; i < cfgNbootstrap; i++) {
+    //   BootstrapArray[i][0] = new TProfile(Form("hMeanPtWithinGap08_%d", i), Form("hMeanPtWithinGap08_%d", i), nMultiBins, &multiBins[0]);
+    //   BootstrapArray[i][1] = new TProfile(Form("c22_gap08_Weff_%d", i), Form("c22_gap08_Weff_%d", i), nMultiBins, &multiBins[0]);
+    //   BootstrapArray[i][2] = new TProfile(Form("c22_gap08_trackMeanPt_%d", i), Form("c22_gap08_trackMeanPt_%d", i), nMultiBins, &multiBins[0]);
+    //   BootstrapArray[i][3] = new TProfile(Form("PtVariance_partA_WithinGap08_%d", i), Form("PtVariance_partA_WithinGap08_%d", i), nMultiBins, &multiBins[0]);
+    //   BootstrapArray[i][4] = new TProfile(Form("PtVariance_partB_WithinGap08_%d", i), Form("PtVariance_partB_WithinGap08_%d", i), nMultiBins, &multiBins[0]);
+    //   for (int j = 0; j < 5; j++) {
+    //     BootstrapArray[i][j]->Sumw2();
+    //     fOutputList->Add(BootstrapArray[i][j]);
+    //   }
     // }
 
 打印子文件夹结构
