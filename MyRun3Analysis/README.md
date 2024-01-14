@@ -8,3 +8,7 @@ o2physics_add_dpl_workflow(flow-pbpb-task
 
 executable name:
 o2-analysis-cf-flow-pbpb-task
+
+
+data file:
+AO2D_LHC23zzh_apass1.root: /alice/data/2023/LHC23zzh/544122/apass1/0420/o2_ctf_run00544122_orbit0140388224_tf0000136787_epn102/001/AO2D.root
