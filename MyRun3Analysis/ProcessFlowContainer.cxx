@@ -1,7 +1,7 @@
 //put in the first lines to ignore the warning message
 #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 
-#include "FlowContainer.h"
+// #include "FlowContainer.h"
 #include "TFile.h"
 #include "TH1D.h"
 #include "TProfile2D.h"
@@ -27,7 +27,7 @@ void SetMarkerAndLine(TH1D* graph, Int_t Color=0, Int_t style=0, Int_t linestyle
 }
 
 void ProcessFlowContainer(){
-    TFile* f = new TFile("AnalysisResults_Hyperloop.root","READ");
+    TFile* f = new TFile("./AnalysisResults_LHC23zzi_pass2_QC1_sampling.root","READ");
     FlowContainer* fc = (FlowContainer*)f->Get("flow-pb-pb-task/FlowContainer");
     if(!fc){
         Printf("can not get flow container");
@@ -35,7 +35,7 @@ void ProcessFlowContainer(){
     }
 
     TCanvas* canvas1 = new TCanvas("canvas1","canvas1",900,900);
-    TH1D* Hist  = new TH1D("Hist","v_{n} in LHC22s_pass5",8,0,80);
+    TH1D* Hist  = new TH1D("Hist","v_{n} in LHC23zzi_pass2_QC1_sampling",8,0,80);
     Hist->SetMinimum(0.);
     Hist->SetMaximum(0.15);
     Hist->SetXTitle("Centrality/%");
@@ -81,15 +81,15 @@ void ProcessFlowContainer(){
     // GetHistCorrXXVsPt
     // GetVN2VsPt
 
-    TCanvas* canvas2 = new TCanvas("canvas2","canvas3",900,900);
-    TH1D* Hist2  = new TH1D("Hist2","v_{n}(p_{T}) in LHC22s_pass5",10,0.2,3.0);
+    TCanvas* canvas2 = new TCanvas("canvas2","canvas2",900,900);
+    TH1D* Hist2  = new TH1D("Hist2","v_{n}(p_{T}) in LHC22s_pass5",10,0.2,5.0);
     Hist2->SetMinimum(0.);
-    Hist2->SetMaximum(0.1);
+    Hist2->SetMaximum(0.3);
     Hist2->SetXTitle("p_{T}");
     Hist2->SetYTitle("v_{n}");
     Hist2->Draw();
     fc->SetIDName("ChGap");
-    TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(2,0,4.9);
+    TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(2,0,5.);
     if(!hV22pt){
         Printf("Can't get hV22");
         return;
