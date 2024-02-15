@@ -10,13 +10,33 @@
 #include "TLegend.h"
 #include "TCanvas.h"
 #include "TObjArray.h"
+#include "TGraphAsymmErrors.h"
 #include <cstring>
 #include <vector>
 #include <map>
 #include <array>
 #include "include/ErrorPropagation.h"
 
+bool ComparewithPublish = true;
+
 void SetMarkerAndLine(TH1D* graph, Int_t Color=0, Int_t style=0, Int_t linestyle=0, Float_t size=1){
+    if(!graph)return;
+    if(Color){
+        graph->SetMarkerColor(Color);
+        graph->SetLineColor(Color);
+    }
+    if(style){
+        graph->SetMarkerStyle(style);
+    }
+    if(linestyle){
+        graph->SetLineStyle(kSolid);
+    }
+    if(size){
+        graph->SetMarkerSize(1.0);
+    }
+}
+
+void SetMarkerAndLine(TGraphAsymmErrors* graph, Int_t Color=0, Int_t style=0, Int_t linestyle=0, Float_t size=1){
     if(!graph)return;
     if(Color){
         graph->SetMarkerColor(Color);
@@ -145,6 +165,22 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc){
     TLegend* legend = new TLegend(0.2,0.7,0.5,0.9);
     for(int i=0;i<3;i++)legend->AddEntry(hVn[i],Form("v_{%d}{2} |#Delta#eta|>1",i+2));
     legend->Draw();
+
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get("v2/Graph1D_y1");
+        SetMarkerAndLine(g_v2,kBlack,kFullSquare,kSolid,1.0);
+        TGraphAsymmErrors* g_v3 = (TGraphAsymmErrors*)publish->Get("v3/Graph1D_y1");
+        SetMarkerAndLine(g_v3,kRed,kFullSquare,kSolid,1.0);
+        TGraphAsymmErrors* g_v4 = (TGraphAsymmErrors*)publish->Get("v4/Graph1D_y1");
+        SetMarkerAndLine(g_v4,kBlue,kFullSquare,kSolid,1.0);
+        g_v2->Draw("PE");
+        g_v3->Draw("PE");
+        g_v4->Draw("PE");
+        legend->AddEntry(g_v2,Form("v_{2}{2} JHEP 05 (2020) 085, 2020"));
+        legend->AddEntry(g_v3,Form("v_{3}{2} JHEP 05 (2020) 085, 2020"));
+        legend->AddEntry(g_v4,Form("v_{4}{2} JHEP 05 (2020) 085, 2020"));
+    }
 }
 
 void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc){
@@ -321,6 +357,18 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, ObservableEnum o
     TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
     legend2->AddEntry(hv422,Form("%s |#Delta#eta|>1",ObservableName[observable]));
     legend2->Draw();
+
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        TGraphAsymmErrors* g = nullptr;
+        if(observable==v422)g=(TGraphAsymmErrors*)publish->Get("v422/Graph1D_y1");
+        else if(observable==chi422)g=(TGraphAsymmErrors*)publish->Get("chi422/Graph1D_y1");
+        else if(observable==rho422)g=(TGraphAsymmErrors*)publish->Get("rho422/Graph1D_y1");
+        if(!g)return;
+        SetMarkerAndLine(g,kRed,kFullSquare,kSolid,1.0);
+        g->Draw("PE");
+        legend2->AddEntry(g,Form("%s JHEP 05 (2020) 085, 2020",ObservableName[observable]));
+    }
 
 }
 
