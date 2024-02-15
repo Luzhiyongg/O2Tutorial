@@ -1,5 +1,6 @@
 //put in the first lines to ignore the warning message
 #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
+#pragma GCC diagnostic ignored "-Wwritable-strings"
 
 // #include "FlowContainer.h"
 #include "TFile.h"
@@ -11,6 +12,8 @@
 #include "TObjArray.h"
 #include <cstring>
 #include <vector>
+#include <map>
+#include <array>
 #include "include/ErrorPropagation.h"
 
 void SetMarkerAndLine(TH1D* graph, Int_t Color=0, Int_t style=0, Int_t linestyle=0, Float_t size=1){
@@ -203,14 +206,70 @@ void GetNonlinearHistogram(FlowContainer* fc, TH1D*& hCorr422, TH1D*& hCorr24, T
     delete temp_42;
 }
 
-void Output_vNL(string FileNameSuffix, FlowContainer* fc){
+enum ObservableEnum{
+    v422,
+    chi422,
+    rho422
+};
+
+std::map<ObservableEnum, Char_t*> ObservableName = {
+  {v422, "v_{4,22}"},
+  {chi422, "#chi_{4,22}"},
+  {rho422, "#rho_{4,22}"}
+};
+
+std::map<ObservableEnum, std::array<double, 2>> UserRangeMap = {
+  {v422, {-0.005,0.015}},
+  {chi422, {-2.,2.}},
+  {rho422, {0.,1.}}
+};
+
+void SetNonlinearValue(TH1D*& target, TH1D*& hCorr422, TH1D*& hCorr24, TH1D*& hCorr42, ObservableEnum observable=v422){
+    if(!target)target = (TH1D*)hCorr422->Clone();
+    for(int i=1;i<=hCorr422->GetNbinsX();i++){
+        if(observable==chi422){
+            target->SetBinContent(i,hCorr422->GetBinContent(i)/hCorr24->GetBinContent(i));
+            target->SetBinError(i,Error_Chi(hCorr422->GetBinContent(i), hCorr422->GetBinError(i), hCorr24->GetBinContent(i), hCorr24->GetBinError(i)));
+        }
+        else{
+            if(observable==v422){
+                if(hCorr24->GetBinContent(i)>0.){
+                    target->SetBinContent(i,hCorr422->GetBinContent(i)/sqrt(hCorr24->GetBinContent(i)));
+                    target->SetBinError(i,Error_vNL(hCorr422->GetBinContent(i), hCorr422->GetBinError(i), hCorr24->GetBinContent(i), hCorr24->GetBinError(i)));
+                }
+                else{
+                    target->SetBinContent(i,0.);
+                    target->SetBinError(i,0.);
+                    Printf("Warning: in %f %%, Ch10Gap24 is negative", hCorr422->GetBinCenter(i));
+                }
+            }
+            else if(observable==rho422){
+                if(hCorr24->GetBinContent(i)>0.&&hCorr42->GetBinContent(i)>0.){
+                    target->SetBinContent(i,hCorr422->GetBinContent(i)/(sqrt(hCorr24->GetBinContent(i))*sqrt(hCorr42->GetBinContent(i))));
+                    target->SetBinError(i,Error_Rho(hCorr422->GetBinContent(i), hCorr422->GetBinError(i), hCorr24->GetBinContent(i), hCorr24->GetBinError(i),hCorr42->GetBinContent(i), hCorr42->GetBinError(i)));
+                }
+                else{
+                    target->SetBinContent(i,0.);
+                    target->SetBinError(i,0.);
+                    Printf("Warning: in %f %%, Ch10Gap24 or Ch10Gap42 is negative", hCorr422->GetBinCenter(i));
+                }
+            }
+        }
+        
+    }
+    delete hCorr422;
+    delete hCorr24;
+    delete hCorr42;
+}
+
+void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, ObservableEnum observable=v422){
     
-    TCanvas* canvas1 = new TCanvas("Canvas_vNL","Canvas_vNL",900,900);
-    TH1D* Hist  = new TH1D(Form("v_NL in %s",FileNameSuffix.c_str()),Form("v_NL in %s",FileNameSuffix.c_str()),8,0,80);
-    Hist->SetMinimum(-0.005);
-    Hist->SetMaximum(0.015);
+    TCanvas* canvas1 = new TCanvas(Form("Canvas_%s",ObservableName[observable]),Form("Canvas_%s",ObservableName[observable]),900,900);
+    TH1D* Hist  = new TH1D(Form("%s in %s",ObservableName[observable],FileNameSuffix.c_str()),Form("%s in %s",ObservableName[observable],FileNameSuffix.c_str()),8,0,80);
+    Hist->SetMinimum(UserRangeMap[observable][0]);
+    Hist->SetMaximum(UserRangeMap[observable][1]);
     Hist->SetXTitle("Centrality/%");
-    Hist->SetYTitle("v_{n}");
+    Hist->SetYTitle(ObservableName[observable]);
     Hist->Draw();
 
     // fc->SetPropagateErrors(kTRUE);
@@ -220,20 +279,7 @@ void Output_vNL(string FileNameSuffix, FlowContainer* fc){
     GetNonlinearHistogram(fc,hCorr422,hCorr24,hCorr42,"Ch10Gap");
 
     TH1D* hv422 = (TH1D*)hCorr422->Clone();
-    for(int i=1;i<=hCorr422->GetNbinsX();i++){
-        if(hCorr24->GetBinContent(i)>0.){
-            hv422->SetBinContent(i,hCorr422->GetBinContent(i)/sqrt(hCorr24->GetBinContent(i)));
-            // hv422->SetBinError(i,Error_vNL(hCorr422->GetBinContent(i), hCorr422->GetBinError(i), hCorr24->GetBinContent(i), hCorr24->GetBinError(i)));
-        }
-        else{
-            hv422->SetBinContent(i,0.);
-            hv422->SetBinError(i,0.);
-            Printf("Warning: in %f %%, Ch10Gap24 is negative", hCorr422->GetBinCenter(i));
-        }
-    }
-    delete hCorr422;
-    delete hCorr24;
-    delete hCorr42;
+    SetNonlinearValue(hv422,hCorr422,hCorr24,hCorr42,observable);
 
     std::vector<std::vector<std::vector<double>>> ValueArray;
     std::vector<std::vector<std::vector<double>>> ValueErrorArray;
@@ -252,20 +298,7 @@ void Output_vNL(string FileNameSuffix, FlowContainer* fc){
             TH1D* hCorr42=nullptr;
             GetNonlinearHistogram(fc,hCorr422,hCorr24,hCorr42,"Ch10Gap");
             TH1D* temp = (TH1D*)hCorr422->Clone();
-            for(int i=1;i<=hCorr422->GetNbinsX();i++){
-                if(hCorr24->GetBinContent(i)>0.){
-                    temp->SetBinContent(i,hCorr422->GetBinContent(i)/sqrt(hCorr24->GetBinContent(i)));
-                    temp->SetBinError(i,Error_vNL(hCorr422->GetBinContent(i), hCorr422->GetBinError(i), hCorr24->GetBinContent(i), hCorr24->GetBinError(i)));
-                }
-                else{
-                    temp->SetBinContent(i,0.);
-                    temp->SetBinError(i,0.);
-                    Printf("Warning: in %f %%, Ch10Gap24 is negative", hCorr422->GetBinCenter(i));
-                }
-            }
-            delete hCorr422;
-            delete hCorr24;
-            delete hCorr42;
+            SetNonlinearValue(temp,hCorr422,hCorr24,hCorr42,observable);
             if(!temp){
                 Printf("Can't get v422");
                 return;
@@ -286,120 +319,7 @@ void Output_vNL(string FileNameSuffix, FlowContainer* fc){
     SetMarkerAndLine(hv422,kBlack,kFullCircle,kSolid,1.0);
     hv422->Draw("ESames");
     TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
-    legend2->AddEntry(hv422,Form("v_{4,22} |#Delta#eta|>1"));
-    legend2->Draw();
-
-}
-
-void Output_Chi(string FileNameSuffix, FlowContainer* fc){
-    
-    TCanvas* canvas1 = new TCanvas("Canvas_Chi","Canvas_Chi",900,900);
-    TH1D* Hist  = new TH1D(Form("#chi_{n,mk} in %s",FileNameSuffix.c_str()),Form("#chi_{n,mk} in %s",FileNameSuffix.c_str()),8,0,80);
-    Hist->SetMinimum(-2.);
-    Hist->SetMaximum(2.);
-    Hist->SetXTitle("Centrality/%");
-    Hist->SetYTitle("#chi_{n,mk}");
-    Hist->Draw();
-
-    // fc->SetPropagateErrors(kTRUE);
-    fc->SetIDName("Ch10GapA");
-    TH1D* hCorr422A = (TH1D*)fc->GetHistCorrXXVsMulti("422");
-    if(!hCorr422A){
-        Printf("Can't get hCorr422A");
-        return;
-    }
-    TH1D* hCorr422 = (TH1D*)hCorr422A->Clone();
-    hCorr422->SetName("hCorr42");
-
-    fc->SetIDName("Ch10GapB");
-    TH1D* hCorr422B = (TH1D*)fc->GetHistCorrXXVsMulti("422");
-    if(!hCorr422B){
-        Printf("Can't get hCorr422B");
-        return;
-    }
-    fc->SetIDName("Ch10Gap");
-    TH1D* hCorr24= (TH1D*)fc->GetHistCorrXXVsMulti("24");
-    if(!hCorr24){
-        Printf("Can't get hCorr24");
-        return;
-    }
-
-    for(int i=1;i<=hCorr422->GetNbinsX();i++){
-        // Printf("%f",hCorr422A->GetBinCenter(i));
-        hCorr422->SetBinContent(i,(hCorr422->GetBinContent(i)+hCorr422B->GetBinContent(i))/2.);
-    }
-
-    TH1D* hv422 = (TH1D*)hCorr422A->Clone();
-    for(int i=1;i<=hCorr422->GetNbinsX();i++){
-        hv422->SetBinContent(i,hCorr422->GetBinContent(i)/hCorr24->GetBinContent(i));
-    }
-
-    SetMarkerAndLine(hv422,kBlack,kFullCircle,kSolid,1.0);
-    hv422->Draw("ESames");
-    TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
-    legend2->AddEntry(hv422,Form("#chi_{4,22} |#Delta#eta|>1"));
-    legend2->Draw();
-
-}
-
-void Output_Rho(string FileNameSuffix, FlowContainer* fc){
-    
-    TCanvas* canvas1 = new TCanvas("Canvas_Rho","Canvas_Rho",900,900);
-    TH1D* Hist  = new TH1D(Form("#rho_{n,mk} in %s",FileNameSuffix.c_str()),Form("#rho_{n,mk} in %s",FileNameSuffix.c_str()),8,0,80);
-    Hist->SetMinimum(0.);
-    Hist->SetMaximum(1.);
-    Hist->SetXTitle("Centrality/%");
-    Hist->SetYTitle("#rho_{n,mk}");
-    Hist->Draw();
-
-    // fc->SetPropagateErrors(kTRUE);
-    fc->SetIDName("Ch10GapA");
-    TH1D* hCorr422A = (TH1D*)fc->GetHistCorrXXVsMulti("422");
-    if(!hCorr422A){
-        Printf("Can't get hCorr422A");
-        return;
-    }
-    TH1D* hCorr422 = (TH1D*)hCorr422A->Clone();
-    hCorr422->SetName("hCorr42");
-
-    fc->SetIDName("Ch10GapB");
-    TH1D* hCorr422B = (TH1D*)fc->GetHistCorrXXVsMulti("422");
-    if(!hCorr422B){
-        Printf("Can't get hCorr422B");
-        return;
-    }
-    fc->SetIDName("Ch10Gap");
-    TH1D* hCorr24= (TH1D*)fc->GetHistCorrXXVsMulti("24");
-    if(!hCorr24){
-        Printf("Can't get hCorr24");
-        return;
-    }
-    TH1D* hCorr42= (TH1D*)fc->GetHistCorrXXVsMulti("42");
-    if(!hCorr42){
-        Printf("Can't get hCorr42");
-        return;
-    }
-
-    for(int i=1;i<=hCorr422->GetNbinsX();i++){
-        // Printf("%f",hCorr422A->GetBinCenter(i));
-        hCorr422->SetBinContent(i,(hCorr422->GetBinContent(i)+hCorr422B->GetBinContent(i))/2.);
-    }
-
-    TH1D* hv422 = (TH1D*)hCorr422A->Clone();
-    for(int i=1;i<=hCorr422->GetNbinsX();i++){
-        if(hCorr24->GetBinContent(i)>0.&&hCorr42->GetBinContent(i)>0.){
-            hv422->SetBinContent(i,hCorr422->GetBinContent(i)/(sqrt(hCorr24->GetBinContent(i))*sqrt(hCorr42->GetBinContent(i))));
-        }
-        else{
-            hv422->SetBinContent(i,0.);
-            Printf("Warning: in %f %%, Ch10Gap24 or Ch10Gap42 is negative", hCorr422A->GetBinCenter(i));
-        }
-    }
-
-    SetMarkerAndLine(hv422,kBlack,kFullCircle,kSolid,1.0);
-    hv422->Draw("ESames");
-    TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
-    legend2->AddEntry(hv422,Form("#rho_{4,22} |#Delta#eta|>1"));
+    legend2->AddEntry(hv422,Form("%s |#Delta#eta|>1",ObservableName[observable]));
     legend2->Draw();
 
 }
@@ -415,9 +335,9 @@ void ProcessFlowContainer(string FileNameSuffix = "LHC23zzh_pass2"){
 
     Output_vn(FileNameSuffix, fc);
     // Output_ptDiffvn(FileNameSuffix, fc);
-    Output_vNL(FileNameSuffix, fc);
-    // Output_Chi(FileNameSuffix, fc);
-    // Output_Rho(FileNameSuffix, fc);
+    Output_Nonlinear(FileNameSuffix, fc, v422);
+    Output_Nonlinear(FileNameSuffix, fc, chi422);
+    Output_Nonlinear(FileNameSuffix, fc, rho422);
     return;
     
 }
