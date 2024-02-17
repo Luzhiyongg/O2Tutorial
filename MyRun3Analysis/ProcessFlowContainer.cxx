@@ -108,8 +108,8 @@ void ResizeValueArray(std::vector<std::vector<std::vector<double>>>& ValueArray,
 }
 
 void Output_vn(string FileNameSuffix, FlowContainer* fc){
-    TCanvas* canvas1 = new TCanvas("Canvass_vn","Canvas_vn",900,900);
-    TH1D* Hist  = new TH1D(Form("v_{n} in %s",FileNameSuffix.c_str()),Form("v_{n} in %s",FileNameSuffix.c_str()),8,0,80);
+    TCanvas* canvas1 = new TCanvas("Canvas_vn","Canvas_vn",900,900);
+    TH1D* Hist  = new TH1D(Form("v_{n}{2} in %s",FileNameSuffix.c_str()),Form("v_{n}{2} in %s",FileNameSuffix.c_str()),8,0,80);
     Hist->SetMinimum(0.);
     Hist->SetMaximum(0.15);
     Hist->SetXTitle("Centrality/%");
@@ -161,25 +161,102 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc){
     SetMarkerAndLine(hVn[0],kBlack,kFullCircle,kSolid,1.0);
     SetMarkerAndLine(hVn[1],kRed,kFullCircle,kSolid,1.0);
     SetMarkerAndLine(hVn[2],kBlue,kFullCircle,kSolid,1.0);
-    for(int i=0;i<3;i++)hVn[i]->Draw("ESames");
+    for(int i=0;i<Nobs;i++)hVn[i]->Draw("ESames");
     TLegend* legend = new TLegend(0.2,0.7,0.5,0.9);
-    for(int i=0;i<3;i++)legend->AddEntry(hVn[i],Form("v_{%d}{2} |#Delta#eta|>1",i+2));
+    for(int i=0;i<Nobs;i++)legend->AddEntry(hVn[i],Form("v_{%d}{2} |#Delta#eta|>1",i+2));
     legend->Draw();
 
     if(ComparewithPublish){
         TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
         TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get("v2/Graph1D_y1");
-        SetMarkerAndLine(g_v2,kBlack,kFullSquare,kSolid,1.0);
+        SetMarkerAndLine(g_v2,kBlack,kOpenSquare,kSolid,1.0);
         TGraphAsymmErrors* g_v3 = (TGraphAsymmErrors*)publish->Get("v3/Graph1D_y1");
-        SetMarkerAndLine(g_v3,kRed,kFullSquare,kSolid,1.0);
+        SetMarkerAndLine(g_v3,kRed,kOpenSquare,kSolid,1.0);
         TGraphAsymmErrors* g_v4 = (TGraphAsymmErrors*)publish->Get("v4/Graph1D_y1");
-        SetMarkerAndLine(g_v4,kBlue,kFullSquare,kSolid,1.0);
+        SetMarkerAndLine(g_v4,kBlue,kOpenSquare,kSolid,1.0);
         g_v2->Draw("PE");
         g_v3->Draw("PE");
         g_v4->Draw("PE");
         legend->AddEntry(g_v2,Form("v_{2}{2} JHEP 05 (2020) 085, 2020"));
         legend->AddEntry(g_v3,Form("v_{3}{2} JHEP 05 (2020) 085, 2020"));
         legend->AddEntry(g_v4,Form("v_{4}{2} JHEP 05 (2020) 085, 2020"));
+    }
+}
+
+void Output_vn4(string FileNameSuffix, FlowContainer* fc){
+    TCanvas* canvas1 = new TCanvas("Canvas_vn4","Canvas_vn4",900,900);
+    TH1D* Hist  = new TH1D(Form("v_{n}{4} in %s",FileNameSuffix.c_str()),Form("v_{n}{4} in %s",FileNameSuffix.c_str()),8,0,80);
+    Hist->SetMinimum(0.);
+    Hist->SetMaximum(0.15);
+    Hist->SetXTitle("Centrality/%");
+    Hist->SetYTitle("v_{n}{4}");
+    Hist->Draw();
+    fc->SetIDName("ChFull");
+    fc->SetPropagateErrors(kTRUE);
+    TH1D* hVn[3] = {nullptr};
+    hVn[0] = (TH1D*)fc->GetVN4VsMulti(2);
+    // TH1D* temp_22 = (TH1D*)fc->GetHistCorrXXVsMulti("22");
+    // TH1D* temp_24 = (TH1D*)fc->GetHistCorrXXVsMulti("24");
+    // hVn[0] = (TH1D*)temp_22->Clone();
+    // hVn[0]->SetName("c24");
+    // for(int i=1;i<=temp_22->GetNbinsX();i++){
+    //     double corr22 = temp_22->GetBinContent(i);
+    //     double corr24 = temp_24->GetBinContent(i);
+    //     double c24 = 2*corr22*corr22 - corr24;
+    //     Printf("corr24: %f, corr22: %f",corr24, corr22);
+    //     if(c24>0){
+    //         hVn[0]->SetBinContent(i,sqrt(sqrt(c24)));
+    //         Printf("v24: %f",sqrt(sqrt(c24)));
+    //     }
+    //     else{
+    //         hVn[0]->SetBinContent(i,0);
+    //     }
+    // }
+    // delete temp_22;
+    // delete temp_24;
+
+    std::vector<std::vector<std::vector<double>>> ValueArray;
+    std::vector<std::vector<std::vector<double>>> ValueErrorArray;
+    std::vector<std::vector<double>> ErrorArray;
+    int Nobs=1;//v24
+    TObjArray* subsamples = fc->GetSubProfiles();
+    int NofSample = subsamples->GetEntries();
+    int Nbin = hVn[0]->GetNbinsX();
+    ResizeValueArray(ValueArray,ValueErrorArray,ErrorArray,Nobs,NofSample,Nbin);
+    
+    for(int sample=0;sample<NofSample;sample++){
+        fc->OverrideMainWithSub(sample,false);
+        for(int i=0;i<Nobs;i++){
+            TH1D* temp = (TH1D*)fc->GetVN4VsMulti(i+2);
+            if(!temp){
+                Printf("Can't get v%d",i+2);
+                return;
+            }
+            for(int j=0;j<temp->GetNbinsX();j++){
+                ValueArray[i][sample][j] = temp->GetBinContent(j+1);
+                ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
+            }
+        }
+    }
+    for(int i=0;i<Nobs;i++){
+        CalculateBootstrapError(ValueArray[i],ValueErrorArray[i],ErrorArray[i]);
+    }
+    for(int i=0;i<Nbin;i++){
+        hVn[0]->SetBinError(i+1, ErrorArray[0][i]);
+    }
+
+    SetMarkerAndLine(hVn[0],kBlack,kFullCircle,kSolid,1.0);
+    for(int i=0;i<Nobs;i++)hVn[i]->Draw("ESames");
+    TLegend* legend = new TLegend(0.2,0.8,0.5,0.9);
+    for(int i=0;i<Nobs;i++)legend->AddEntry(hVn[i],Form("v_{%d}{4}",i+2));
+    legend->Draw();
+
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1666817-v1-root.root","READ");
+        TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get("Table 2/Graph1D_y1");
+        SetMarkerAndLine(g_v2,kRed,kOpenSquare,kSolid,1.0);
+        g_v2->Draw("PE");
+        legend->AddEntry(g_v2,Form("v_{2}{4} JHEP 07 (2018) 103"));
     }
 }
 
@@ -365,7 +442,7 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, ObservableEnum o
         else if(observable==chi422)g=(TGraphAsymmErrors*)publish->Get("chi422/Graph1D_y1");
         else if(observable==rho422)g=(TGraphAsymmErrors*)publish->Get("rho422/Graph1D_y1");
         if(!g)return;
-        SetMarkerAndLine(g,kRed,kFullSquare,kSolid,1.0);
+        SetMarkerAndLine(g,kRed,kOpenSquare,kSolid,1.0);
         g->Draw("PE");
         legend2->AddEntry(g,Form("%s JHEP 05 (2020) 085, 2020",ObservableName[observable]));
     }
@@ -382,6 +459,7 @@ void ProcessFlowContainer(string FileNameSuffix = "LHC23zzh_pass2"){
     TObjArray* Subsamples = fc->GetSubProfiles();
 
     Output_vn(FileNameSuffix, fc);
+    Output_vn4(FileNameSuffix, fc);
     // Output_ptDiffvn(FileNameSuffix, fc);
     Output_Nonlinear(FileNameSuffix, fc, v422);
     Output_Nonlinear(FileNameSuffix, fc, chi422);
