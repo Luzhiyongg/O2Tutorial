@@ -562,17 +562,15 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc){
     legend2->AddEntry(NSC32,Form("NSC(3,2) |#Delta#eta|>1"));
     legend2->Draw();
 
-    // if(ComparewithPublish){
-    //     TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
-    //     TGraphAsymmErrors* g = nullptr;
-    //     if(observable==v422)g=(TGraphAsymmErrors*)publish->Get("v422/Graph1D_y1");
-    //     else if(observable==chi422)g=(TGraphAsymmErrors*)publish->Get("chi422/Graph1D_y1");
-    //     else if(observable==rho422)g=(TGraphAsymmErrors*)publish->Get("rho422/Graph1D_y1");
-    //     if(!g)return;
-    //     SetMarkerAndLine(g,kRed,kOpenSquare,kSolid,1.0);
-    //     g->Draw("PE");
-    //     legend2->AddEntry(g,Form("%s JHEP 05 (2020) 085, 2020",ObservableName[observable]));
-    // }
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1848215-v1-root.root","READ");
+        TGraphAsymmErrors* g = nullptr;
+        g=(TGraphAsymmErrors*)publish->Get("Table 1/Graph1D_y1");
+        if(!g)return;
+        SetMarkerAndLine(g,kRed,kOpenSquare,kSolid,1.0);
+        g->Draw("PE");
+        legend2->AddEntry(g,Form("NSC(3,2) PLB 818 (2021) 136354, 2021"));
+    }
 
 }
 
