@@ -465,11 +465,13 @@ void CalculateNSC32(FlowContainer* fc, TH1D*& target){
     TH1D* temp_22_Full= (TH1D*)fc->GetHistCorrXXVsMulti("22");
     if(!temp_22_Full){Printf("Can't get temp_22_Full");return;}
     hCorr22_Full = (TH1D*)temp_22_Full->Clone();
+    hCorr22_Full->SetName("hCorr22_Full");
     delete temp_22_Full;
 
     TH1D* temp_32_Full= (TH1D*)fc->GetHistCorrXXVsMulti("32");
     if(!temp_32_Full){Printf("Can't get temp_32_Full");return;}
     hCorr32_Full = (TH1D*)temp_32_Full->Clone();
+    hCorr32_Full->SetName("hCorr32_Full");
     delete temp_32_Full;
 
     fc->SetIDName(Form("Ch10Gap"));
@@ -544,6 +546,7 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc){
                 ValueArray[i][sample][j] = temp->GetBinContent(j+1);
                 ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
             }
+            delete temp;
         }
     }
     for(int i=0;i<Nobs;i++){
