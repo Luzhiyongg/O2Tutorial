@@ -18,6 +18,7 @@
 #include "include/ErrorPropagation.h"
 
 bool ComparewithPublish = true;
+bool OutputPNG = true;
 
 void SetMarkerAndLine(TH1D* graph, Int_t Color=0, Int_t style=0, Int_t linestyle=0, Float_t size=1){
     if(!graph)return;
@@ -181,6 +182,10 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc){
         legend->AddEntry(g_v3,Form("v_{3}{2} JHEP 05 (2020) 085, 2020"));
         legend->AddEntry(g_v4,Form("v_{4}{2} JHEP 05 (2020) 085, 2020"));
     }
+
+    if(OutputPNG){
+        canvas1->SaveAs("./ProcessOutput/vn.png");
+    }
 }
 
 void Output_vn4(string FileNameSuffix, FlowContainer* fc){
@@ -258,6 +263,10 @@ void Output_vn4(string FileNameSuffix, FlowContainer* fc){
         g_v2->Draw("PE");
         legend->AddEntry(g_v2,Form("v_{2}{4} JHEP 07 (2018) 103"));
     }
+
+    if(OutputPNG){
+        canvas1->SaveAs("./ProcessOutput/v24.png");
+    }
 }
 
 void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc){
@@ -279,6 +288,10 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc){
     TLegend* legend2 = new TLegend(0.2,0.8,0.5,0.9);
     legend2->AddEntry(hV22pt,Form("v_{2}{2}(p_{T}) |#Delta#eta|>1 cent:0~5%%"));
     legend2->Draw();
+
+    if(OutputPNG){
+        canvas2->SaveAs("./ProcessOutput/ptDiffvn.png");
+    }
 }
 
 void GetNonlinearHistogram(FlowContainer* fc, TH1D*& hCorr422, TH1D*& hCorr24, TH1D*& hCorr42, string GapName="Ch10Gap"){
@@ -329,6 +342,12 @@ std::map<ObservableEnum, Char_t*> ObservableName = {
   {v422, "v_{4,22}"},
   {chi422, "#chi_{4,22}"},
   {rho422, "#rho_{4,22}"}
+};
+
+std::map<ObservableEnum, Char_t*> OutputObservableName = {
+  {v422, "v422"},
+  {chi422, "chi422"},
+  {rho422, "rho422"}
 };
 
 std::map<ObservableEnum, std::array<double, 2>> UserRangeMap = {
@@ -445,6 +464,10 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, ObservableEnum o
         SetMarkerAndLine(g,kRed,kOpenSquare,kSolid,1.0);
         g->Draw("PE");
         legend2->AddEntry(g,Form("%s JHEP 05 (2020) 085, 2020",ObservableName[observable]));
+    }
+
+    if(OutputPNG){
+        canvas1->SaveAs(Form("./ProcessOutput/%s.png",OutputObservableName[observable]));
     }
 
 }
@@ -572,6 +595,9 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc){
         legend2->AddEntry(g,Form("NSC(3,2) PLB 818 (2021) 136354, 2021"));
     }
 
+    if(OutputPNG){
+        canvas1->SaveAs(Form("./ProcessOutput/NSC.png"));
+    }
 }
 
 void ProcessFlowContainer(string FileNameSuffix = "LHC23zzh_pass2"){
@@ -585,7 +611,7 @@ void ProcessFlowContainer(string FileNameSuffix = "LHC23zzh_pass2"){
 
     Output_vn(FileNameSuffix, fc);
     Output_vn4(FileNameSuffix, fc);
-    // Output_ptDiffvn(FileNameSuffix, fc);
+    Output_ptDiffvn(FileNameSuffix, fc);
     Output_Nonlinear(FileNameSuffix, fc, v422);
     Output_Nonlinear(FileNameSuffix, fc, chi422);
     Output_Nonlinear(FileNameSuffix, fc, rho422);
