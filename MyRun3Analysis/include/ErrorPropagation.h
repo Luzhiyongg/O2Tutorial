@@ -49,4 +49,18 @@ double Error_Chi(double N, double eN, double D1, double eD1){
     return err;
 }
 
+double Error_NSC(double N, double eN, double N1, double eN1, double N2, double eN2, double D1, double eD1, double D2, double eD2){
+    //NSC = (N-N1*N2)/(D1*D2)
+
+    double err = sqrt(
+        pow(eN/(D1*D2),2)
+        +pow(eN1*N2/(D1*D2),2)
+        +pow(eN2*N1/(D1*D2),2)
+        +pow(eD1*(N-N1*N2)/(D1*D1*D2),2)
+        +pow(eD2*(N-N1*N2)/(D1*D2*D2),2)
+    );
+    if(err<=0||err>5)printf("Warning: err for NSC is %f\n",err);
+    return err;
+}
+
 #endif

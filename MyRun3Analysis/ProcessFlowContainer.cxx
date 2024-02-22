@@ -449,6 +449,130 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, ObservableEnum o
 
 }
 
+void CalculateNSC32(FlowContainer* fc, TH1D*& target){
+
+    TH1D* hCorr3232=nullptr;
+    TH1D* hCorr22_Full=nullptr;
+    TH1D* hCorr32_Full=nullptr;
+    TH1D* hCorr22_Gap=nullptr;
+    TH1D* hCorr32_Gap=nullptr;
+    fc->SetIDName(Form("ChFull"));
+    TH1D* temp_3232= (TH1D*)fc->GetHistCorrXXVsMulti("3232");
+    if(!temp_3232){Printf("Can't get temp_3232");return;}
+    hCorr3232 = (TH1D*)temp_3232->Clone();
+    delete temp_3232;
+
+    TH1D* temp_22_Full= (TH1D*)fc->GetHistCorrXXVsMulti("22");
+    if(!temp_22_Full){Printf("Can't get temp_22_Full");return;}
+    hCorr22_Full = (TH1D*)temp_22_Full->Clone();
+    delete temp_22_Full;
+
+    TH1D* temp_32_Full= (TH1D*)fc->GetHistCorrXXVsMulti("32");
+    if(!temp_32_Full){Printf("Can't get temp_32_Full");return;}
+    hCorr32_Full = (TH1D*)temp_32_Full->Clone();
+    delete temp_32_Full;
+
+    fc->SetIDName(Form("Ch10Gap"));
+    TH1D* temp_22_Gap= (TH1D*)fc->GetHistCorrXXVsMulti("22");
+    if(!temp_22_Gap){Printf("Can't get temp_22_Gap");return;}
+    hCorr22_Gap = (TH1D*)temp_22_Gap->Clone();
+    delete temp_22_Gap;
+
+    TH1D* temp_32_Gap= (TH1D*)fc->GetHistCorrXXVsMulti("32");
+    if(!temp_32_Gap){Printf("Can't get temp_32_Gap");return;}
+    hCorr32_Gap = (TH1D*)temp_32_Gap->Clone();
+    delete temp_32_Gap;
+
+    target = (TH1D*)hCorr3232->Clone();
+    for(int i=1;i<=hCorr3232->GetNbinsX();i++){
+        target->SetBinContent(i,
+        (hCorr3232->GetBinContent(i)-hCorr22_Full->GetBinContent(i)*hCorr32_Full->GetBinContent(i))
+        /(hCorr22_Gap->GetBinContent(i)*hCorr32_Gap->GetBinContent(i))
+        );
+        double err = Error_NSC(hCorr3232->GetBinContent(i),hCorr3232->GetBinError(i),
+        hCorr22_Full->GetBinContent(i),hCorr22_Full->GetBinError(i),
+        hCorr32_Full->GetBinContent(i),hCorr32_Full->GetBinError(i),
+        hCorr22_Gap->GetBinContent(i),hCorr22_Gap->GetBinError(i),
+        hCorr32_Gap->GetBinContent(i),hCorr32_Gap->GetBinError(i)
+        );
+        target->SetBinError(i,err);
+    }
+
+    delete hCorr3232;
+    delete hCorr22_Full;
+    delete hCorr32_Full;
+    delete hCorr22_Gap;
+    delete hCorr32_Gap;
+    
+}
+
+void Output_NSC(string FileNameSuffix, FlowContainer* fc){
+    
+    TCanvas* canvas1 = new TCanvas(Form("Canvas_NSC"),Form("Canvas_NSC"),900,900);
+    TH1D* Hist  = new TH1D(Form("NSC in %s",FileNameSuffix.c_str()),Form("NSC in %s",FileNameSuffix.c_str()),8,0,80);
+    Hist->SetMinimum(-1.);
+    Hist->SetMaximum(1.);
+    Hist->SetXTitle("Centrality/%");
+    Hist->SetYTitle("NSC(3,2)");
+    Hist->Draw();
+
+    // fc->SetPropagateErrors(kTRUE);
+    TH1D* NSC32 = nullptr;
+    CalculateNSC32(fc, NSC32);
+    NSC32->SetName("NSC32");
+    
+
+    std::vector<std::vector<std::vector<double>>> ValueArray;
+    std::vector<std::vector<std::vector<double>>> ValueErrorArray;
+    std::vector<std::vector<double>> ErrorArray;
+    int Nobs=1;//NSC
+    TObjArray* subsamples = fc->GetSubProfiles();
+    int NofSample = subsamples->GetEntries();
+    int Nbin = NSC32->GetNbinsX();
+    ResizeValueArray(ValueArray,ValueErrorArray,ErrorArray,Nobs,NofSample,Nbin);
+    
+    for(int sample=0;sample<NofSample;sample++){
+        fc->OverrideMainWithSub(sample,false);
+        for(int i=0;i<Nobs;i++){
+            TH1D* temp = nullptr;
+            CalculateNSC32(fc, temp);
+            if(!temp){
+                Printf("Can't get NSC32");
+                return;
+            }
+            for(int j=0;j<temp->GetNbinsX();j++){
+                ValueArray[i][sample][j] = temp->GetBinContent(j+1);
+                ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
+            }
+        }
+    }
+    for(int i=0;i<Nobs;i++){
+        CalculateBootstrapError(ValueArray[i],ValueErrorArray[i],ErrorArray[i]);
+    }
+    for(int i=0;i<Nbin;i++){
+        NSC32->SetBinError(i+1, ErrorArray[0][i]);
+    }
+
+    SetMarkerAndLine(NSC32,kBlack,kFullCircle,kSolid,1.0);
+    NSC32->Draw("ESames");
+    TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
+    legend2->AddEntry(NSC32,Form("NSC(3,2) |#Delta#eta|>1"));
+    legend2->Draw();
+
+    // if(ComparewithPublish){
+    //     TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+    //     TGraphAsymmErrors* g = nullptr;
+    //     if(observable==v422)g=(TGraphAsymmErrors*)publish->Get("v422/Graph1D_y1");
+    //     else if(observable==chi422)g=(TGraphAsymmErrors*)publish->Get("chi422/Graph1D_y1");
+    //     else if(observable==rho422)g=(TGraphAsymmErrors*)publish->Get("rho422/Graph1D_y1");
+    //     if(!g)return;
+    //     SetMarkerAndLine(g,kRed,kOpenSquare,kSolid,1.0);
+    //     g->Draw("PE");
+    //     legend2->AddEntry(g,Form("%s JHEP 05 (2020) 085, 2020",ObservableName[observable]));
+    // }
+
+}
+
 void ProcessFlowContainer(string FileNameSuffix = "LHC23zzh_pass2"){
     TFile* f = new TFile(Form("./AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
     FlowContainer* fc = (FlowContainer*)f->Get("flow-pb-pb-task/FlowContainer");
@@ -464,6 +588,7 @@ void ProcessFlowContainer(string FileNameSuffix = "LHC23zzh_pass2"){
     Output_Nonlinear(FileNameSuffix, fc, v422);
     Output_Nonlinear(FileNameSuffix, fc, chi422);
     Output_Nonlinear(FileNameSuffix, fc, rho422);
+    Output_NSC(FileNameSuffix, fc);
     return;
     
 }
