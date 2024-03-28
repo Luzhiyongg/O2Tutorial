@@ -18,7 +18,7 @@
 #include "include/ErrorPropagation.h"
 
 bool ComparewithPublish = true;
-bool OutputPNG = true;
+bool OutputPNG = false;
 
 void SetMarkerAndLine(TH1D* graph, Int_t Color=0, Int_t style=0, Int_t linestyle=0, Float_t size=1){
     if(!graph)return;
@@ -113,7 +113,7 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc){
     TH1D* Hist  = new TH1D(Form("v_{n}{2} in %s",FileNameSuffix.c_str()),Form("v_{n}{2} in %s",FileNameSuffix.c_str()),8,0,80);
     Hist->SetMinimum(0.);
     Hist->SetMaximum(0.15);
-    Hist->SetXTitle("Centrality/%");
+    Hist->SetXTitle("Centrality (%)");
     Hist->SetYTitle("v_{n}");
     Hist->Draw();
     fc->SetIDName("Ch10Gap");
@@ -162,6 +162,7 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc){
     SetMarkerAndLine(hVn[0],kBlack,kFullCircle,kSolid,1.0);
     SetMarkerAndLine(hVn[1],kRed,kFullCircle,kSolid,1.0);
     SetMarkerAndLine(hVn[2],kBlue,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
     for(int i=0;i<Nobs;i++)hVn[i]->Draw("ESames");
     TLegend* legend = new TLegend(0.2,0.7,0.5,0.9);
     for(int i=0;i<Nobs;i++)legend->AddEntry(hVn[i],Form("v_{%d}{2} |#Delta#eta|>1",i+2));
@@ -193,7 +194,7 @@ void Output_vn4(string FileNameSuffix, FlowContainer* fc){
     TH1D* Hist  = new TH1D(Form("v_{n}{4} in %s",FileNameSuffix.c_str()),Form("v_{n}{4} in %s",FileNameSuffix.c_str()),8,0,80);
     Hist->SetMinimum(0.);
     Hist->SetMaximum(0.15);
-    Hist->SetXTitle("Centrality/%");
+    Hist->SetXTitle("Centrality (%)");
     Hist->SetYTitle("v_{n}{4}");
     Hist->Draw();
     fc->SetIDName("ChFull");
@@ -251,6 +252,7 @@ void Output_vn4(string FileNameSuffix, FlowContainer* fc){
     }
 
     SetMarkerAndLine(hVn[0],kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
     for(int i=0;i<Nobs;i++)hVn[i]->Draw("ESames");
     TLegend* legend = new TLegend(0.2,0.8,0.5,0.9);
     for(int i=0;i<Nobs;i++)legend->AddEntry(hVn[i],Form("v_{%d}{4}",i+2));
@@ -284,6 +286,7 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc){
         return;
     }
     SetMarkerAndLine(hV22pt,kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
     hV22pt->Draw("ESames");
     TLegend* legend2 = new TLegend(0.2,0.8,0.5,0.9);
     legend2->AddEntry(hV22pt,Form("v_{2}{2}(p_{T}) |#Delta#eta|>1 cent:0~5%%"));
@@ -351,9 +354,9 @@ std::map<ObservableEnum, Char_t*> OutputObservableName = {
 };
 
 std::map<ObservableEnum, std::array<double, 2>> UserRangeMap = {
-  {v422, {-0.005,0.015}},
-  {chi422, {-2.,2.}},
-  {rho422, {0.,1.}}
+  {v422, {-0.006,0.015}},
+  {chi422, {-5.5,2.}},
+  {rho422, {-0.5,1.}}
 };
 
 void SetNonlinearValue(TH1D*& target, TH1D*& hCorr422, TH1D*& hCorr24, TH1D*& hCorr42, ObservableEnum observable=v422){
@@ -400,7 +403,7 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, ObservableEnum o
     TH1D* Hist  = new TH1D(Form("%s in %s",ObservableName[observable],FileNameSuffix.c_str()),Form("%s in %s",ObservableName[observable],FileNameSuffix.c_str()),8,0,80);
     Hist->SetMinimum(UserRangeMap[observable][0]);
     Hist->SetMaximum(UserRangeMap[observable][1]);
-    Hist->SetXTitle("Centrality/%");
+    Hist->SetXTitle("Centrality (%)");
     Hist->SetYTitle(ObservableName[observable]);
     Hist->Draw();
 
@@ -449,6 +452,7 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, ObservableEnum o
     }
 
     SetMarkerAndLine(hv422,kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
     hv422->Draw("ESames");
     TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
     legend2->AddEntry(hv422,Form("%s |#Delta#eta|>1",ObservableName[observable]));
@@ -537,7 +541,7 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc){
     TH1D* Hist  = new TH1D(Form("NSC in %s",FileNameSuffix.c_str()),Form("NSC in %s",FileNameSuffix.c_str()),8,0,80);
     Hist->SetMinimum(-1.);
     Hist->SetMaximum(1.);
-    Hist->SetXTitle("Centrality/%");
+    Hist->SetXTitle("Centrality (%)");
     Hist->SetYTitle("NSC(3,2)");
     Hist->Draw();
 
@@ -580,6 +584,7 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc){
     }
 
     SetMarkerAndLine(NSC32,kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
     NSC32->Draw("ESames");
     TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
     legend2->AddEntry(NSC32,Form("NSC(3,2) |#Delta#eta|>1"));
@@ -600,6 +605,94 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc){
     }
 }
 
+void CompareNonlinearCorr(string FileNameSuffix, FlowContainer* fc){
+    TCanvas* canvas1 = new TCanvas(Form("Canvas_NSC"),Form("Canvas_NSC"),900,900);
+    TH1D* Hist  = new TH1D(Form("<<4,-2,-2>> in %s",FileNameSuffix.c_str()),Form("<<4,-2,-2>> in %s",FileNameSuffix.c_str()),8,0,80);
+    Hist->SetMinimum(-5e-5);
+    Hist->SetMaximum(2e-4);
+    Hist->SetXTitle("Centrality (%)");
+    Hist->SetYTitle("Correlation");
+    Hist->Draw();
+
+    TH1D* hCorr422 = nullptr;
+    fc->SetIDName(Form("Ch10GapA"));
+    TH1D* temp_422A = (TH1D*)fc->GetHistCorrXXVsMulti("422");
+    if(!temp_422A){Printf("Can't get temp_422A");return;}
+    TH1D* hCorr422A = (TH1D*)temp_422A->Clone();
+    delete temp_422A;
+    hCorr422A->SetName("hCorr422A");
+
+    fc->SetIDName(Form("Ch10GapB"));
+    TH1D* temp_422B = (TH1D*)fc->GetHistCorrXXVsMulti("422");
+    if(!temp_422B){Printf("Can't get temp_422B");return;}
+    TH1D* hCorr422B = (TH1D*)temp_422B->Clone();
+    delete temp_422B;
+    hCorr422B->SetName("hCorr422B");
+
+    if(!hCorr422){
+        hCorr422 = (TH1D*)hCorr422A->Clone();
+        hCorr422->SetName("hCorr422_mean");
+    }
+    for(int i=1;i<=hCorr422->GetNbinsX();i++){
+        // Printf("%f",hCorr422A->GetBinCenter(i));
+        hCorr422->SetBinContent(i,(hCorr422A->GetBinContent(i)+hCorr422B->GetBinContent(i))/2.);
+        hCorr422->SetBinError(i,(hCorr422A->GetBinError(i)+hCorr422B->GetBinError(i))/2.);
+    }
+
+    SetMarkerAndLine(hCorr422,kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
+    hCorr422->Draw("ESames");
+
+}
+
+void CompareNSC32Corr(string FileNameSuffix, FlowContainer* fc){
+    TCanvas* canvas1 = new TCanvas(Form("Canvas_NSC"),Form("Canvas_NSC"),900,900);
+    TH1D* Hist  = new TH1D(Form("NSC in %s",FileNameSuffix.c_str()),Form("NSC in %s",FileNameSuffix.c_str()),8,0,80);
+    Hist->SetMinimum(0.);
+    Hist->SetMaximum(2e-5);
+    Hist->SetXTitle("Centrality (%)");
+    Hist->SetYTitle("Correlation");
+    Hist->Draw();
+
+    fc->SetIDName(Form("ChFull"));
+    TH1D* temp_3232= (TH1D*)fc->GetHistCorrXXVsMulti("3232");
+    if(!temp_3232){Printf("Can't get temp_3232");return;}
+    TH1D* hCorr3232 = (TH1D*)temp_3232->Clone();
+    delete temp_3232;
+
+    TH1D* temp_22_Full= (TH1D*)fc->GetHistCorrXXVsMulti("22");
+    if(!temp_22_Full){Printf("Can't get temp_22_Full");return;}
+    TH1D* hCorr22_Full = (TH1D*)temp_22_Full->Clone();
+    hCorr22_Full->SetName("hCorr22_Full");
+    delete temp_22_Full;
+
+    TH1D* temp_32_Full= (TH1D*)fc->GetHistCorrXXVsMulti("32");
+    if(!temp_32_Full){Printf("Can't get temp_32_Full");return;}
+    TH1D* hCorr32_Full = (TH1D*)temp_32_Full->Clone();
+    hCorr32_Full->SetName("hCorr32_Full");
+    delete temp_32_Full;
+
+    TH1D* hCorr32and22 = (TH1D*)hCorr22_Full->Clone();
+    for(int i=1;i<=hCorr32and22->GetNbinsX();i++){
+        hCorr32and22->SetBinContent(i, hCorr22_Full->GetBinContent(i)*hCorr32_Full->GetBinContent(i));
+        hCorr32and22->SetBinError(i, 0., sqrt(
+            pow(hCorr22_Full->GetBinContent(i)*hCorr32_Full->GetBinError(i),2)
+            +pow(hCorr32_Full->GetBinContent(i)*hCorr22_Full->GetBinError(i),2)
+        ));
+    }
+
+    SetMarkerAndLine(hCorr3232,kBlack,kFullCircle,kSolid,1.0);
+    SetMarkerAndLine(hCorr32and22,kRed,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
+    hCorr3232->Draw("ESames");
+    hCorr32and22->Draw("ESames");
+    TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
+    legend2->AddEntry(hCorr3232,Form("<<3,2,-3,-2>>"));
+    legend2->AddEntry(hCorr32and22,Form("<<3,-3>><<2,-2>>"));
+    legend2->Draw();
+
+}
+
 void ProcessFlowContainer(string FileNameSuffix = "LHC23zzh_pass2"){
     TFile* f = new TFile(Form("./AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
     FlowContainer* fc = (FlowContainer*)f->Get("flow-pb-pb-task/FlowContainer");
@@ -616,6 +709,8 @@ void ProcessFlowContainer(string FileNameSuffix = "LHC23zzh_pass2"){
     Output_Nonlinear(FileNameSuffix, fc, chi422);
     Output_Nonlinear(FileNameSuffix, fc, rho422);
     Output_NSC(FileNameSuffix, fc);
+    // CompareNSC32Corr(FileNameSuffix, fc);
+    // CompareNonlinearCorr(FileNameSuffix, fc);
     return;
     
 }
