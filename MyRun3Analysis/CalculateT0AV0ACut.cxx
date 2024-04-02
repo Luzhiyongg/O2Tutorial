@@ -35,7 +35,7 @@ void CalculateT0AV0ACut(string FileNameSuffix = "LHC23zzh_pass2"){
         Double_t Counter=0.;
         for(Int_t j=1;j<=N_v0a;j++){
             if(V0AT0A->GetBinContent(i,j)>0){
-                Printf("%f * %f",V0AT0A->GetYaxis()->GetBinCenter(j), V0AT0A->GetBinContent(i,j));
+                // Printf("%f * %f",V0AT0A->GetYaxis()->GetBinCenter(j), V0AT0A->GetBinContent(i,j));
                 Sum += V0AT0A->GetYaxis()->GetBinCenter(j) * V0AT0A->GetBinContent(i,j);
                 SquareSum += V0AT0A->GetYaxis()->GetBinCenter(j) * V0AT0A->GetYaxis()->GetBinCenter(j) * V0AT0A->GetBinContent(i,j);
                 Counter+=V0AT0A->GetBinContent(i,j);
@@ -50,19 +50,25 @@ void CalculateT0AV0ACut(string FileNameSuffix = "LHC23zzh_pass2"){
         }
     }
 
-    TF1* f1 = new TF1("f1","[0]*x+[1]",Min_t0a,Max_t0a);
-    TF1* f2 = new TF1("f2","[0]*x+[1]",Min_t0a,Max_t0a);
+    TF1* f1 = new TF1("f1","[0]+[1]*x",Min_t0a,Max_t0a);
+    TF1* f2 = new TF1("f2","[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x",Min_t0a,Max_t0a);
     TCanvas* c1 = new TCanvas("c1","c1",600,600);
     V0AT0AMean->Draw();
     V0AT0AMean->Fit(f1);
-    // TCanvas* c2 = new TCanvas("c2","c2",600,600);
-    // V0AT0ASigma->Draw();
-    // V0AT0ASigma->Fit(f2);
+    TCanvas* c2 = new TCanvas("c2","c2",600,600);
+    V0AT0ASigma->Draw();
+    V0AT0ASigma->Fit(f2);
+    Printf("Fit function:");
+    Printf("T0AV0AMean: %f + %e * x",f1->GetParameter(0),f1->GetParameter(1));
+    Printf("T0AV0ASigma: %f + %e * x + %e * x^2 + %e * x^3 + %e * x^4",f2->GetParameter(0),f2->GetParameter(1),f2->GetParameter(2),f2->GetParameter(3),f2->GetParameter(4));
 
     TH2D* afterCut = (TH2D*)V0AT0A->Clone();
     for(Int_t i=1;i<=N_t0a;i++){
         for(Int_t j=1;j<=N_v0a;j++){
-            if(abs(afterCut->GetYaxis()->GetBinCenter(j)-f1->Eval(afterCut->GetXaxis()->GetBinCenter(i))) > 5*SigmaDis[i-1]){
+            // if(abs(afterCut->GetYaxis()->GetBinCenter(j)-f1->Eval(afterCut->GetXaxis()->GetBinCenter(i))) > 5*SigmaDis[i-1]){
+            //     afterCut->SetBinContent(i,j,0);
+            // }
+            if(abs(afterCut->GetYaxis()->GetBinCenter(j)-f1->Eval(afterCut->GetXaxis()->GetBinCenter(i))) > 5*f2->Eval(afterCut->GetXaxis()->GetBinCenter(i))){
                 afterCut->SetBinContent(i,j,0);
             }
         }
@@ -80,11 +86,11 @@ void CalculateT0AV0ACut(string FileNameSuffix = "LHC23zzh_pass2"){
     // V0AT0ASigma->Write();
 
     // specific the dataset when upload to ccdb (set the valid run number)
-    TFile* output = new TFile(Form("./T0AV0ACut/T0AV0ACut_%s.root",FileNameSuffix.c_str()),"RECREATE");
-    TList* outputL = new TList();
-    outputL->Add(V0AT0AMean);
-    outputL->Add(V0AT0ASigma);
-    outputL->Write("ccdb_object",1);
-    output->Close();
+    // TFile* output = new TFile(Form("./T0AV0ACut/T0AV0ACut_%s.root",FileNameSuffix.c_str()),"RECREATE");
+    // TList* outputL = new TList();
+    // outputL->Add(V0AT0AMean);
+    // outputL->Add(V0AT0ASigma);
+    // outputL->Write("ccdb_object",1);
+    // output->Close();
 
 }
