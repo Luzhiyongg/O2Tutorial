@@ -80,13 +80,18 @@ void ProcessFlowContainerDrawDiffRoot(){
     vector<string> FileNameSuffixs;
     vector<TFile*> resultsFiles_vn;
     vector<TFile*> resultsFiles_v422;
+    vector<TFile*> resultsFiles_chi422;
+    vector<TFile*> resultsFiles_rho422;
     vector<TFile*> resultsFiles_NSC;
-    FileNameSuffixs.push_back("LHC23zzh_pass2_192487");
-    FileNameSuffixs.push_back("LHC23zzn_pass3_I_A11_small_217816");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_test_QC1_small_222461");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_test2_QC1_small_222462");
+    FileNameSuffixs.push_back("LHC23zzh_pass3_small_222577");
 
     for(auto& suffix : FileNameSuffixs){
         string fileName_vn = "./ProcessOutput/vn_" + suffix + ".root";
         string fileName_v422 = "./ProcessOutput/v422_" + suffix + ".root";
+        string fileName_chi422 = "./ProcessOutput/chi422_" + suffix + ".root";
+        string fileName_rho422 = "./ProcessOutput/rho422_" + suffix + ".root";
         string fileName_NSC = "./ProcessOutput/NSC_" + suffix + ".root";
 
         TFile* resultsFile = TFile::Open(fileName_vn.c_str(), "READ");
@@ -101,6 +106,18 @@ void ProcessFlowContainerDrawDiffRoot(){
             return;
         }
         resultsFiles_v422.push_back(resultsFile);
+        resultsFile = TFile::Open(fileName_chi422.c_str(), "READ");
+        if(!resultsFile || resultsFile->IsZombie()){
+            cout << "Error: cannot open file " << fileName_chi422 << endl;
+            return;
+        }
+        resultsFiles_chi422.push_back(resultsFile);
+        resultsFile = TFile::Open(fileName_rho422.c_str(), "READ");
+        if(!resultsFile || resultsFile->IsZombie()){
+            cout << "Error: cannot open file " << fileName_rho422 << endl;
+            return;
+        }
+        resultsFiles_rho422.push_back(resultsFile);
         resultsFile = TFile::Open(fileName_NSC.c_str(), "READ");
         if(!resultsFile || resultsFile->IsZombie()){
             cout << "Error: cannot open file " << fileName_NSC << endl;
@@ -109,6 +126,12 @@ void ProcessFlowContainerDrawDiffRoot(){
         resultsFiles_NSC.push_back(resultsFile);
     }
 
+    // No histogram statistics box
+    gStyle->SetOptStat(0); 
+
+    // =================
+    // vn{2}
+    // =================
     int index = 0;
     TCanvas* c1 = new TCanvas("c1", "c1", 1200, 800);
     TLegend* leg = new TLegend(0.2,0.7,0.5,0.9);
@@ -147,9 +170,12 @@ void ProcessFlowContainerDrawDiffRoot(){
     }
     leg->Draw();
 
+    // =================
+    // v422
+    // =================
     index = 0;
     TCanvas* c2 = new TCanvas("c2", "c2", 1200, 800);
-    TLegend* leg2 = new TLegend(0.2,0.7,0.5,0.9);
+    TLegend* leg2 = new TLegend(0.2,0.2,0.5,0.4);
     TH1D* frame_v422 = new TH1D("frame_v422", "frame_v422", 90,0,90);
     frame_v422->SetMaximum(0.015);
     frame_v422->SetMinimum(-0.01);
@@ -177,6 +203,65 @@ void ProcessFlowContainerDrawDiffRoot(){
     }
     leg2->Draw();
 
+    // =================
+    // chi422
+    // =================
+    index = 0;
+    TCanvas* c4 = new TCanvas("c4", "c4", 1200, 800);
+    TLegend* leg4 = new TLegend(0.2,0.2,0.5,0.4);
+    TH1D* frame_chi422 = new TH1D("frame_chi422", "frame_chi422", 90,0,90);
+    frame_chi422->SetMaximum(2.);
+    frame_chi422->SetMinimum(-5.5);
+    frame_chi422->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_chi422 = (TH1D*)resultsFiles_chi422[i]->Get("hCorr422_mean");
+        SetMarkerAndLine(h_chi422,GetColor(index),kFullCircle,kSolid,1.0);
+        h_chi422->Draw("ESAMES");
+        leg4->AddEntry(h_chi422,Form("#chi_{4,22} (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        TGraphAsymmErrors* g = nullptr;
+        g=(TGraphAsymmErrors*)publish->Get("chi422/Graph1D_y1");
+        if(!g)return;
+        SetMarkerAndLine(g,kBlack,kOpenSquare,kSolid,1.0);
+        g->Draw("PE");
+        leg4->AddEntry(g,Form("#chi_{4,22} JHEP 05 (2020) 085, 2020"));
+    }
+    leg4->Draw();
+
+    // =================
+    // rho422
+    // =================
+    index = 0;
+    TCanvas* c5 = new TCanvas("c5", "c5", 1200, 800);
+    TLegend* leg5 = new TLegend(0.2,0.2,0.5,0.4);
+    TH1D* frame_rho422 = new TH1D("frame_rho422", "frame_rho422", 90,0,90);
+    frame_rho422->SetMaximum(1.);
+    frame_rho422->SetMinimum(-0.5);
+    frame_rho422->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_rho422 = (TH1D*)resultsFiles_rho422[i]->Get("hCorr422_mean");
+        SetMarkerAndLine(h_rho422,GetColor(index),kFullCircle,kSolid,1.0);
+        h_rho422->Draw("ESAMES");
+        leg5->AddEntry(h_rho422,Form("#rho_{4,22} (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        TGraphAsymmErrors* g = nullptr;
+        g=(TGraphAsymmErrors*)publish->Get("rho422/Graph1D_y1");
+        if(!g)return;
+        SetMarkerAndLine(g,kBlack,kOpenSquare,kSolid,1.0);
+        g->Draw("PE");
+        leg5->AddEntry(g,Form("#rho_{4,22} JHEP 05 (2020) 085, 2020"));
+    }
+    leg5->Draw();
+
+    // =================
+    // NSC(3,2)
+    // =================
     index = 0;
     TCanvas* c3 = new TCanvas("c3", "c3", 1200, 800);
     TLegend* leg3 = new TLegend(0.2,0.7,0.5,0.9);
