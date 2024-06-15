@@ -83,6 +83,8 @@ void ProcessFlowContainerDrawDiffRoot(){
     vector<TFile*> resultsFiles_chi422;
     vector<TFile*> resultsFiles_rho422;
     vector<TFile*> resultsFiles_NSC;
+    vector<TFile*> resultsFiles_pTDiffv2Cent0To5;
+    vector<TFile*> resultsFiles_pTDiffv2Cent30To40;
     FileNameSuffixs.push_back("LHC23zzh_pass4_test_QC1_small_222461");
     FileNameSuffixs.push_back("LHC23zzh_pass4_test2_QC1_small_222462");
     FileNameSuffixs.push_back("LHC23zzh_pass3_small_222577");
@@ -93,6 +95,8 @@ void ProcessFlowContainerDrawDiffRoot(){
         string fileName_chi422 = "./ProcessOutput/chi422_" + suffix + ".root";
         string fileName_rho422 = "./ProcessOutput/rho422_" + suffix + ".root";
         string fileName_NSC = "./ProcessOutput/NSC_" + suffix + ".root";
+        string fileName_pTDiffv2Cent0To5 = "./ProcessOutput/pTDiffv2Cent0To5_" + suffix + ".root";
+        string fileName_pTDiffv2Cent30To40 = "./ProcessOutput/pTDiffv2Cent30To40_" + suffix + ".root";
 
         TFile* resultsFile = TFile::Open(fileName_vn.c_str(), "READ");
         if(!resultsFile || resultsFile->IsZombie()){
@@ -124,6 +128,18 @@ void ProcessFlowContainerDrawDiffRoot(){
             return;
         }
         resultsFiles_NSC.push_back(resultsFile);
+        resultsFile = TFile::Open(fileName_pTDiffv2Cent0To5.c_str(), "READ");
+        if(!resultsFile || resultsFile->IsZombie()){
+            cout << "Error: cannot open file " << fileName_pTDiffv2Cent0To5 << endl;
+            return;
+        }
+        resultsFiles_pTDiffv2Cent0To5.push_back(resultsFile);
+        resultsFile = TFile::Open(fileName_pTDiffv2Cent30To40.c_str(), "READ");
+        if(!resultsFile || resultsFile->IsZombie()){
+            cout << "Error: cannot open file " << fileName_pTDiffv2Cent30To40 << endl;
+            return;
+        }
+        resultsFiles_pTDiffv2Cent30To40.push_back(resultsFile);
     }
 
     // No histogram statistics box
@@ -287,6 +303,61 @@ void ProcessFlowContainerDrawDiffRoot(){
     }
     leg3->Draw();
 
+    // =================
+    // pTDiffv2Cent0To5
+    // =================
+    index = 0;
+    TCanvas* c6 = new TCanvas("c6", "c6", 1200, 800);
+    TLegend* leg6 = new TLegend(0.2,0.7,0.5,0.9);
+    TH1D* frame_pTDiffv2Cent0To5 = new TH1D("frame_pTDiffv2Cent0To5", "frame_pTDiffv2Cent0To5", 50,0,5.);
+    frame_pTDiffv2Cent0To5->SetMaximum(0.3);
+    frame_pTDiffv2Cent0To5->SetMinimum(0.);
+    frame_pTDiffv2Cent0To5->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_pTDiffv2Cent0To5 = (TH1D*)resultsFiles_pTDiffv2Cent0To5[i]->Get("pTDiffv2");
+        SetMarkerAndLine(h_pTDiffv2Cent0To5,GetColor(index),kFullCircle,kSolid,1.0);
+        h_pTDiffv2Cent0To5->Draw("ESAMES");
+        leg6->AddEntry(h_pTDiffv2Cent0To5,Form("v_{2}(p_{T}) Cent:0~5%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1419244-v2-root.root","READ");
+        TGraphAsymmErrors* g = nullptr;
+        g=(TGraphAsymmErrors*)publish->Get("Table 7/Graph1D_y1");
+        if(!g)return;
+        SetMarkerAndLine(g,kBlack,kOpenSquare,kSolid,1.0);
+        g->Draw("PE");
+        leg6->AddEntry(g,Form("v_{2}(p_{T}) Cent:0~5%% Phys.Rev.Lett. 116 (2016) 132302, 2016"));
+    }
+    leg6->Draw();
+
+    // =================
+    // pTDiffv2Cent30To40
+    // =================
+    index = 0;
+    TCanvas* c7 = new TCanvas("c7", "c7", 1200, 800);
+    TLegend* leg7 = new TLegend(0.2,0.7,0.5,0.9);
+    TH1D* frame_pTDiffv2Cent30To40 = new TH1D("frame_pTDiffv2Cent30To40", "frame_pTDiffv2Cent30To40", 50,0,5.);
+    frame_pTDiffv2Cent30To40->SetMaximum(0.3);
+    frame_pTDiffv2Cent30To40->SetMinimum(0.);
+    frame_pTDiffv2Cent30To40->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_pTDiffv2Cent30To40 = (TH1D*)resultsFiles_pTDiffv2Cent30To40[i]->Get("pTDiffv2");
+        SetMarkerAndLine(h_pTDiffv2Cent30To40,GetColor(index),kFullCircle,kSolid,1.0);
+        h_pTDiffv2Cent30To40->Draw("ESAMES");
+        leg7->AddEntry(h_pTDiffv2Cent30To40,Form("v_{2}(p_{T}) Cent:30~40%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1419244-v2-root.root","READ");
+        TGraphAsymmErrors* g = nullptr;
+        g=(TGraphAsymmErrors*)publish->Get("Table 8/Graph1D_y1");
+        if(!g)return;
+        SetMarkerAndLine(g,kBlack,kOpenSquare,kSolid,1.0);
+        g->Draw("PE");
+        leg7->AddEntry(g,Form("v_{2}(p_{T}) Cent:30~40%% Phys.Rev.Lett. 116 (2016) 132302, 2016"));
+    }
+    leg7->Draw();
 
 
     return;

@@ -19,6 +19,9 @@
 
 bool ComparewithPublish = false;
 bool OutputPNG = true;
+bool RebinpTDiff = true;
+std::vector<Double_t> pTDiffOriginBinning = {0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.6, 2.8, 3, 3.5, 4, 5, 6, 8, 10};
+std::vector<Double_t> pTDiffTargetBinning = {0.2, 0.4, 0.6, 0.8, 1.0, 1.3, 1.5, 1.7, 2.0, 2.4, 3.0, 3.5, 4.0, 5.0};
 
 void SetMarkerAndLine(TH1D* graph, Int_t Color=0, Int_t style=0, Int_t linestyle=0, Float_t size=1){
     if(!graph)return;
@@ -276,29 +279,64 @@ void Output_vn4(string FileNameSuffix, FlowContainer* fc){
     }
 }
 
-void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc){
-    TCanvas* canvas2 = new TCanvas("canvas_ptDiffvn","canvas_ptDiffvn",900,900);
+void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=0., Double_t CentMax=5.){
+    TCanvas* canvas2 = nullptr;
+    bool anotherCanvas = false;
+    // if canvas_ptDiffvn exist, new a canvas with different name
+    if(gROOT->FindObject("canvas_ptDiffvn"))anotherCanvas = true;
+    if(!anotherCanvas)canvas2 = new TCanvas("canvas_ptDiffvn","canvas_ptDiffvn",900,900);
+    else canvas2 = new TCanvas("canvas_ptDiffvn_2","canvas_ptDiffvn_2",900,900);
     TH1D* Hist2  = new TH1D(Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),20,0.2,10.0);
     Hist2->SetMinimum(0.);
-    Hist2->SetMaximum(0.5);
+    Hist2->SetMaximum(0.3);
+    Hist2->GetXaxis()->SetRangeUser(0.2,5.0);
     Hist2->SetXTitle("p_{T}");
     Hist2->SetYTitle("v_{n}");
     Hist2->Draw();
     fc->SetIDName("ChGap");
-    TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(2,0,5.);
+    TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(2,CentMin,CentMax);
+    hV22pt->SetName("pTDiffv2");
     if(!hV22pt){
         Printf("Can't get hV22");
         return;
+    }
+    if(RebinpTDiff){
+        TH1D* pTMerge = new TH1D("pTMerge","pTMerge",pTDiffTargetBinning.size(),pTDiffTargetBinning.data());
+        pTMerge->SetName("pTDiffv2");
+        for(int i=0;i<pTDiffTargetBinning.size()-1;i++){
+            auto it = std::find(pTDiffOriginBinning.begin(), pTDiffOriginBinning.end(), pTDiffTargetBinning[i]);
+            if (it == pTDiffOriginBinning.end()){
+                Printf("Can't find bin %f in origin binning",pTDiffTargetBinning[i]);
+                break;
+            }
+            Int_t StartBin = it - pTDiffOriginBinning.begin();
+            auto it2 = std::find(pTDiffOriginBinning.begin(), pTDiffOriginBinning.end(), pTDiffTargetBinning[i+1]);
+            Int_t EndBin = it2 - pTDiffOriginBinning.begin();
+            Double_t value = 0;
+            Double_t weight =0;
+            for(Int_t bin=StartBin+1;bin<=EndBin;bin++){
+                value += hV22pt->GetBinContent(bin)/(hV22pt->GetBinError(bin)*hV22pt->GetBinError(bin));
+                weight += 1./(hV22pt->GetBinError(bin)*hV22pt->GetBinError(bin));
+            }
+            value /= weight;
+            weight = 1./weight;
+            pTMerge->SetBinContent(i+1,value);
+            Printf("pTMerge bin %d: %f",i+1,value);
+            pTMerge->SetBinError(i+1,sqrt(weight));
+        }
+        hV22pt = pTMerge;
     }
     SetMarkerAndLine(hV22pt,kBlack,kFullCircle,kSolid,1.0);
     gStyle->SetOptStat("");
     hV22pt->Draw("ESames");
     TLegend* legend2 = new TLegend(0.2,0.8,0.5,0.9);
-    legend2->AddEntry(hV22pt,Form("v_{2}{2}(p_{T}) |#Delta#eta|>1 cent:0~5%%"));
+    legend2->AddEntry(hV22pt,Form("v_{2}{2}(p_{T}) |#Delta#eta|>1 cent:%d~%d%%",(int)CentMin,(int)CentMax));
     legend2->Draw();
 
     if(OutputPNG){
-        canvas2->SaveAs("./ProcessOutput/ptDiffvn.png");
+        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv2Cent%dTo%d_%s.root",(int)CentMin,(int)CentMax,FileNameSuffix.c_str()),"RECREATE");
+        hV22pt->Write();
+        fout->Close();
     }
 }
 
@@ -790,7 +828,9 @@ void CompareNSC32Corr(string FileNameSuffix, FlowContainer* fc){
 
 }
 
-void ProcessFlowContainerCompare(string FileNameSuffix = "LHC23zzn_pass3_I_A11_small_217816"){
+void ProcessFlowContainerCompare(string FileNameSuffix = "LHC23zzh_pass4_test_QC1_small_222461"){
+    // LHC23zzh_pass4_test2_QC1_small_222462
+    // LHC23zzh_pass3_small_222577
     TFile* f = new TFile(Form("./AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
     FlowContainer* fc = (FlowContainer*)f->Get("flow-pb-pb-task/FlowContainer");
     if(!fc){
@@ -801,7 +841,8 @@ void ProcessFlowContainerCompare(string FileNameSuffix = "LHC23zzn_pass3_I_A11_s
 
     Output_vn(FileNameSuffix, fc);
     // Output_vn4(FileNameSuffix, fc);
-    // Output_ptDiffvn(FileNameSuffix, fc);
+    Output_ptDiffvn(FileNameSuffix, fc);
+    Output_ptDiffvn(FileNameSuffix, fc, 30, 40);
     Output_Nonlinear(FileNameSuffix, fc, v422);
     Output_Nonlinear(FileNameSuffix, fc, chi422);
     Output_Nonlinear(FileNameSuffix, fc, rho422);
