@@ -1,5 +1,5 @@
 {
-    "flow-pb-pb-task": {
+    "flow-task": {
         "cfgCutVertex": "10",
         "cfgCutPtPOIMin": "0.200000003",
         "cfgCutPtPOIMax": "10",
@@ -94,7 +94,7 @@
                 "10"
             ]
         },
-        "axisCentrality": {
+        "axisIndependent": {
             "values": [
                 "0",
                 "0",
