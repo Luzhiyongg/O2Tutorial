@@ -16,6 +16,18 @@
         "cfgEfficiency": "",
         "cfgAcceptance": "Users/z/zhlu/Acceptance/NUA_LHC23zzh_pass2_multCorrCut",
         "cfgMagnetField": "GLO\/Config\/GRPMagField",
+        "cfgUserDefineGFWCorr": {
+            "values": [
+                "refN02 {2} refP02 {-2}",
+                "refN12 {2} refP12 {-2}"
+            ]
+        },
+        "cfgUserDefineGFWName": {
+            "values": [
+                "Ch02Gap22",
+                "Ch12Gap22"
+            ]
+        },
         "axisVertex": {
             "values": [
                 "40",
