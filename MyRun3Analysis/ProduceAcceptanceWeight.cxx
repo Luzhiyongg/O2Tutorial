@@ -10,8 +10,8 @@
 
 
 void ProduceAcceptanceWeight(){
-    TFile* f = new TFile("./AnalysisResults_LHC23zzh_pass2.root","READ");
-    GFWWeights* W = (GFWWeights*)f->Get("flow-pb-pb-task/weights");
+    TFile* f = new TFile("./AnalysisResults_LHC23zzh_pass4_260874.root","READ");
+    GFWWeights* W = (GFWWeights*)f->Get("flow-task/weights");
     if(!W){
         Printf("can not getflow-pb-pb-task/weights");
         return;
@@ -24,7 +24,7 @@ void ProduceAcceptanceWeight(){
 
     // Eff->Draw();
 
-    TFile* fout = new TFile("./Acceptance/NUA_LHC23zzh_pass2.root","RECREATE");
+    TFile* fout = new TFile("./Acceptance/NUA_LHC23zzh_pass4_260874.root","RECREATE");
     Weights->Write();
     fout->Close();
     
