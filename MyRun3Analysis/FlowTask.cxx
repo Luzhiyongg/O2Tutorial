@@ -559,20 +559,22 @@ struct FlowTask {
   template <typename TTrack>
   bool trackSelected(TTrack track)
   {
-    if (cfgFilterFlag == 0)
-      return track.isGlobalTrack();
-    else if (cfgFilterFlag == 1)
-      return (track.isGlobalTrackSDD() == (uint8_t) true);
-    else if (cfgFilterFlag == 2)
-      return (track.isGlobalTrackWoTPCCluster() && track.tpcNClsFound() >= cfgCutTPCclu);
-    else if (cfgFilterFlag == 3)
-      return (track.isGlobalTrackWoPtEta() && (abs(track.eta()) < cfgCutEta) && (track.pt() > cfgCutPtMin) && (track.pt() < cfgCutPtMax));
-    else if (cfgFilterFlag == 4)
-      return (track.isGlobalTrackWoDCA() && track.dcaZ() <= cfgCutDCAz && track.dcaXY() <= cfgCutDCAxy * pow(track.pt(), -1.1));
-    else if (cfgFilterFlag == 5)
-      return (track.isGlobalTrackWoDCATPCCluster() && track.dcaZ() <= cfgCutDCAz && track.dcaXY() <= cfgCutDCAxy * pow(track.pt(), -1.1) && track.tpcNClsFound() >= cfgCutTPCclu);
-
-    return false; // if cfgFilterFlag is not recognized
+    switch (cfgFilterFlag) {
+      case 0:
+        return track.isGlobalTrack();
+      case 1:
+        return (track.isGlobalTrackSDD() == (uint8_t) true);
+      case 2:
+        return (track.isGlobalTrackWoTPCCluster() && track.tpcNClsFound() >= cfgCutTPCclu);
+      case 3:
+        return (track.isGlobalTrackWoPtEta() && (abs(track.eta()) < cfgCutEta) && (track.pt() > cfgCutPtMin) && (track.pt() < cfgCutPtMax));
+      case 4:
+        return (track.isGlobalTrackWoDCA() && track.dcaZ() <= cfgCutDCAz && track.dcaXY() <= cfgCutDCAxy * pow(track.pt(), -1.1));
+      case 5:
+        return (track.isGlobalTrackWoDCATPCCluster() && track.dcaZ() <= cfgCutDCAz && track.dcaXY() <= cfgCutDCAxy * pow(track.pt(), -1.1) && track.tpcNClsFound() >= cfgCutTPCclu);
+      default:
+        return false;
+    }
   }
 
   template <typename TTrack>
