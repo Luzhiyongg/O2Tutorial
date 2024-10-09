@@ -264,7 +264,7 @@ struct FlowTask {
     std::vector<std::string> UserDefineGFWCorr = cfgUserDefineGFWCorr;
     std::vector<std::string> UserDefineGFWName = cfgUserDefineGFWName;
     if (!UserDefineGFWCorr.empty() && !UserDefineGFWName.empty()) {
-      for (int i = 0; i < UserDefineGFWName.size(); i++) {
+      for (auto i = 0; i < UserDefineGFWName.size(); i++) {
         oba->Add(new TNamed(UserDefineGFWName.at(i).c_str(), UserDefineGFWName.at(i).c_str()));
       }
     }
@@ -333,7 +333,7 @@ struct FlowTask {
     if (!UserDefineGFWCorr.empty() && !UserDefineGFWName.empty()) {
       LOGF(info, "User adding GFW CorrelatorConfig:");
       // attentaion: here we follow the index of cfgUserDefineGFWCorr
-      for (int i = 0; i < UserDefineGFWCorr.size(); i++) {
+      for (auto i = 0; i < UserDefineGFWCorr.size(); i++) {
         if (i >= UserDefineGFWName.size()) {
           LOGF(fatal, "The names you provided are more than configurations. UserDefineGFWName.size(): %d > UserDefineGFWCorr.size(): %d", UserDefineGFWName.size(), UserDefineGFWCorr.size());
           break;
@@ -571,6 +571,8 @@ struct FlowTask {
       return (track.isGlobalTrackWoDCA() && track.dcaZ() <= cfgCutDCAz && track.dcaXY() <= cfgCutDCAxy * pow(track.pt(), -1.1));
     else if (cfgFilterFlag == 5)
       return (track.isGlobalTrackWoDCATPCCluster() && track.dcaZ() <= cfgCutDCAz && track.dcaXY() <= cfgCutDCAxy * pow(track.pt(), -1.1) && track.tpcNClsFound() >= cfgCutTPCclu);
+
+    return false; // if cfgFilterFlag is not recognized
   }
 
   template <typename TTrack>
