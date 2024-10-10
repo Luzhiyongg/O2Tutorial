@@ -18,8 +18,8 @@
 #include "include/ErrorPropagation.h"
 
 bool ComparewithPublish = false;
-bool OutputPNG = true;
-bool RebinpTDiff = true;
+bool OutputRoot = true;
+bool RebinpTDiff = false;
 std::vector<Double_t> pTDiffOriginBinning = {0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.6, 2.8, 3, 3.5, 4, 5, 6, 8, 10};
 std::vector<Double_t> pTDiffTargetBinning = {0.2, 0.4, 0.6, 0.8, 1.0, 1.3, 1.5, 1.7, 2.0, 2.4, 3.0, 3.5, 4.0, 5.0};
 
@@ -187,7 +187,7 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc){
         legend->AddEntry(g_v4,Form("v_{4}{2} JHEP 05 (2020) 085, 2020"));
     }
 
-    if(OutputPNG){
+    if(OutputRoot){
         TFile* fout = new TFile(Form("./ProcessOutput/vn_%s.root",FileNameSuffix.c_str()),"RECREATE");
         hVn[0]->Write();
         hVn[1]->Write();
@@ -274,8 +274,11 @@ void Output_vn4(string FileNameSuffix, FlowContainer* fc){
         legend->AddEntry(g_v2,Form("v_{2}{4} JHEP 07 (2018) 103"));
     }
 
-    if(OutputPNG){
-        canvas1->SaveAs("./ProcessOutput/v24.png");
+    if(OutputRoot){
+        TFile* fout = new TFile(Form("./ProcessOutput/v24_%s.root",FileNameSuffix.c_str()),"RECREATE");
+        hVn[0]->Write();
+        fout->Close();
+        // canvas1->SaveAs("./ProcessOutput/v24.png");
     }
 }
 
@@ -333,7 +336,7 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     legend2->AddEntry(hV22pt,Form("v_{2}{2}(p_{T}) |#Delta#eta|>1 cent:%d~%d%%",(int)CentMin,(int)CentMax));
     legend2->Draw();
 
-    if(OutputPNG){
+    if(OutputRoot){
         TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv2Cent%dTo%d_%s.root",(int)CentMin,(int)CentMax,FileNameSuffix.c_str()),"RECREATE");
         hV22pt->Write();
         fout->Close();
@@ -517,7 +520,7 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, ObservableEnum o
         legend2->AddEntry(g,Form("%s JHEP 05 (2020) 085, 2020",ObservableName[observable]));
     }
 
-    if(OutputPNG){
+    if(OutputRoot){
         TFile* fout = new TFile(Form("./ProcessOutput/%s_%s.root",OutputObservableName[observable],FileNameSuffix.c_str()),"RECREATE");
         hv422->Write();
         fout->Close();
@@ -599,7 +602,7 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, FlowContainer* f
         legend2->AddEntry(g,Form("%s JHEP 05 (2020) 085, 2020",ObservableName[observable]));
     }
 
-    if(OutputPNG){
+    if(OutputRoot){
         TFile* fout = new TFile(Form("./ProcessOutput/%s_%s.root",OutputObservableName[observable],FileNameSuffix.c_str()),"RECREATE");
         hv422->Write();
         fout->Close();
@@ -732,7 +735,7 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc){
         legend2->AddEntry(g,Form("NSC(3,2) PLB 818 (2021) 136354, 2021"));
     }
 
-    if(OutputPNG){
+    if(OutputRoot){
         TFile* fout = new TFile(Form("./ProcessOutput/NSC_%s.root",FileNameSuffix.c_str()),"RECREATE");
         NSC32->Write();
         fout->Close();
@@ -828,9 +831,10 @@ void CompareNSC32Corr(string FileNameSuffix, FlowContainer* fc){
 
 }
 
-void ProcessFlowContainerCompare(string FileNameSuffix = "LHC23zzh_pass4_test_QC1_small_222461"){
-    // LHC23zzh_pass4_test2_QC1_small_222462
-    // LHC23zzh_pass3_small_222577
+void ProcessFlowContainerCompare(string FileNameSuffix = "LHC23zzh_pass4_test5_QC1_small_234024"){
+    // LHC23zzh_pass4_test3_QC1_small_234034
+    // LHC23zzh_pass4_test5_QC1_small_234024
+    // LHC23zzh_pass3_small_233288
     TFile* f = new TFile(Form("./AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
     FlowContainer* fc = (FlowContainer*)f->Get("flow-pb-pb-task/FlowContainer");
     if(!fc){
@@ -843,6 +847,7 @@ void ProcessFlowContainerCompare(string FileNameSuffix = "LHC23zzh_pass4_test_QC
     // Output_vn4(FileNameSuffix, fc);
     Output_ptDiffvn(FileNameSuffix, fc);
     Output_ptDiffvn(FileNameSuffix, fc, 30, 40);
+    Output_ptDiffvn(FileNameSuffix, fc, 5, 10);
     Output_Nonlinear(FileNameSuffix, fc, v422);
     Output_Nonlinear(FileNameSuffix, fc, chi422);
     Output_Nonlinear(FileNameSuffix, fc, rho422);
