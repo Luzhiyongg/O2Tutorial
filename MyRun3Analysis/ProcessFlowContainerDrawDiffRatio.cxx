@@ -253,7 +253,7 @@ void ProcessFlowContainerDrawDiffRatio(){
         index++;
     }
 
-        // =================
+    // =================
     // chi422
     // =================
     index = 0;
@@ -301,7 +301,7 @@ void ProcessFlowContainerDrawDiffRatio(){
     c_rho422->cd(1);
     gPad->SetBottomMargin(0.05);
     TLegend* leg_rho422 = new TLegend(0.2,0.2,0.5,0.4);
-    TH1D* frame_rho422 = new TH1D("frame_rho422", "frame_rho422", 90,0,90);
+    TH1D* frame_rho422 = new TH1D("frame_rho422", "frame_rho422", 60,0,60);
     frame_rho422->SetMaximum(1.);
     frame_rho422->SetMinimum(-0.5);
     frame_rho422->Draw("AXIS");
@@ -340,7 +340,7 @@ void ProcessFlowContainerDrawDiffRatio(){
     c3->cd(1);
     gPad->SetBottomMargin(0.05);
     TLegend* leg3 = new TLegend(0.2,0.7,0.5,0.9);
-    TH1D* frame_NSC = new TH1D("frame_NSC", "frame_NSC", 90,0,90);
+    TH1D* frame_NSC = new TH1D("frame_NSC", "frame_NSC", 60,0,60);
     frame_NSC->SetMaximum(1.);
     frame_NSC->SetMinimum(-1);
     frame_NSC->Draw("AXIS");
@@ -379,7 +379,7 @@ void ProcessFlowContainerDrawDiffRatio(){
     c6->cd(1);
     gPad->SetBottomMargin(0.05);
     TLegend* leg6 = new TLegend(0.2,0.7,0.8,0.9);
-    TH1D* frame_pTDiffv2Cent0To5 = new TH1D("frame_pTDiffv2Cent0To5", "frame_pTDiffv2Cent0To5", 50,0,5.);
+    TH1D* frame_pTDiffv2Cent0To5 = new TH1D("frame_pTDiffv2Cent0To5", "frame_pTDiffv2Cent0To5", 50,0,10.);
     frame_pTDiffv2Cent0To5->SetMaximum(0.15);
     frame_pTDiffv2Cent0To5->SetMinimum(0.);
     frame_pTDiffv2Cent0To5->Draw("AXIS");
@@ -417,7 +417,7 @@ void ProcessFlowContainerDrawDiffRatio(){
     c5->cd(1);
     gPad->SetBottomMargin(0.05);
     TLegend* leg5 = new TLegend(0.3,0.15,0.9,0.4);
-    TH1D* frame_pTDiffv2Cent5To10 = new TH1D("frame_pTDiffv2Cent5To10", "frame_pTDiffv2Cent5To10", 50,0,5.);
+    TH1D* frame_pTDiffv2Cent5To10 = new TH1D("frame_pTDiffv2Cent5To10", "frame_pTDiffv2Cent5To10", 50,0,10.);
     frame_pTDiffv2Cent5To10->SetMaximum(0.15);
     frame_pTDiffv2Cent5To10->SetMinimum(0.);
     frame_pTDiffv2Cent5To10->Draw("AXIS");
@@ -456,7 +456,7 @@ void ProcessFlowContainerDrawDiffRatio(){
     c7->cd(1);
     gPad->SetBottomMargin(0.05);
     TLegend* leg7 = new TLegend(0.3,0.15,0.9,0.4);
-    TH1D* frame_pTDiffv2Cent30To40 = new TH1D("frame_pTDiffv2Cent30To40", "frame_pTDiffv2Cent30To40", 50,0,5.);
+    TH1D* frame_pTDiffv2Cent30To40 = new TH1D("frame_pTDiffv2Cent30To40", "frame_pTDiffv2Cent30To40", 50,0,10.);
     frame_pTDiffv2Cent30To40->SetMaximum(0.3);
     frame_pTDiffv2Cent30To40->SetMinimum(0.);
     frame_pTDiffv2Cent30To40->Draw("AXIS");
