@@ -107,9 +107,9 @@ void ProcessFlowContainerDrawDiffRatio(){
     vector<TFile*> resultsFiles_pTDiffv2Cent0To5;
     vector<TFile*> resultsFiles_pTDiffv2Cent5To10;
     vector<TFile*> resultsFiles_pTDiffv2Cent30To40;
-    FileNameSuffixs.push_back("LHC23zzh_pass4_test3_QC1_small_234034");
-    FileNameSuffixs.push_back("LHC23zzh_pass4_test5_QC1_small_234024");
-    FileNameSuffixs.push_back("LHC23zzh_pass3_small_233288");
+    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931");
+    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931_midOCC");
+    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931_highOcc");
 
     for(auto& suffix : FileNameSuffixs){
         string fileName_vn = "./ProcessOutput/vn_" + suffix + ".root";
@@ -194,37 +194,181 @@ void ProcessFlowContainerDrawDiffRatio(){
         leg->AddEntry(h_v22,Form("v_{2}{2} (%s)",FileNameSuffixs[i].c_str()),"lp");
         index++;
     }
-    TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
-    TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get("v2/Graph1D_y1");
-    SetMarkerAndLine(g_v2,kBlack,kOpenSquare,kSolid,1.0);
-    g_v2->Draw("PE");
-    leg->AddEntry(g_v2,Form("v_{2}{2} JHEP 05 (2020) 085, 2020"));
     leg->Draw();
-    
-    TH1D* pub_v22 = new TH1D("pub_v22","pub_v22",7,x_v2);
-    for(int i=0;i<7;i++){
-        pub_v22->SetBinContent(i+1,g_v2->GetPointY(i));
-        pub_v22->SetBinError(i+1,g_v2->GetErrorY(i));
-    }
 
     c1->cd(2);
     gPad->SetTopMargin(0.05);
     TH1D* frame_ratio = new TH1D("frame_ratio", "frame_ratio", 60,0,60);
     frame_ratio->SetMaximum(1.05);
     frame_ratio->SetMinimum(0.7);
-    frame_ratio->SetYTitle("Ratio to Run 2");
+    frame_ratio->SetYTitle("Ratio");
     frame_ratio->Draw("AXIS");
     TF1* One = new TF1("One","1",0,60);
     One->SetLineColor(kBlack);
     One->SetLineStyle(kDashed);
     One->Draw("sames");
     index=0;
-    for(int i=0;i<FileNameSuffixs.size();i++){
-        TH1D* ratio = GetRatio(7,(TH1D*)resultsFiles_vn[i]->Get("Corr_corr_22_hist"),pub_v22);
-        SetMarkerAndLine(ratio,GetColor(index),kFullCircle,kSolid,1.0);
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio = GetRatio(7,(TH1D*)resultsFiles_vn[i]->Get("Corr_corr_22_hist"),(TH1D*)resultsFiles_vn[0]->Get("Corr_corr_22_hist"));
+        SetMarkerAndLine(ratio,GetColor(i),kFullCircle,kSolid,1.0);
         ratio->Draw("ESAMES");
         index++;
     }
+
+    // =================
+    // v422
+    // =================
+    index = 0;
+    TCanvas* c2 = new TCanvas("c2", "c2", 800, 1200);
+    c2->Divide(1,2);
+    c2->cd(1);
+    gPad->SetBottomMargin(0.05);
+    TLegend* leg2 = new TLegend(0.2,0.2,0.5,0.4);
+    TH1D* frame_v422 = new TH1D("frame_v422", "frame_v422", 90,0,90);
+    frame_v422->SetMaximum(0.015);
+    frame_v422->SetMinimum(-0.01);
+    frame_v422->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_v422 = (TH1D*)resultsFiles_v422[i]->Get("hCorr422_mean");
+        SetMarkerAndLine(h_v422,GetColor(index),kFullCircle,kSolid,1.0);
+        h_v422->Draw("ESAMES");
+        leg2->AddEntry(h_v422,Form("v_{4,22} (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    leg2->Draw();
+
+    c2->cd(2);
+    gPad->SetTopMargin(0.05);
+    TH1D* frame_ratio_v422 = new TH1D("frame_ratio_v422", "frame_ratio_v422", 60,0,60);
+    frame_ratio_v422->SetMaximum(1.1);
+    frame_ratio_v422->SetMinimum(0.9);
+    frame_ratio_v422->SetYTitle("Ratio");
+    frame_ratio_v422->Draw("AXIS");
+    One->Draw("sames");
+    index=0;
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_v422 = GetRatio(7,(TH1D*)resultsFiles_v422[i]->Get("hCorr422_mean"),(TH1D*)resultsFiles_v422[0]->Get("hCorr422_mean"));
+        SetMarkerAndLine(ratio_v422,GetColor(i),kFullCircle,kSolid,1.0);
+        ratio_v422->Draw("ESAMES");
+        index++;
+    }
+
+        // =================
+    // chi422
+    // =================
+    index = 0;
+    TCanvas* c4 = new TCanvas("c4", "c4", 800, 1200);
+    c4->Divide(1,2);
+    c4->cd(1);
+    gPad->SetBottomMargin(0.05);
+    TLegend* leg4 = new TLegend(0.2,0.2,0.5,0.4);
+    TH1D* frame_chi422 = new TH1D("frame_chi422", "frame_chi422", 60,0,60);
+    frame_chi422->SetMaximum(2.);
+    frame_chi422->SetMinimum(-5.5);
+    frame_chi422->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_chi422 = (TH1D*)resultsFiles_chi422[i]->Get("hCorr422_mean");
+        SetMarkerAndLine(h_chi422,GetColor(index),kFullCircle,kSolid,1.0);
+        h_chi422->Draw("ESAMES");
+        leg4->AddEntry(h_chi422,Form("#chi_{4,22} (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    leg4->Draw();
+
+    c4->cd(2);
+    gPad->SetTopMargin(0.05);
+    TH1D* frame_ratio_chi422 = new TH1D("frame_ratio_chi422", "frame_ratio_chi422", 60,0,60);
+    frame_ratio_chi422->SetMaximum(1.1);
+    frame_ratio_chi422->SetMinimum(0.9);
+    frame_ratio_chi422->SetYTitle("Ratio");
+    frame_ratio_chi422->Draw("AXIS");
+    One->Draw("sames");
+    index=0;
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_chi422 = GetRatio(7,(TH1D*)resultsFiles_chi422[i]->Get("hCorr422_mean"),(TH1D*)resultsFiles_chi422[0]->Get("hCorr422_mean"));
+        SetMarkerAndLine(ratio_chi422,GetColor(i),kFullCircle,kSolid,1.0);
+        ratio_chi422->Draw("ESAMES");
+        index++;
+    }
+
+
+    // =================
+    // rho422
+    // =================
+    index = 0;
+    TCanvas* c_rho422 = new TCanvas("c_rho422", "c_rho422", 800, 1200);
+    c_rho422->Divide(1,2);
+    c_rho422->cd(1);
+    gPad->SetBottomMargin(0.05);
+    TLegend* leg_rho422 = new TLegend(0.2,0.2,0.5,0.4);
+    TH1D* frame_rho422 = new TH1D("frame_rho422", "frame_rho422", 90,0,90);
+    frame_rho422->SetMaximum(1.);
+    frame_rho422->SetMinimum(-0.5);
+    frame_rho422->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_rho422 = (TH1D*)resultsFiles_rho422[i]->Get("hCorr422_mean");
+        SetMarkerAndLine(h_rho422,GetColor(index),kFullCircle,kSolid,1.0);
+        h_rho422->Draw("ESAMES");
+        leg_rho422->AddEntry(h_rho422,Form("#rho_{4,22} (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    leg_rho422->Draw();
+
+    c_rho422->cd(2);
+    gPad->SetTopMargin(0.05);
+    TH1D* frame_ratio_rho422 = new TH1D("frame_ratio_rho422", "frame_ratio_rho422", 60,0,60);
+    frame_ratio_rho422->SetMaximum(1.1);
+    frame_ratio_rho422->SetMinimum(0.9);
+    frame_ratio_rho422->SetYTitle("Ratio");
+    frame_ratio_rho422->Draw("AXIS");
+    One->Draw("sames");
+    index=0;
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_rho422 = GetRatio(7,(TH1D*)resultsFiles_rho422[i]->Get("hCorr422_mean"),(TH1D*)resultsFiles_rho422[0]->Get("hCorr422_mean"));
+        SetMarkerAndLine(ratio_rho422,GetColor(i),kFullCircle,kSolid,1.0);
+        ratio_rho422->Draw("ESAMES");
+        index++;
+    }
+
+
+    // =================
+    // NSC(3,2)
+    // =================
+    index = 0;
+    TCanvas* c3 = new TCanvas("c3", "c3", 800, 1200);
+    c3->Divide(1,2);
+    c3->cd(1);
+    gPad->SetBottomMargin(0.05);
+    TLegend* leg3 = new TLegend(0.2,0.7,0.5,0.9);
+    TH1D* frame_NSC = new TH1D("frame_NSC", "frame_NSC", 90,0,90);
+    frame_NSC->SetMaximum(1.);
+    frame_NSC->SetMinimum(-1);
+    frame_NSC->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_NSC = (TH1D*)resultsFiles_NSC[i]->Get("NSC32");
+        SetMarkerAndLine(h_NSC,GetColor(index),kFullCircle,kSolid,1.0);
+        h_NSC->Draw("ESAMES");
+        leg3->AddEntry(h_NSC,Form("NSC(3,2) (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    leg3->Draw();
+
+    c3->cd(2);
+    gPad->SetTopMargin(0.05);
+    TH1D* frame_ratio_NSC = new TH1D("frame_ratio_NSC", "frame_ratio_NSC", 60,0,60);
+    frame_ratio_NSC->SetMaximum(1.1);
+    frame_ratio_NSC->SetMinimum(0.9);
+    frame_ratio_NSC->SetYTitle("Ratio");
+    frame_ratio_NSC->Draw("AXIS");
+    One->Draw("sames");
+    index=0;
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_NSC = GetRatio(7,(TH1D*)resultsFiles_NSC[i]->Get("NSC32"),(TH1D*)resultsFiles_NSC[0]->Get("NSC32"));
+        SetMarkerAndLine(ratio_NSC,GetColor(i),kFullCircle,kSolid,1.0);
+        ratio_NSC->Draw("ESAMES");
+        index++;
+    }
+
 
     // =================
     // pTDiffv2Cent0To5
@@ -246,36 +390,20 @@ void ProcessFlowContainerDrawDiffRatio(){
         leg6->AddEntry(h_pTDiffv2Cent0To5,Form("v_{2}(p_{T}) Cent:0~5%% (%s)",FileNameSuffixs[i].c_str()),"lp");
         index+=1;
     }
-    // TFile* publish_ptDiff = new TFile("./HEPData-ins1419244-v2-root.root","READ");
-    TFile* publish_ptDiff = new TFile("./HEPData-ins1666817-v1-root.root","READ");
-
-    TGraphAsymmErrors* g_pt05 = nullptr;
-    // g_pt05=(TGraphAsymmErrors*)publish_ptDiff->Get("Table 7/Graph1D_y1");
-    g_pt05=(TGraphAsymmErrors*)publish_ptDiff->Get("Table 15/Graph1D_y1");
-    if(!g_pt05)return;
-    SetMarkerAndLine(g_pt05,kBlack,kOpenSquare,kSolid,1.0);
-    g_pt05->Draw("PE");
-    leg6->AddEntry(g_pt05,Form("v_{2}(p_{T}) Cent:0~5%% JHEP 07 (2018) 103"));
     leg6->Draw();
-
-    TH1D* pub_pt05 = new TH1D("pub_pt05","pub_pt05",28,x_pTDiff);
-    for(int i=0;i<28;i++){
-        pub_pt05->SetBinContent(i+1,g_pt05->GetPointY(i));
-        pub_pt05->SetBinError(i+1,g_pt05->GetErrorY(i));
-    }
 
     c6->cd(2);
     gPad->SetTopMargin(0.05);
     TH1D* frame_ratio_pt05 = new TH1D("frame_ratio_pt05", "frame_ratio_pt05",50,0.,5.);
     frame_ratio_pt05->SetMaximum(1.5);
     frame_ratio_pt05->SetMinimum(0.5);
-    frame_ratio_pt05->SetYTitle("Ratio to Run 2");
+    frame_ratio_pt05->SetYTitle("Ratio");
     frame_ratio_pt05->Draw("AXIS");
     One->Draw("sames");
     index=0;
-    for(int i=0;i<FileNameSuffixs.size();i++){
-        TH1D* ratio_pt05 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv2Cent0To5[i]->Get("pTDiffv2"),pub_pt05,true);
-        SetMarkerAndLine(ratio_pt05,GetColor(index),kFullCircle,kSolid,1.0);
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_pt05 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv2Cent0To5[i]->Get("pTDiffv2"),(TH1D*)resultsFiles_pTDiffv2Cent0To5[0]->Get("pTDiffv2"),true);
+        SetMarkerAndLine(ratio_pt05,GetColor(i),kFullCircle,kSolid,1.0);
         ratio_pt05->Draw("ESAMES");
         index++;
     }
@@ -300,30 +428,20 @@ void ProcessFlowContainerDrawDiffRatio(){
         leg5->AddEntry(h_pTDiffv2Cent5To10,Form("v_{2}(p_{T}) Cent:5~10%% (%s)",FileNameSuffixs[i].c_str()),"lp");
         index+=1;
     }
-    TGraphAsymmErrors* g_pt510=(TGraphAsymmErrors*)publish_ptDiff->Get("Table 23/Graph1D_y1");
-    SetMarkerAndLine(g_pt510,kBlack,kOpenSquare,kSolid,1.0);
-    g_pt510->Draw("PE");
-    leg5->AddEntry(g_pt510,Form("v_{2}(p_{T}) Cent:5~10%% JHEP 07 (2018) 103"));
     leg5->Draw();
-
-    TH1D* pub_pt510 = new TH1D("pub_pt510","pub_pt510",28,x_pTDiff);
-    for(int i=0;i<28;i++){
-        pub_pt510->SetBinContent(i+1,g_pt510->GetPointY(i));
-        pub_pt510->SetBinError(i+1,g_pt510->GetErrorY(i));
-    }
 
     c5->cd(2);
     gPad->SetTopMargin(0.05);
     TH1D* frame_ratio_pt510 = new TH1D("frame_ratio_pt510", "frame_ratio_pt510",50,0.,5.);
     frame_ratio_pt510->SetMaximum(1.5);
     frame_ratio_pt510->SetMinimum(0.5);
-    frame_ratio_pt510->SetYTitle("Ratio to Run 2");
+    frame_ratio_pt510->SetYTitle("Ratio");
     frame_ratio_pt510->Draw("AXIS");
     One->Draw("sames");
     index=0;
-    for(int i=0;i<FileNameSuffixs.size();i++){
-        TH1D* ratio_pt510 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv2Cent5To10[i]->Get("pTDiffv2"),pub_pt510,true);
-        SetMarkerAndLine(ratio_pt510,GetColor(index),kFullCircle,kSolid,1.0);
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_pt510 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv2Cent5To10[i]->Get("pTDiffv2"),(TH1D*)resultsFiles_pTDiffv2Cent5To10[0]->Get("pTDiffv2"),true);
+        SetMarkerAndLine(ratio_pt510,GetColor(i),kFullCircle,kSolid,1.0);
         ratio_pt510->Draw("ESAMES");
         index++;
     }
@@ -349,30 +467,20 @@ void ProcessFlowContainerDrawDiffRatio(){
         leg7->AddEntry(h_pTDiffv2Cent30To40,Form("v_{2}(p_{T}) Cent:30~40%% (%s)",FileNameSuffixs[i].c_str()),"lp");
         index+=1;
     }
-    TGraphAsymmErrors* g_pT3040=(TGraphAsymmErrors*)publish_ptDiff->Get("Table 53/Graph1D_y1");
-    SetMarkerAndLine(g_pT3040,kBlack,kOpenSquare,kSolid,1.0);
-    g_pT3040->Draw("PE");
-    leg7->AddEntry(g_pT3040,Form("v_{2}(p_{T}) Cent:30~40%% JHEP 07 (2018) 103"));
     leg7->Draw();
-
-    TH1D* pub_pt3040 = new TH1D("pub_pt3040","pub_pt3040",28,x_pTDiff);
-    for(int i=0;i<28;i++){
-        pub_pt3040->SetBinContent(i+1,g_pT3040->GetPointY(i));
-        pub_pt3040->SetBinError(i+1,g_pT3040->GetErrorY(i));
-    }
 
     c7->cd(2);
     gPad->SetTopMargin(0.05);
     TH1D* frame_ratio_pT3040 = new TH1D("frame_ratio_pT3040", "frame_ratio_pT3040",50,0.,5.);
     frame_ratio_pT3040->SetMaximum(1.5);
     frame_ratio_pT3040->SetMinimum(0.5);
-    frame_ratio_pT3040->SetYTitle("Ratio to Run 2");
+    frame_ratio_pT3040->SetYTitle("Ratio");
     frame_ratio_pT3040->Draw("AXIS");
     One->Draw("sames");
     index=0;
-    for(int i=0;i<FileNameSuffixs.size();i++){
-        TH1D* ratio_pT3040 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv2Cent30To40[i]->Get("pTDiffv2"),pub_pt3040,true);
-        SetMarkerAndLine(ratio_pT3040,GetColor(index),kFullCircle,kSolid,1.0);
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_pT3040 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv2Cent30To40[i]->Get("pTDiffv2"),(TH1D*)resultsFiles_pTDiffv2Cent30To40[0]->Get("pTDiffv2"),true);
+        SetMarkerAndLine(ratio_pT3040,GetColor(i),kFullCircle,kSolid,1.0);
         ratio_pT3040->Draw("ESAMES");
         index++;
     }
