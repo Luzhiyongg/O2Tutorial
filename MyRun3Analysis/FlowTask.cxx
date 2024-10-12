@@ -569,9 +569,9 @@ struct FlowTask {
       case 3:
         return (track.isGlobalTrackWoPtEta() && (abs(track.eta()) < cfgCutEta) && (track.pt() > cfgCutPtMin) && (track.pt() < cfgCutPtMax));
       case 4:
-        return (track.isGlobalTrackWoDCA() && track.dcaZ() <= cfgCutDCAz && track.dcaXY() <= cfgCutDCAxy * pow(track.pt(), -1.1));
+        return (track.isGlobalTrackWoDCA() && abs(track.dcaZ()) <= cfgCutDCAz && abs(track.dcaXY()) <= cfgCutDCAxy * pow(track.pt(), -1.1));
       case 5:
-        return (track.isGlobalTrackWoDCATPCCluster() && track.dcaZ() <= cfgCutDCAz && track.dcaXY() <= cfgCutDCAxy * pow(track.pt(), -1.1) && track.tpcNClsFound() >= cfgCutTPCclu);
+        return (track.isGlobalTrackWoDCATPCCluster() && abs(track.dcaZ()) <= cfgCutDCAz && abs(track.dcaXY()) <= cfgCutDCAxy * pow(track.pt(), -1.1) && track.tpcNClsFound() >= cfgCutTPCclu);
       default:
         return false;
     }
