@@ -106,6 +106,8 @@ void ProcessFlowContainerDrawDiffRatio(){
     vector<TFile*> resultsFiles_NSC;
     vector<TFile*> resultsFiles_pTDiffv2Cent0To5;
     vector<TFile*> resultsFiles_pTDiffv2Cent5To10;
+    vector<TFile*> resultsFiles_pTDiffv2Cent10To20;
+    vector<TFile*> resultsFiles_pTDiffv2Cent20To30;
     vector<TFile*> resultsFiles_pTDiffv2Cent30To40;
     FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931");
     FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931_midOCC");
@@ -119,6 +121,8 @@ void ProcessFlowContainerDrawDiffRatio(){
         string fileName_NSC = "./ProcessOutput/NSC_" + suffix + ".root";
         string fileName_pTDiffv2Cent0To5 = "./ProcessOutput/pTDiffv2Cent0To5_" + suffix + ".root";
         string fileName_pTDiffv2Cent5To10 = "./ProcessOutput/pTDiffv2Cent5To10_" + suffix + ".root";
+        string fileName_pTDiffv2Cent10To20 = "./ProcessOutput/pTDiffv2Cent10To20_" + suffix + ".root";
+        string fileName_pTDiffv2Cent20To30 = "./ProcessOutput/pTDiffv2Cent20To30_" + suffix + ".root";
         string fileName_pTDiffv2Cent30To40 = "./ProcessOutput/pTDiffv2Cent30To40_" + suffix + ".root";
 
         TFile* resultsFile = TFile::Open(fileName_vn.c_str(), "READ");
@@ -163,6 +167,18 @@ void ProcessFlowContainerDrawDiffRatio(){
             return;
         }
         resultsFiles_pTDiffv2Cent5To10.push_back(resultsFile);
+        resultsFile = TFile::Open(fileName_pTDiffv2Cent10To20.c_str(), "READ");
+        if(!resultsFile || resultsFile->IsZombie()){
+            cout << "Error: cannot open file " << fileName_pTDiffv2Cent10To20 << endl;
+            return;
+        }
+        resultsFiles_pTDiffv2Cent10To20.push_back(resultsFile);
+        resultsFile = TFile::Open(fileName_pTDiffv2Cent20To30.c_str(), "READ");
+        if(!resultsFile || resultsFile->IsZombie()){
+            cout << "Error: cannot open file " << fileName_pTDiffv2Cent20To30 << endl;
+            return;
+        }
+        resultsFiles_pTDiffv2Cent20To30.push_back(resultsFile);
         resultsFile = TFile::Open(fileName_pTDiffv2Cent30To40.c_str(), "READ");
         if(!resultsFile || resultsFile->IsZombie()){
             cout << "Error: cannot open file " << fileName_pTDiffv2Cent30To40 << endl;
@@ -200,7 +216,7 @@ void ProcessFlowContainerDrawDiffRatio(){
     gPad->SetTopMargin(0.05);
     TH1D* frame_ratio = new TH1D("frame_ratio", "frame_ratio", 60,0,60);
     frame_ratio->SetMaximum(1.05);
-    frame_ratio->SetMinimum(0.7);
+    frame_ratio->SetMinimum(0.9);
     frame_ratio->SetYTitle("Ratio");
     frame_ratio->Draw("AXIS");
     TF1* One = new TF1("One","1",0,60);
@@ -394,9 +410,9 @@ void ProcessFlowContainerDrawDiffRatio(){
 
     c6->cd(2);
     gPad->SetTopMargin(0.05);
-    TH1D* frame_ratio_pt05 = new TH1D("frame_ratio_pt05", "frame_ratio_pt05",50,0.,5.);
-    frame_ratio_pt05->SetMaximum(1.5);
-    frame_ratio_pt05->SetMinimum(0.5);
+    TH1D* frame_ratio_pt05 = new TH1D("frame_ratio_pt05", "frame_ratio_pt05",50,0.,10.);
+    frame_ratio_pt05->SetMaximum(1.1);
+    frame_ratio_pt05->SetMinimum(0.9);
     frame_ratio_pt05->SetYTitle("Ratio");
     frame_ratio_pt05->Draw("AXIS");
     One->Draw("sames");
@@ -432,9 +448,9 @@ void ProcessFlowContainerDrawDiffRatio(){
 
     c5->cd(2);
     gPad->SetTopMargin(0.05);
-    TH1D* frame_ratio_pt510 = new TH1D("frame_ratio_pt510", "frame_ratio_pt510",50,0.,5.);
-    frame_ratio_pt510->SetMaximum(1.5);
-    frame_ratio_pt510->SetMinimum(0.5);
+    TH1D* frame_ratio_pt510 = new TH1D("frame_ratio_pt510", "frame_ratio_pt510",50,0.,10.);
+    frame_ratio_pt510->SetMaximum(1.1);
+    frame_ratio_pt510->SetMinimum(0.9);
     frame_ratio_pt510->SetYTitle("Ratio");
     frame_ratio_pt510->Draw("AXIS");
     One->Draw("sames");
@@ -445,6 +461,84 @@ void ProcessFlowContainerDrawDiffRatio(){
         ratio_pt510->Draw("ESAMES");
         index++;
     }
+
+
+    // =================
+    // pTDiffv2Cent10To20
+    // =================
+    index = 0;
+    TCanvas* c10To20 = new TCanvas("c10To20", "c10To20", 800, 1200);
+    c10To20->Divide(1,2);
+    c10To20->cd(1);
+    gPad->SetBottomMargin(0.05);
+    TLegend* leg10To20 = new TLegend(0.3,0.15,0.9,0.4);
+    TH1D* frame_pTDiffv2Cent10To20 = new TH1D("frame_pTDiffv2Cent10To20", "frame_pTDiffv2Cent10To20", 50,0,10.);
+    frame_pTDiffv2Cent10To20->SetMaximum(0.2);
+    frame_pTDiffv2Cent10To20->SetMinimum(0.);
+    frame_pTDiffv2Cent10To20->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_pTDiffv2Cent10To20 = (TH1D*)resultsFiles_pTDiffv2Cent10To20[i]->Get("pTDiffv2");
+        SetMarkerAndLine(h_pTDiffv2Cent10To20,GetColor(index),kFullCircle,kSolid,1.0);
+        h_pTDiffv2Cent10To20->Draw("ESAMES");
+        leg10To20->AddEntry(h_pTDiffv2Cent10To20,Form("v_{2}(p_{T}) Cent:10~20%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    leg10To20->Draw();
+
+    c10To20->cd(2);
+    gPad->SetTopMargin(0.05);
+    TH1D* frame_ratio_pt1020 = new TH1D("frame_ratio_pt1020", "frame_ratio_pt1020",50,0.,10.);
+    frame_ratio_pt1020->SetMaximum(1.1);
+    frame_ratio_pt1020->SetMinimum(0.9);
+    frame_ratio_pt1020->SetYTitle("Ratio");
+    frame_ratio_pt1020->Draw("AXIS");
+    One->Draw("sames");
+    index=0;
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_pt1020 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv2Cent10To20[i]->Get("pTDiffv2"),(TH1D*)resultsFiles_pTDiffv2Cent10To20[0]->Get("pTDiffv2"),true);
+        SetMarkerAndLine(ratio_pt1020,GetColor(i),kFullCircle,kSolid,1.0);
+        ratio_pt1020->Draw("ESAMES");
+        index++;
+    }
+
+    // =================
+    // pTDiffv2Cent20To30
+    // =================
+    index = 0;
+    TCanvas* c20To30 = new TCanvas("c20To30", "c20To30", 800, 1200);
+    c20To30->Divide(1,2);
+    c20To30->cd(1);
+    gPad->SetBottomMargin(0.05);
+    TLegend* leg20To30 = new TLegend(0.3,0.15,0.9,0.4);
+    TH1D* frame_pTDiffv2Cent20To30 = new TH1D("frame_pTDiffv2Cent20To30", "frame_pTDiffv2Cent20To30", 50,0,10.);
+    frame_pTDiffv2Cent20To30->SetMaximum(0.3);
+    frame_pTDiffv2Cent20To30->SetMinimum(0.);
+    frame_pTDiffv2Cent20To30->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_pTDiffv2Cent20To30 = (TH1D*)resultsFiles_pTDiffv2Cent20To30[i]->Get("pTDiffv2");
+        SetMarkerAndLine(h_pTDiffv2Cent20To30,GetColor(index),kFullCircle,kSolid,1.0);
+        h_pTDiffv2Cent20To30->Draw("ESAMES");
+        leg20To30->AddEntry(h_pTDiffv2Cent20To30,Form("v_{2}(p_{T}) Cent:20~30%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index+=1;
+    }
+    leg20To30->Draw();
+
+    c20To30->cd(2);
+    gPad->SetTopMargin(0.05);
+    TH1D* frame_ratio_pt2030 = new TH1D("frame_ratio_pt2030", "frame_ratio_pt2030",50,0.,10.);
+    frame_ratio_pt2030->SetMaximum(1.1);
+    frame_ratio_pt2030->SetMinimum(0.9);
+    frame_ratio_pt2030->SetYTitle("Ratio");
+    frame_ratio_pt2030->Draw("AXIS");
+    One->Draw("sames");
+    index=0;
+    for(int i=1;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_pt2030 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv2Cent20To30[i]->Get("pTDiffv2"),(TH1D*)resultsFiles_pTDiffv2Cent20To30[0]->Get("pTDiffv2"),true);
+        SetMarkerAndLine(ratio_pt2030,GetColor(i),kFullCircle,kSolid,1.0);
+        ratio_pt2030->Draw("ESAMES");
+        index++;
+    }
+
 
 
     // =================
@@ -471,9 +565,9 @@ void ProcessFlowContainerDrawDiffRatio(){
 
     c7->cd(2);
     gPad->SetTopMargin(0.05);
-    TH1D* frame_ratio_pT3040 = new TH1D("frame_ratio_pT3040", "frame_ratio_pT3040",50,0.,5.);
-    frame_ratio_pT3040->SetMaximum(1.5);
-    frame_ratio_pT3040->SetMinimum(0.5);
+    TH1D* frame_ratio_pT3040 = new TH1D("frame_ratio_pT3040", "frame_ratio_pT3040",50,0.,10.);
+    frame_ratio_pT3040->SetMaximum(1.1);
+    frame_ratio_pT3040->SetMinimum(0.9);
     frame_ratio_pT3040->SetYTitle("Ratio");
     frame_ratio_pT3040->Draw("AXIS");
     One->Draw("sames");

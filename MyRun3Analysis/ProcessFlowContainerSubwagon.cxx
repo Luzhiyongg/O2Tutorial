@@ -832,11 +832,11 @@ void CompareNSC32Corr(string FileNameSuffix, FlowContainer* fc){
 
 }
 
-void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_276313"){
+void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23_PbPb_pass4_272931"){
     // Produce flow results in root file for each subwagon
 
     TFile* f = new TFile(Form("./AnalysisResults/AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
-    vector<string> SubwagonNames = {"","_midOcc","_highOcc"};
+    vector<string> SubwagonNames = {"","_midOCC","_highOcc"};
     for(uint i=0; i < SubwagonNames.size(); i++){
         FlowContainer* fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         if(!fc){
@@ -852,6 +852,10 @@ void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_
         Output_ptDiffvn(FileNameSuffix, fc, 30, 40, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         Output_ptDiffvn(FileNameSuffix, fc, 5, 10, SubwagonNames[i]);
+        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+        Output_ptDiffvn(FileNameSuffix, fc, 10, 20, SubwagonNames[i]);
+        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+        Output_ptDiffvn(FileNameSuffix, fc, 20, 30, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         Output_Nonlinear(FileNameSuffix, fc, v422, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
