@@ -16,6 +16,7 @@
 #include <CCDB/BasicCCDBManager.h>
 #include <cmath>
 #include <vector>
+#include <map>
 #include "Framework/runDataProcessing.h"
 #include "Framework/AnalysisTask.h"
 #include "Framework/ASoAHelpers.h"
@@ -55,7 +56,7 @@ struct FlowRunbyRun {
   O2_DEFINE_CONFIGURABLE(cfgCutChi2prTPCcls, float, 2.5, "Chi2 per TPC clusters")
   O2_DEFINE_CONFIGURABLE(cfgCutDCAz, float, 2.0f, "max DCA to vertex z")
   O2_DEFINE_CONFIGURABLE(cfgUseNch, bool, false, "Use Nch for flow observables")
-  Configurable<std::vector<uint>> cfgRunNumber{"cfgRunNumber", std::vector<uint>{544095,544098,544116,544121,544122,544123,544124}, "Preconfigured run numbers"};
+  Configurable<std::vector<int>> cfgRunNumbers{"cfgRunNumbers", std::vector<int>{544095,544098,544116,544121,544122,544123,544124}, "Preconfigured run numbers"};
   
 
   ConfigurableAxis axisVertex{"axisVertex", {20, -10, 10}, "vertex axis for histograms"};
@@ -80,6 +81,23 @@ struct FlowRunbyRun {
   // define global variables
   GFW* fGFW = new GFW();
   std::vector<GFW::CorrConfig> corrconfigs;
+  std::vector<int> RunNumbers; // vector of run numbers
+  std::map<int, std::vector<std::shared_ptr<TH1>>> TH1sList; // map of histograms for all runs
+  std::map<int, std::vector<std::shared_ptr<TProfile>>> ProfilesList; // map of profiles for all runs
+  enum OutputTH1Names {
+    // here are TProfiles for vn-pt correlations that are not implemented in GFW
+    hPhi = 0,
+    hEta,
+    hVtxZ,
+    hMult,
+    hCent,
+    kCount_TH1Names
+  };
+  enum OutputTProfileNames {
+    c22 = 0,
+    c22_gap10,
+    kCount_TProfileNames
+  };
 
   using aodCollisions = soa::Filtered<soa::Join<aod::Collisions, aod::EvSels, aod::CentFT0Cs, aod::Mults>>;
   using aodTracks = soa::Filtered<soa::Join<aod::Tracks, aod::TrackSelection, aod::TracksExtra, aod::TracksDCA>>;
@@ -90,21 +108,24 @@ struct FlowRunbyRun {
     ccdb->setCaching(true);
     ccdb->setCreatedNotAfter(nolaterthan.value);
 
-    //Add some output objects to the histogram registry
-    registry.add("hPhi", "", {HistType::kTH1D, {axisPhi}});
-    registry.add("hEta", "", {HistType::kTH1D, {axisEta}});
-    registry.add("hVtxZ", "", {HistType::kTH1D, {axisVertex}});
-    registry.add("hMult", "", {HistType::kTH1D, {{3000,0.5,3000.5}}});
-    registry.add("hCent", "", {HistType::kTH1D, {{90,0,90}}});
-    registry.add("c22", "", {HistType::kTProfile, {axisIndependent}});
+    //Add output histograms to the registry
+    std::vector<int> temp = cfgRunNumbers;
+    RunNumbers = temp;
+    for (auto& runNumber : RunNumbers) {
+      CreateOutputObjectsForRun(runNumber);
+    }
 
     fGFW->AddRegion("full", -0.8, 0.8, 1, 1);
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE));
+    fGFW->AddRegion("refN10", -0.8, -0.5, 1, 1);
+    fGFW->AddRegion("refP10", 0.5, 0.8, 1, 1);
+    corrconfigs.resize(kCount_TProfileNames);
+    corrconfigs[c22] = fGFW->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE);
+    corrconfigs[c22_gap10] = fGFW->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE);
     fGFW->CreateRegions();
   }
 
   template<char... chars>
-  void FillProfile(const GFW::CorrConfig& corrconf, const ConstStr<chars...>& tarName, const double& cent)
+  void FillProfile(const GFW::CorrConfig& corrconf, std::shared_ptr<TProfile> profile, const double& cent)
   {
     double dnx, val;
     dnx = fGFW->Calculate(corrconf,0,kTRUE).real();
@@ -112,33 +133,68 @@ struct FlowRunbyRun {
     if(!corrconf.pTDif) {
       val = fGFW->Calculate(corrconf,0,kFALSE).real()/dnx;
       if(TMath::Abs(val)<1)
-        registry.fill(tarName,cent,val,dnx);
+        profile->Fill(cent,val,dnx);
       return;
     };
     return;
   }
 
+  void CreateOutputObjectsForRun(int runNumber){
+    std::vector<std::shared_ptr<TH1>> histos(kCount_TH1Names);
+    histos[hPhi] = registry.add<TH1>(Form("%d/hPhi", runNumber), "", {HistType::kTH1D, {axisPhi}});
+    histos[hEta] = registry.add<TH1>(Form("%d/hEta", runNumber), "", {HistType::kTH1D, {axisEta}});
+    histos[hVtxZ] = registry.add<TH1>(Form("%d/hVtxZ", runNumber), "", {HistType::kTH1D, {axisVertex}});
+    histos[hMult] = registry.add<TH1>(Form("%d/hMult", runNumber), "", {HistType::kTH1D, {{3000,0.5,3000.5}}});
+    histos[hCent] = registry.add<TH1>(Form("%d/hCent", runNumber), "", {HistType::kTH1D, {{90,0,90}}});
+    TH1sList.insert(std::make_pair(runNumber, histos));
+
+    std::vector<std::shared_ptr<TProfile>> profiles(kCount_TProfileNames);
+    profiles[c22] = registry.add<TProfile>(Form("%d/c22", runNumber), "", {HistType::kTProfile, {axisIndependent}});
+    profiles[c22_gap10] = registry.add<TProfile>(Form("%d/c22_gap10", runNumber), "", {HistType::kTProfile, {axisIndependent}});
+    ProfilesList.insert(std::make_pair(runNumber, profiles));
+  }
+
   void process(aodCollisions::iterator const& collision, aod::BCsWithTimestamps const&, aodTracks const& tracks)
   {
-    int Ntot = tracks.size();
-    if (Ntot < 1)
+    if (!collision.sel8())
       return;
-    float vtxz = collision.posZ();
-    registry.fill(HIST("hVtxZ"), vtxz);
-    registry.fill(HIST("hMult"),Ntot);
-    registry.fill(HIST("hCent"),collision.centFT0C());
+    if (tracks.size() < 1)
+      return;
+    // detect run number
+    auto bc = collision.bc_as<aod::BCsWithTimestamps>();
+    int runNumber = bc.runNumber();
+    if (std::find(RunNumbers.begin(), RunNumbers.end(), runNumber) == RunNumbers.end()){
+      // if run number is not in the preconfigured list, create new output histograms for this run
+      CreateOutputObjectsForRun(runNumber);
+      RunNumbers.push_back(runNumber);
+    }
+    
+    if (TH1sList.find(runNumber) == TH1sList.end()) {
+      LOGF(fatal, "RunNumber %d not found in TH1sList", runNumber);
+      return;
+    }
+
+    TH1sList[runNumber][hVtxZ]->Fill(collision.posZ());
+    TH1sList[runNumber][hMult]->Fill(tracks.size());
+    TH1sList[runNumber][hCent]->Fill(collision.centFT0C());
+
     fGFW->Clear();
     const auto cent = collision.centFT0C();
     float weff = 1, wacc = 1;
     for (auto& track : tracks) {
-      registry.fill(HIST("hPhi"), track.phi());
-      registry.fill(HIST("hEta"), track.eta());
-      
-      fGFW->Fill(track.eta(), 1, track.phi(), wacc * weff, 1);
+      TH1sList[runNumber][hPhi]->Fill(track.phi());
+      TH1sList[runNumber][hEta]->Fill(track.eta());
+      bool WithinPtPOI = (cfgCutPtPOIMin < track.pt()) && (track.pt() < cfgCutPtPOIMax); // within POI pT range
+      bool WithinPtRef = (cfgCutPtRefMin < track.pt()) && (track.pt() < cfgCutPtRefMax); // within RF pT range
+      if (WithinPtRef) {
+        fGFW->Fill(track.eta(), 1, track.phi(), wacc * weff, 1);
+      }
     }
 
-    //Filling c22 with ROOT TProfile
-    FillProfile(corrconfigs.at(0), HIST("c22"), cent);
+    //Filling TProfile
+    for (uint i = 0; i < kCount_TProfileNames; ++i) {
+      FillProfile(corrconfigs[i], ProfilesList[runNumber][i], cent);
+    }
   }
 };
 
