@@ -197,37 +197,35 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     }
 }
 
-void Output_vn4(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
-    TCanvas* canvas1 = new TCanvas("Canvas_vn4","Canvas_vn4",900,900);
-    TH1D* Hist  = new TH1D(Form("v_{n}{4} in %s",FileNameSuffix.c_str()),Form("v_{n}{4} in %s",FileNameSuffix.c_str()),8,0,80);
+TH1D* GetVnm(FlowContainer* fc, Int_t n, Int_t m_particle = 4){
+    if (m_particle == 2)
+        return (TH1D*)fc->GetVN2VsMulti(n);
+    else if (m_particle == 4)
+        return (TH1D*)fc->GetVN4VsMulti(n);
+    else if (m_particle == 6)
+        return (TH1D*)fc->GetVN6VsMulti(n);
+    else if (m_particle == 8)
+        return (TH1D*)fc->GetVN8VsMulti(n);
+    
+    return nullptr;
+}
+
+void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_particle = 4, string IDName = "ChFull", string Subwagon=""){
+    TCanvas* canvas1 = new TCanvas(Form("Canvas_Vnm_%d_%d", n, m_particle),Form("Canvas_Vnm_%d_%d", n, m_particle),900,900);
+    TH1D* Hist  = new TH1D(Form("v_{%d}{%d} in %s", n, m_particle, FileNameSuffix.c_str()), Form("v_{%d}{%d} in %s", n, m_particle, FileNameSuffix.c_str()),8,0,80);
     Hist->SetMinimum(0.);
     Hist->SetMaximum(0.15);
     Hist->SetXTitle("Centrality (%)");
-    Hist->SetYTitle("v_{n}{4}");
+    Hist->SetYTitle(Form("v_{%d}{%d}", n, m_particle));
     Hist->Draw();
-    fc->SetIDName("ChFull");
+    fc->SetIDName(IDName.c_str());
     fc->SetPropagateErrors(kTRUE);
     TH1D* hVn[3] = {nullptr};
-    hVn[0] = (TH1D*)fc->GetVN4VsMulti(2);
-    // TH1D* temp_22 = (TH1D*)fc->GetHistCorrXXVsMulti("22");
-    // TH1D* temp_24 = (TH1D*)fc->GetHistCorrXXVsMulti("24");
-    // hVn[0] = (TH1D*)temp_22->Clone();
-    // hVn[0]->SetName("c24");
-    // for(int i=1;i<=temp_22->GetNbinsX();i++){
-    //     double corr22 = temp_22->GetBinContent(i);
-    //     double corr24 = temp_24->GetBinContent(i);
-    //     double c24 = 2*corr22*corr22 - corr24;
-    //     Printf("corr24: %f, corr22: %f",corr24, corr22);
-    //     if(c24>0){
-    //         hVn[0]->SetBinContent(i,sqrt(sqrt(c24)));
-    //         Printf("v24: %f",sqrt(sqrt(c24)));
-    //     }
-    //     else{
-    //         hVn[0]->SetBinContent(i,0);
-    //     }
-    // }
-    // delete temp_22;
-    // delete temp_24;
+    hVn[0] = GetVnm(fc, n, m_particle);
+    if (hVn[0] == nullptr){
+        Printf("Can't get v_{%d}{%d}",n, m_particle);
+        return;
+    }
 
     std::vector<std::vector<std::vector<double>>> ValueArray;
     std::vector<std::vector<std::vector<double>>> ValueErrorArray;
@@ -241,9 +239,9 @@ void Output_vn4(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     for(int sample=0;sample<NofSample;sample++){
         fc->OverrideMainWithSub(sample,false);
         for(int i=0;i<Nobs;i++){
-            TH1D* temp = (TH1D*)fc->GetVN4VsMulti(i+2);
+            TH1D* temp = GetVnm(fc, n, m_particle);
             if(!temp){
-                Printf("Can't get v%d",i+2);
+                Printf("Can't get v_{%d}{%d}", n, m_particle);
                 return;
             }
             for(int j=0;j<temp->GetNbinsX();j++){
@@ -263,7 +261,7 @@ void Output_vn4(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     gStyle->SetOptStat("");
     for(int i=0;i<Nobs;i++)hVn[i]->Draw("ESames");
     TLegend* legend = new TLegend(0.2,0.8,0.5,0.9);
-    for(int i=0;i<Nobs;i++)legend->AddEntry(hVn[i],Form("v_{%d}{4}",i+2));
+    for(int i=0;i<Nobs;i++)legend->AddEntry(hVn[i],Form("v_{%d}{%d}", n, m_particle));
     legend->Draw();
 
     if(ComparewithPublish){
@@ -275,10 +273,9 @@ void Output_vn4(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     }
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/v24_%s%s.root",FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("./ProcessOutput/v%d%d_%s.root", n, m_particle, FileNameSuffix.c_str()),"RECREATE");
         hVn[0]->Write();
         fout->Close();
-        // canvas1->SaveAs("./ProcessOutput/v24.png");
     }
 }
 
@@ -832,11 +829,11 @@ void CompareNSC32Corr(string FileNameSuffix, FlowContainer* fc){
 
 }
 
-void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23_PbPb_pass4_272931"){
+void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_284143"){
     // Produce flow results in root file for each subwagon
 
     TFile* f = new TFile(Form("./AnalysisResults/AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
-    vector<string> SubwagonNames = {"","_midOCC","_highOcc"};
+    vector<string> SubwagonNames = {""};
     for(uint i=0; i < SubwagonNames.size(); i++){
         FlowContainer* fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         if(!fc){
@@ -845,7 +842,11 @@ void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23_PbPb_pass4_2729
         }
         Output_vn(FileNameSuffix, fc, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_vn4(FileNameSuffix, fc, SubwagonNames[i]);
+        Output_Vnm(FileNameSuffix, fc, 2, 4, "ChFull", SubwagonNames[i]);
+        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+        Output_Vnm(FileNameSuffix, fc, 2, 6, "ChFull", SubwagonNames[i]);
+        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+        Output_Vnm(FileNameSuffix, fc, 2, 8, "ChFull", SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         Output_ptDiffvn(FileNameSuffix, fc, 0, 5, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
