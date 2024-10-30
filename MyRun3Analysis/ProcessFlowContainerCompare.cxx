@@ -740,6 +740,142 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc){
     }
 }
 
+TH1D* GetSCklm(FlowContainer* fc, Int_t k, Int_t l, Int_t m){
+
+    TH1D* hCorrklkl=nullptr;
+    TH1D* hCorrk2_Full=nullptr;
+    TH1D* hCorrl2_Full=nullptr;
+
+    fc->SetIDName(Form("ChFull"));
+    hCorrklkl = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d%d%d%d", k, l, k, l));
+    if (!hCorrklkl) {Printf("Can't get hCorrklkl"); return nullptr;}
+    hCorrk2_Full = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", k));
+    if (!hCorrk2_Full) {Printf("Can't get hCorrk2_Full"); return nullptr;}
+    hCorrl2_Full = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", l));
+    if (!hCorrl2_Full) {Printf("Can't get hCorrl2_Full"); return nullptr;}
+    if (m < 0) {
+        TH1D* out = (TH1D*)hCorrklkl->Clone();
+        for (int i = 1; i <= hCorrklkl->GetNbinsX(); i++) {
+            out->SetBinContent(i, hCorrklkl->GetBinContent(i) - hCorrk2_Full->GetBinContent(i) * hCorrl2_Full->GetBinContent(i));
+            double err = Error_SCnm(hCorrklkl->GetBinContent(i), hCorrklkl->GetBinError(i), hCorrk2_Full->GetBinContent(i), hCorrk2_Full->GetBinError(i), hCorrl2_Full->GetBinContent(i), hCorrl2_Full->GetBinError(i));
+            out->SetBinError(i, err);
+        }
+        return out;
+    }
+
+    TH1D* hCorrklmklm=nullptr;
+    TH1D* hCorrkmkm=nullptr;
+    TH1D* hCorrlmlm=nullptr;
+    TH1D* hCorrm2_Full=nullptr;
+    hCorrklmklm = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d%d%d%d%d%d", k, l, m, k, l, m));
+    if (!hCorrklmklm) {Printf("Can't get hCorrklmklm"); return nullptr;}
+    hCorrkmkm = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d%d%d%d", k, m, k, m));
+    if (!hCorrkmkm) {Printf("Can't get hCorrkmkm"); return nullptr;}
+    hCorrlmlm = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d%d%d%d", l, m, l, m));
+    if (!hCorrlmlm) {Printf("Can't get hCorrlmlm"); return nullptr;}
+    hCorrm2_Full = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", m));
+    if (!hCorrm2_Full) {Printf("Can't get hCorrm2_Full"); return nullptr;}
+
+    TH1D* out = (TH1D*)hCorrklmklm->Clone();
+    for (int i = 1; i <= hCorrklmklm->GetNbinsX(); i++) {
+        out->SetBinContent(i, hCorrklmklm->GetBinContent(i) 
+        - hCorrklkl->GetBinContent(i) * hCorrm2_Full->GetBinContent(i)
+        - hCorrkmkm->GetBinContent(i) * hCorrl2_Full->GetBinContent(i)
+        - hCorrlmlm->GetBinContent(i) * hCorrk2_Full->GetBinContent(i)
+        + 2*hCorrk2_Full->GetBinContent(i)*hCorrl2_Full->GetBinContent(i)*hCorrm2_Full->GetBinContent(i)
+        );
+        double err = Error_SCklm(
+            hCorrklmklm->GetBinContent(i), hCorrklmklm->GetBinError(i),
+            hCorrklkl->GetBinContent(i), hCorrklkl->GetBinError(i),
+            hCorrkmkm->GetBinContent(i), hCorrkmkm->GetBinError(i),
+            hCorrlmlm->GetBinContent(i), hCorrlmlm->GetBinError(i),
+            hCorrk2_Full->GetBinContent(i), hCorrk2_Full->GetBinError(i),
+            hCorrl2_Full->GetBinContent(i), hCorrl2_Full->GetBinError(i),
+            hCorrm2_Full->GetBinContent(i), hCorrm2_Full->GetBinError(i)
+        );
+        out->SetBinError(i, err);
+    }
+    return out;
+    
+}
+
+void Output_SCklm(string FileNameSuffix, FlowContainer* fc, Int_t k, Int_t l, Int_t m=-1){
+    
+    TCanvas* canvas1 = nullptr;
+    if (m < 0) canvas1 = new TCanvas(Form("Canvas_SC%d%d",k,l),Form("Canvas_SC%d%d",k,l),900,900);
+    else canvas1 = new TCanvas(Form("Canvas_SC%d%d%d",k,l,m),Form("Canvas_SC%d%d%d",k,l,m),900,900);
+    TH1D* Hist  = nullptr;
+    if (m < 0) Hist = new TH1D(Form("SC%d%d in %s",k,l,FileNameSuffix.c_str()),Form("SC%d%d in %s",k,l,FileNameSuffix.c_str()),8,0,80);
+    else Hist = new TH1D(Form("SC%d%d%d in %s",k,l,m,FileNameSuffix.c_str()),Form("SC%d%d%d in %s",k,l,m,FileNameSuffix.c_str()),8,0,80);
+    if (m<0){
+        Hist->SetMinimum(-1e-5);
+        Hist->SetMaximum(1e-5);
+    }
+    else{
+        Hist->SetMinimum(-1e-8);
+        Hist->SetMaximum(1e-8);
+    }
+    Hist->SetXTitle("Centrality (%)");
+    if(m<0) Hist->SetYTitle(Form("SC(%d,%d)",k,l));
+    else Hist->SetYTitle(Form("SC(%d,%d,%d)",k,l,m));
+    Hist->Draw();
+
+    fc->SetPropagateErrors(kTRUE);
+    TH1D* SCklm = GetSCklm(fc, k, l, m);
+    if (!SCklm) {Printf("Can't get SCklm"); return;}
+    if (m < 0) SCklm->SetName(Form("SC%d%d",k,l));
+    else SCklm->SetName(Form("SC%d%d%d",k,l,m));
+    
+
+    std::vector<std::vector<std::vector<double>>> ValueArray;
+    std::vector<std::vector<std::vector<double>>> ValueErrorArray;
+    std::vector<std::vector<double>> ErrorArray;
+    int Nobs=1;//NSC
+    TObjArray* subsamples = fc->GetSubProfiles();
+    int NofSample = subsamples->GetEntries();
+    int Nbin = SCklm->GetNbinsX();
+    ResizeValueArray(ValueArray,ValueErrorArray,ErrorArray,Nobs,NofSample,Nbin);
+    
+    for(int sample=0;sample<NofSample;sample++){
+        fc->OverrideMainWithSub(sample,false);
+        for(int i=0;i<Nobs;i++){
+            TH1D* temp = GetSCklm(fc, k, l, m);
+            temp->SetName(Form("SC%d%d%d_%d",k,l,m,sample));
+            if(!temp){
+                Printf("Can't get SC%d%d%d_%d",k,l,m,sample);
+                return;
+            }
+            for(int j=0;j<temp->GetNbinsX();j++){
+                ValueArray[i][sample][j] = temp->GetBinContent(j+1);
+                ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
+            }
+            delete temp;
+        }
+    }
+    for(int i=0;i<Nobs;i++){
+        CalculateBootstrapError(ValueArray[i],ValueErrorArray[i],ErrorArray[i]);
+    }
+    for(int i=0;i<Nbin;i++){
+        SCklm->SetBinError(i+1, ErrorArray[0][i]);
+    }
+
+    SetMarkerAndLine(SCklm,kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
+    SCklm->Draw("ESames");
+    TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
+    if (m < 0) legend2->AddEntry(SCklm,Form("SC(%d,%d)",k,l));
+    else legend2->AddEntry(SCklm,Form("SC(%d,%d,%d)",k,l,m));
+    legend2->Draw();
+
+    if(OutputRoot){
+        TFile* fout = nullptr;
+        if (m < 0) fout = new TFile(Form("./ProcessOutput/SC%d%d_%s.root",k,l,FileNameSuffix.c_str()),"RECREATE");
+        else fout = new TFile(Form("./ProcessOutput/SC%d%d%d_%s.root",k,l,m,FileNameSuffix.c_str()),"RECREATE");
+        SCklm->Write();
+        fout->Close();
+    }
+}
+
 void CompareNonlinearCorr(string FileNameSuffix, FlowContainer* fc){
     TCanvas* canvas1 = new TCanvas(Form("Canvas_NSC"),Form("Canvas_NSC"),900,900);
     TH1D* Hist  = new TH1D(Form("<<4,-2,-2>> in %s",FileNameSuffix.c_str()),Form("<<4,-2,-2>> in %s",FileNameSuffix.c_str()),8,0,80);
@@ -852,7 +988,13 @@ void ProcessFlowContainerCompare(string FileNameSuffix = "LHC23zzh_pass4_small_2
     // Output_Nonlinear(FileNameSuffix, fc, v422);
     // Output_Nonlinear(FileNameSuffix, fc, chi422);
     // Output_Nonlinear(FileNameSuffix, fc, rho422);
-    // Output_NSC(FileNameSuffix, fc);
+    Output_NSC(FileNameSuffix, fc);
+    Output_SCklm(FileNameSuffix, fc, 2, 3);
+    Output_SCklm(FileNameSuffix, fc, 2, 4);
+    Output_SCklm(FileNameSuffix, fc, 2, 3, 4);
+    Output_SCklm(FileNameSuffix, fc, 2, 3, 5);
+    Output_SCklm(FileNameSuffix, fc, 2, 4, 6);
+    Output_SCklm(FileNameSuffix, fc, 3, 4, 5);
     // CompareNSC32Corr(FileNameSuffix, fc);
     // CompareNonlinearCorr(FileNameSuffix, fc);
     return;
