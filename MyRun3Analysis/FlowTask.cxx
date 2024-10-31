@@ -591,7 +591,7 @@ struct FlowTask {
   {
     if (cfgCutDCAzPtDepEnabled && (track.dcaZ() > (0.004f + 0.013f / track.pt())))
       return false;
-    
+
     if (cfgTrkSelSwitch) {
       return myTrackSel.IsSelected(track);
     } else {
@@ -646,7 +646,7 @@ struct FlowTask {
     registry.fill(HIST("hEventCount"), 1.5);
     auto bc = collision.bc_as<aod::BCsWithTimestamps>();
     int currentRunNumber = bc.runNumber();
-    for (auto& ExcludedRun : cfgRunRemoveList.value){
+    for (auto& ExcludedRun : cfgRunRemoveList.value) {
       if (currentRunNumber == ExcludedRun) {
         LOGF(info, "Skipping event from run %d", currentRunNumber);
         return;
