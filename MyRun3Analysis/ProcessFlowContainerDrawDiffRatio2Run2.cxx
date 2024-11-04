@@ -109,9 +109,11 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     vector<TFile*> resultsFiles_pTDiffv2Cent10To20;
     vector<TFile*> resultsFiles_pTDiffv2Cent20To30;
     vector<TFile*> resultsFiles_pTDiffv2Cent30To40;
-    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931");
-    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931_midOCC");
-    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931_highOcc");
+    FileNameSuffixs.push_back("LHC23_PbPb_pass4_279261");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260_midOcc");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260_highOcc");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_279536");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_279536_Mult_Cor");
 
     for(auto& suffix : FileNameSuffixs){
         string fileName_vn = "./ProcessOutput/vn_" + suffix + ".root";
@@ -191,7 +193,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     gStyle->SetOptStat(0); 
 
     // =================
-    // vn{2}
+    // v2{2}
     // =================
     int index = 0;
     TCanvas* c1 = new TCanvas("c1", "c1", 800, 1200);
@@ -212,6 +214,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     }
     TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
     TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get("v2/Graph1D_y1");
+    // TFile* publish_v2 = new TFile("./v2_Gap10_TPCPileUp.root","READ");
+    // TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish_v2->Get("v2{2}_Gap10_TPCPileUp");
     SetMarkerAndLine(g_v2,kBlack,kOpenSquare,kSolid,1.0);
     g_v2->Draw("PE");
     leg->AddEntry(g_v2,Form("v_{2}{2} JHEP 05 (2020) 085, 2020"));
@@ -239,6 +243,104 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         TH1D* ratio = GetRatio(7,(TH1D*)resultsFiles_vn[i]->Get("Corr_corr_22_hist"),pub_v22);
         SetMarkerAndLine(ratio,GetColor(index),kFullCircle,kSolid,1.0);
         ratio->Draw("ESAMES");
+        index++;
+    }
+
+    // =================
+    // v3{2}
+    // =================
+    index = 0;
+    TCanvas* c_v32 = new TCanvas("c_v32", "c_v32", 800, 1200);
+    c_v32->Divide(1,2);
+    c_v32->cd(1);
+    gPad->SetBottomMargin(0.05);
+    TLegend* leg_v32 = new TLegend(0.2,0.7,0.8,0.9);
+    TH1D* frame_v32 = new TH1D("frame_v32", "frame_v32", 60,0,60);
+    frame_v32->SetMaximum(0.15);
+    frame_v32->SetMinimum(0.);
+    frame_v32->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_v32 = (TH1D*)resultsFiles_vn[i]->Get("Corr_corr_32_hist");
+        SetMarkerAndLine(h_v32,GetColor(index),kFullCircle,kSolid,1.0);
+        h_v32->Draw("ESAMES");
+        leg_v32->AddEntry(h_v32,Form("v_{3}{2} (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index++;
+    }
+    // TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+    TGraphAsymmErrors* g_v32 = (TGraphAsymmErrors*)publish->Get("v3/Graph1D_y1");
+    SetMarkerAndLine(g_v32,kBlack,kOpenSquare,kSolid,1.0);
+    g_v32->Draw("PE");
+    leg_v32->AddEntry(g_v32,Form("v_{3}{2} JHEP 05 (2020) 085, 2020"));
+    leg_v32->Draw();
+
+    TH1D* pub_v32 = new TH1D("pub_v32","pub_v32",7,x_v2);
+    for(int i=0;i<7;i++){
+        pub_v32->SetBinContent(i+1,g_v32->GetPointY(i));
+        pub_v32->SetBinError(i+1,g_v32->GetErrorY(i));
+    }
+
+    c_v32->cd(2);
+    gPad->SetTopMargin(0.05);
+    TH1D* frame_ratio_v32 = new TH1D("frame_ratio_v32", "frame_ratio_v32", 60,0,60);
+    frame_ratio_v32->SetMaximum(1.05);
+    frame_ratio_v32->SetMinimum(0.7);
+    frame_ratio_v32->SetYTitle("Ratio to Run 2");
+    frame_ratio_v32->Draw("AXIS");
+    One->Draw("sames");
+    index=0;
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_v32 = GetRatio(7,(TH1D*)resultsFiles_vn[i]->Get("Corr_corr_32_hist"),pub_v32);
+        SetMarkerAndLine(ratio_v32,GetColor(index),kFullCircle,kSolid,1.0);
+        ratio_v32->Draw("ESAMES");
+        index++;
+    }
+
+    // =================
+    // v4{2}
+    // =================
+    index = 0;
+    TCanvas* c_v42 = new TCanvas("c_v42", "c_v42", 800, 1200);
+    c_v42->Divide(1,2);
+    c_v42->cd(1);
+    gPad->SetBottomMargin(0.05);
+    TLegend* leg_v42 = new TLegend(0.2,0.7,0.8,0.9);
+    TH1D* frame_v42 = new TH1D("frame_v42", "frame_v42", 60,0,60);
+    frame_v42->SetMaximum(0.15);
+    frame_v42->SetMinimum(0.);
+    frame_v42->Draw("AXIS");
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* h_v42 = (TH1D*)resultsFiles_vn[i]->Get("Corr_corr_42_hist");
+        SetMarkerAndLine(h_v42,GetColor(index),kFullCircle,kSolid,1.0);
+        h_v42->Draw("ESAMES");
+        leg_v42->AddEntry(h_v42,Form("v_{4}{2} (%s)",FileNameSuffixs[i].c_str()),"lp");
+        index++;
+    }
+    // TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+    TGraphAsymmErrors* g_v42 = (TGraphAsymmErrors*)publish->Get("v4/Graph1D_y1");
+    SetMarkerAndLine(g_v42,kBlack,kOpenSquare,kSolid,1.0);
+    g_v42->Draw("PE");
+    leg_v42->AddEntry(g_v42,Form("v_{4}{2} JHEP 05 (2020) 085, 2020"));
+    leg_v42->Draw();
+
+    TH1D* pub_v42 = new TH1D("pub_v42","pub_v42",7,x_v2);
+    for(int i=0;i<7;i++){
+        pub_v42->SetBinContent(i+1,g_v42->GetPointY(i));
+        pub_v42->SetBinError(i+1,g_v42->GetErrorY(i));
+    }
+
+    c_v42->cd(2);
+    gPad->SetTopMargin(0.05);
+    TH1D* frame_ratio_v42 = new TH1D("frame_ratio_v42", "frame_ratio_v42", 60,0,60);
+    frame_ratio_v42->SetMaximum(1.05);
+    frame_ratio_v42->SetMinimum(0.7);
+    frame_ratio_v42->SetYTitle("Ratio to Run 2");
+    frame_ratio_v42->Draw("AXIS");
+    One->Draw("sames");
+    index=0;
+    for(int i=0;i<FileNameSuffixs.size();i++){
+        TH1D* ratio_v42 = GetRatio(7,(TH1D*)resultsFiles_vn[i]->Get("Corr_corr_42_hist"),pub_v42);
+        SetMarkerAndLine(ratio_v42,GetColor(index),kFullCircle,kSolid,1.0);
+        ratio_v42->Draw("ESAMES");
         index++;
     }
 
