@@ -723,10 +723,9 @@ struct FlowTask {
       bool WithinEtaGap08 = (track.eta() >= -0.4) && (track.eta() <= 0.4);
       if (cfgOutputNUAWeights) {
         if (cfgOutputNUAWeightsRefPt) {
-          if (WithinPtRef) 
+          if (WithinPtRef)
             fWeights->Fill(track.phi(), track.eta(), vtxz, track.pt(), cent, 0);
-        }
-        else
+        } else
           fWeights->Fill(track.phi(), track.eta(), vtxz, track.pt(), cent, 0);
       }
       if (!setCurrentParticleWeights(weff, wacc, track.phi(), track.eta(), track.pt(), vtxz))
