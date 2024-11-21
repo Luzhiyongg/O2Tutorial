@@ -49,6 +49,32 @@ double Error_Chi(double N, double eN, double D1, double eD1){
     return err;
 }
 
+double Error_SCnm(double N, double eN, double N1, double eN1, double N2, double eN2){
+    //SC = (N-N1*N2)
+
+    double err = sqrt(
+        pow(eN,2) + pow(eN1*N2,2) + pow(eN2*N1,2)
+    );
+    if(err<=0||err>5)printf("Warning: err for SC is %f\n",err);
+    return err;
+}
+
+double Error_SCklm(double N_klm, double eN_klm, double N_kl, double eN_kl, 
+double N_km, double eN_km, double N_lm, double eN_lm,
+double N_k, double eN_k, double N_l, double eN_l, double N_m, double eN_m
+){
+    //SC(k,l,m) = N_klm - N_kl*N_m - N_km*N_l - N_lm*N_k + 2*N_k*N_l*N_m
+
+    double err = sqrt(
+        pow(eN_klm,2)+pow(eN_kl*N_m,2)+pow(eN_km*N_l,2)+pow(eN_lm*N_k,2)
+        +pow((2*N_l*N_m-N_lm)*eN_k,2)
+        +pow((2*N_k*N_m-N_km)*eN_l,2)
+        +pow((2*N_k*N_l-N_kl)*eN_m,2)
+    );
+    if(err<=0||err>5)printf("Warning: err for SC is %f\n",err);
+    return err;
+}
+
 double Error_NSC(double N, double eN, double N1, double eN1, double N2, double eN2, double D1, double eD1, double D2, double eD2){
     //NSC = (N-N1*N2)/(D1*D2)
 
