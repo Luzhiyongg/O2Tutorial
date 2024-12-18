@@ -4,41 +4,6 @@
 #include "./BasicSetting.h"
 #include "./GraphSetting.h"
 
-TH1D* mergeCentralityToTargetBin(TH1D* h, const std::vector<float>& targetCentralityBins){
-    // merge from fine binning to wide binning
-    // target binning is defined in BasicSetting.h
-    // target binning shoule not cross the origin binning, because this function detects the edge of bins.
-    TH1D* h_target = new TH1D(Form("%s",h->GetName()),Form("%s",h->GetName()),targetCentralityBins.size()-1,targetCentralityBins.data());
-    for(int i=1;i<targetCentralityBins.size();i++){    
-        double content=0;
-        double weightSum=0;
-        int count=0;
-        for(int j=1;j<=h->GetNbinsX();j++){
-            double lowEdge = h->GetBinLowEdge(j);
-            double highEdge = h->GetBinLowEdge(j+1);
-            if(lowEdge>=targetCentralityBins[i-1] && highEdge<=targetCentralityBins[i]){
-                double weight = 1. / (h->GetBinError(j) * h->GetBinError(j));
-                content += h->GetBinContent(j) * weight;
-                weightSum += weight;
-                count++;
-            }
-        }
-        if(count > 0 && !std::isinf(content)){
-            content = content/weightSum;
-            double error = sqrt(1./weightSum)/sqrt(count);
-            h_target->SetBinContent(i,content);
-            h_target->SetBinError(i,error);
-            Printf("Bin %f, content=%f, error=%f",(targetCentralityBins[i-1]+targetCentralityBins[i])/2,content,error);
-        }
-        else{
-            h_target->SetBinContent(i,-1);
-            h_target->SetBinError(i,10.);
-            Printf("Bin %f, Set to content=-1, error=10",(targetCentralityBins[i-1]+targetCentralityBins[i])/2);
-        }
-    }
-    return h_target;
-}
-
 void CalculateBootstrapError(std::vector<std::vector<double>>& ValueArray, std::vector<std::vector<double>>& ValueErrorArray, std::vector<double>& ErrorArray){
     int Nsample = ValueArray.size();
     int Nbin = ValueArray[0].size();
@@ -52,20 +17,17 @@ void CalculateBootstrapError(std::vector<std::vector<double>>& ValueArray, std::
         SumWeight[i]=0;
         Mean[i]=0;
         for(int j=0;j<Nsample;j++){
-            if (ValueArray[j][i]==-1 && ValueErrorArray[j][i]==10) continue;
             Count[i]++;
             Mean[i] += ValueArray[j][i] * (1./(ValueErrorArray[j][i]*ValueErrorArray[j][i]));
             // Printf("ValueArray[%d][%d]=%f, ValueErrorArray[%d][%d]=%f",j,i,ValueArray[j][i],j,i,ValueErrorArray[j][i]);
             SumWeight[i] += (1./(ValueErrorArray[j][i]*ValueErrorArray[j][i]));
         }
-        if(Count[i]>0)
-            Mean[i] = Mean[i]/SumWeight[i];
+        Mean[i] = Mean[i]/SumWeight[i];
     }
     for (Int_t i = 0; i < Nsample; i++)
     {
         for (Int_t j = 0; j < Nbin; j++)
         {
-            if (ValueArray[j][i]==-1 && ValueErrorArray[j][i]==10) continue;
             ErrorArray[j] += (ValueArray[i][j] - Mean[j]) * (ValueArray[i][j] - Mean[j]);
         }
     }
@@ -109,7 +71,6 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     TH1D* hVn[3] = {nullptr};
     for(int i=0;i<3;i++){
         hVn[i] = (TH1D*)fc->GetVN2VsMulti(i+2);
-        hVn[i] = mergeCentralityToTargetBin(hVn[i],targetCentralityBins);
         if(!hVn[i]){
             Printf("Can't get v%d",i+2);
             return;
@@ -129,7 +90,6 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
         fc->OverrideMainWithSub(sample,false);
         for(int i=0;i<Nobs;i++){
             TH1D* temp = (TH1D*)fc->GetVN2VsMulti(i+2);
-            temp = mergeCentralityToTargetBin(temp,targetCentralityBins);
             if(!temp){
                 Printf("Can't get v%d",i+2);
                 return;
@@ -212,7 +172,6 @@ void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_p
     fc->SetPropagateErrors(kTRUE);
     TH1D* hVn[3] = {nullptr};
     hVn[0] = GetVnm(fc, n, m_particle);
-    hVn[0] = mergeCentralityToTargetBin(hVn[0],targetCentralityBins);
     if (hVn[0] == nullptr){
         Printf("Can't get v_{%d}{%d}",n, m_particle);
         return;
@@ -231,7 +190,6 @@ void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_p
         fc->OverrideMainWithSub(sample,false);
         for(int i=0;i<Nobs;i++){
             TH1D* temp = GetVnm(fc, n, m_particle);
-            temp = mergeCentralityToTargetBin(temp,targetCentralityBins);
             if(!temp){
                 Printf("Can't get v_{%d}{%d}", n, m_particle);
                 return;
@@ -376,7 +334,6 @@ void GetNonlinearHistogram(FlowContainer* fc, TH1D*& hCorr422, TH1D*& hCorr24, T
     if(!temp_422A){Printf("Can't get temp_422A");return;}
     TH1D* hCorr422A = (TH1D*)temp_422A->Clone();
     delete temp_422A;
-    hCorr422A = mergeCentralityToTargetBin(hCorr422A,targetCentralityBins);
     hCorr422A->SetName("hCorr422A");
 
     fc->SetIDName(Form("%sB",GapName.c_str()));
@@ -384,7 +341,6 @@ void GetNonlinearHistogram(FlowContainer* fc, TH1D*& hCorr422, TH1D*& hCorr24, T
     if(!temp_422B){Printf("Can't get temp_422B");return;}
     TH1D* hCorr422B = (TH1D*)temp_422B->Clone();
     delete temp_422B;
-    hCorr422B = mergeCentralityToTargetBin(hCorr422B,targetCentralityBins);
     hCorr422B->SetName("hCorr422B");
 
     if(!hCorr422){
@@ -402,14 +358,12 @@ void GetNonlinearHistogram(FlowContainer* fc, TH1D*& hCorr422, TH1D*& hCorr24, T
     if(!temp_24){Printf("Can't get temp_24");return;}
     hCorr24 = (TH1D*)temp_24->Clone();
     delete temp_24;
-    hCorr24 = mergeCentralityToTargetBin(hCorr24,targetCentralityBins);
 
     fc->SetIDName(Form("%s",GapName.c_str()));
     TH1D* temp_42= (TH1D*)fc->GetHistCorrXXVsMulti("42");
     if(!temp_42){Printf("Can't get temp_42");return;}
     hCorr42 = (TH1D*)temp_42->Clone();
     delete temp_42;
-    hCorr42 = mergeCentralityToTargetBin(hCorr42,targetCentralityBins);
 }
 
 void SetNonlinearValue(TH1D*& target, TH1D*& hCorr422, TH1D*& hCorr24, TH1D*& hCorr42, nonlinearObservableEnum observable=v422){
@@ -426,8 +380,8 @@ void SetNonlinearValue(TH1D*& target, TH1D*& hCorr422, TH1D*& hCorr24, TH1D*& hC
                     target->SetBinError(i,Error_vNL(hCorr422->GetBinContent(i), hCorr422->GetBinError(i), hCorr24->GetBinContent(i), hCorr24->GetBinError(i)));
                 }
                 else{
-                    target->SetBinContent(i,-1.);
-                    target->SetBinError(i,10.);
+                    target->SetBinContent(i,0.);
+                    target->SetBinError(i,0.);
                     Printf("Warning: in %f %%, Ch10Gap24 is negative", hCorr422->GetBinCenter(i));
                 }
             }
@@ -437,8 +391,8 @@ void SetNonlinearValue(TH1D*& target, TH1D*& hCorr422, TH1D*& hCorr24, TH1D*& hC
                     target->SetBinError(i,Error_Rho(hCorr422->GetBinContent(i), hCorr422->GetBinError(i), hCorr24->GetBinContent(i), hCorr24->GetBinError(i),hCorr42->GetBinContent(i), hCorr42->GetBinError(i)));
                 }
                 else{
-                    target->SetBinContent(i,-1.);
-                    target->SetBinError(i,10.);
+                    target->SetBinContent(i,0.);
+                    target->SetBinError(i,0.);
                     Printf("Warning: in %f %%, Ch10Gap24 or Ch10Gap42 is negative", hCorr422->GetBinCenter(i));
                 }
             }
@@ -690,7 +644,6 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     // fc->SetPropagateErrors(kTRUE);
     TH1D* NSC32 = nullptr;
     CalculateNSC32(fc, NSC32);
-    NSC32 = mergeCentralityToTargetBin(NSC32, targetCentralityBins);
     NSC32->SetName("NSC32");
     
 
@@ -708,7 +661,6 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
         for(int i=0;i<Nobs;i++){
             TH1D* temp = nullptr;
             CalculateNSC32(fc, temp);
-            temp = mergeCentralityToTargetBin(temp, targetCentralityBins);
             if(!temp){
                 Printf("Can't get NSC32");
                 return;
@@ -835,7 +787,6 @@ void Output_SCklm(string FileNameSuffix, FlowContainer* fc, Int_t k, Int_t l, In
     fc->SetPropagateErrors(kTRUE);
     TH1D* SCklm = GetSCklm(fc, k, l, m);
     if (!SCklm) {Printf("Can't get SCklm"); return;}
-    SCklm = mergeCentralityToTargetBin(SCklm, targetCentralityBins);
     if (m < 0) SCklm->SetName(Form("SC%d%d",k,l));
     else SCklm->SetName(Form("SC%d%d%d",k,l,m));
     
@@ -853,7 +804,6 @@ void Output_SCklm(string FileNameSuffix, FlowContainer* fc, Int_t k, Int_t l, In
         fc->OverrideMainWithSub(sample,false);
         for(int i=0;i<Nobs;i++){
             TH1D* temp = GetSCklm(fc, k, l, m);
-            temp = mergeCentralityToTargetBin(temp, targetCentralityBins);
             temp->SetName(Form("SC%d%d%d_%d",k,l,m,sample));
             if(!temp){
                 Printf("Can't get SC%d%d%d_%d",k,l,m,sample);
