@@ -170,7 +170,7 @@ void ProcessFlowContainerDrawDiffRoot(){
         index+=3;
     }
     if(ComparewithPublish){
-        TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
         TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get("v2/Graph1D_y1");
         SetMarkerAndLine(g_v2,kBlack,kOpenSquare,kSolid,1.0);
         TGraphAsymmErrors* g_v3 = (TGraphAsymmErrors*)publish->Get("v3/Graph1D_y1");
@@ -205,7 +205,7 @@ void ProcessFlowContainerDrawDiffRoot(){
     }
 
      if(ComparewithPublish){
-        TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
         TGraphAsymmErrors* g = nullptr;
         // if(observable==v422)
         g=(TGraphAsymmErrors*)publish->Get("v422/Graph1D_y1");
@@ -237,7 +237,7 @@ void ProcessFlowContainerDrawDiffRoot(){
         index+=1;
     }
     if(ComparewithPublish){
-        TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
         TGraphAsymmErrors* g = nullptr;
         g=(TGraphAsymmErrors*)publish->Get("chi422/Graph1D_y1");
         if(!g)return;
@@ -265,7 +265,7 @@ void ProcessFlowContainerDrawDiffRoot(){
         index+=1;
     }
     if(ComparewithPublish){
-        TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
         TGraphAsymmErrors* g = nullptr;
         g=(TGraphAsymmErrors*)publish->Get("rho422/Graph1D_y1");
         if(!g)return;
@@ -293,7 +293,7 @@ void ProcessFlowContainerDrawDiffRoot(){
         index+=1;
     }
     if(ComparewithPublish){
-        TFile* publish = new TFile("./HEPData-ins1848215-v1-root.root","READ");
+        TFile* publish = new TFile("./PublicData/HEPData-ins1848215-v1-root.root","READ");
         TGraphAsymmErrors* g = nullptr;
         g=(TGraphAsymmErrors*)publish->Get("Table 1/Graph1D_y1");
         if(!g)return;
@@ -321,7 +321,7 @@ void ProcessFlowContainerDrawDiffRoot(){
         index+=1;
     }
     if(ComparewithPublish){
-        TFile* publish = new TFile("./HEPData-ins1419244-v2-root.root","READ");
+        TFile* publish = new TFile("./PublicData/HEPData-ins1419244-v2-root.root","READ");
         TGraphAsymmErrors* g = nullptr;
         g=(TGraphAsymmErrors*)publish->Get("Table 7/Graph1D_y1");
         if(!g)return;
@@ -349,7 +349,7 @@ void ProcessFlowContainerDrawDiffRoot(){
         index+=1;
     }
     if(ComparewithPublish){
-        TFile* publish = new TFile("./HEPData-ins1419244-v2-root.root","READ");
+        TFile* publish = new TFile("./PublicData/HEPData-ins1419244-v2-root.root","READ");
         TGraphAsymmErrors* g = nullptr;
         g=(TGraphAsymmErrors*)publish->Get("Table 8/Graph1D_y1");
         if(!g)return;

@@ -381,9 +381,9 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // No histogram statistics box
     gStyle->SetOptStat(0); 
 
-    TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
-    TFile* publish_1671792 = new TFile("./HEPData-ins1671792-v1-root.root","READ");
-    TFile* publish_Run2pass2 = new TFile("./vn_Run2Pass2.root","READ");
+    TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
+    TFile* publish_1671792 = new TFile("./PublicData/HEPData-ins1671792-v1-root.root","READ");
+    TFile* publish_Run2pass2 = new TFile("./PublicData/vn_Run2Pass2.root","READ");
     int index = 0;
     TF1* One = new TF1("One","1",0,60);
     // =================
@@ -461,7 +461,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             leg_v32->AddEntry(h_v32,Form("v_{3}{2} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
-        // TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        // TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
         TGraphAsymmErrors* g_v32 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v3{2}_Gap10_TPCPileUp");
         SetMarkerAndLine(g_v32,kBlack,kOpenSquare,kSolid,1.0);
         g_v32->Draw("PE");
@@ -510,7 +510,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             leg_v42->AddEntry(h_v42,Form("v_{4}{2} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
-        // TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        // TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
         // TGraphAsymmErrors* g_v42 = (TGraphAsymmErrors*)publish->Get("v4/Graph1D_y1");
         TGraphAsymmErrors* g_v42 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v4{2}_Gap10_TPCPileUp");
         SetMarkerAndLine(g_v42,kBlack,kOpenSquare,kSolid,1.0);
@@ -541,7 +541,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         }
     }
 
-    TFile* publish_ins1666817 = new TFile("./HEPData-ins1666817-v1-root.root","READ");
+    TFile* publish_ins1666817 = new TFile("./PublicData/HEPData-ins1666817-v1-root.root","READ");
     // =================
     // v2{4},v2{6},v2{8}
     // =================
@@ -638,7 +638,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             leg2->AddEntry(h_v422,Form("v_{4,22} (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
-        // TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+        // TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
         TGraphAsymmErrors* g_v422 = (TGraphAsymmErrors*)publish->Get("v422/Graph1D_y1");
         SetMarkerAndLine(g_v422,kBlack,kOpenSquare,kSolid,1.0);
         g_v422->Draw("PE");
@@ -774,7 +774,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     }
 
 
-    TFile* publish_NSC32 = new TFile("./HEPData-ins1848215-v1-root.root","READ");
+    TFile* publish_NSC32 = new TFile("./PublicData/HEPData-ins1848215-v1-root.root","READ");
     // =================
     // NSC(3,2)
     // =================
@@ -827,7 +827,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         }
     }
 
-    TFile* publish_ins1452590 = new TFile("./HEPData-ins1452590-v1-root.root","READ");
+    TFile* publish_ins1452590 = new TFile("./PublicData/HEPData-ins1452590-v1-root.root","READ");
     // =================
     // SC(2,3)
     // =================
@@ -903,7 +903,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         }
         leg_sc24->Draw();
 
-        // TFile* publish_ins1452590 = new TFile("./HEPData-ins1452590-v1-root.root","READ");
+        // TFile* publish_ins1452590 = new TFile("./PublicData/HEPData-ins1452590-v1-root.root","READ");
         TGraphAsymmErrors* g_sc24 = (TGraphAsymmErrors*)publish_ins1452590->Get("Table 1/Graph1D_y2");
         SetMarkerAndLine(g_sc24,kBlack,kOpenSquare,kSolid,1.0);
         g_sc24->Draw("PE");
@@ -934,7 +934,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     }
 
 
-    TFile* publish_ins1839720 = new TFile("./HEPData-ins1839720-v1-root.root","READ");
+    TFile* publish_ins1839720 = new TFile("./PublicData/HEPData-ins1839720-v1-root.root","READ");
     // =================
     // SC(2,3,4)
     // =================
@@ -1166,8 +1166,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             leg6->AddEntry(h_pTDiffv2Cent0To5,Form("v_{2}{2,|#Delta#eta|>1.0}(p_{T}) Cent:0~5%% (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
-        // TFile* publish_ins1666817 = new TFile("./HEPData-ins1419244-v2-root.root","READ");
-        // TFile* publish_ins1666817 = new TFile("./HEPData-ins1666817-v1-root.root","READ");
+        // TFile* publish_ins1666817 = new TFile("./PublicData/HEPData-ins1419244-v2-root.root","READ");
+        // TFile* publish_ins1666817 = new TFile("./PublicData/HEPData-ins1666817-v1-root.root","READ");
 
         TGraphAsymmErrors* g_pt05 = nullptr;
         // g_pt05=(TGraphAsymmErrors*)publish_ins1666817->Get("Table 7/Graph1D_y1");
