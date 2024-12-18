@@ -206,6 +206,9 @@ TH1D* GetVnm(FlowContainer* fc, Int_t n, Int_t m_particle = 4){
         return (TH1D*)fc->GetVN6VsMulti(n);
     else if (m_particle == 8)
         return (TH1D*)fc->GetVN8VsMulti(n);
+    else if (m_particle == 10){
+        return nullptr;
+    }
     
     return nullptr;
 }
@@ -293,7 +296,7 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     Hist2->SetXTitle("p_{T}");
     Hist2->SetYTitle("v_{n}");
     Hist2->Draw();
-    fc->SetIDName("ChGap");
+    fc->SetIDName("Ch10Gap");
     fc->SetPropagateErrors(kTRUE);
     TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(2,CentMin,CentMax);
     hV22pt->SetName("pTDiffv2");
@@ -337,6 +340,43 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     if(OutputRoot){
         TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv2Cent%dTo%d_%s%s.root",(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         hV22pt->Write();
+        fout->Close();
+    }
+}
+
+void Output_ptDiffvn4(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=0., Double_t CentMax=5., string Subwagon=""){
+    TCanvas* canvas2 = nullptr;
+    bool anotherCanvas = false;
+    // if canvas_ptDiffvn exist, new a canvas with different name
+    if(gROOT->FindObject("canvas_ptDiffvn4"))anotherCanvas = true;
+    if(!anotherCanvas)canvas2 = new TCanvas("canvas_ptDiffvn4","canvas_ptDiffvn4",900,900);
+    else canvas2 = new TCanvas("canvas_ptDiffvn4_2","canvas_ptDiffvn4_2",900,900);
+    TH1D* Hist2  = new TH1D(Form("v_{n}{4}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}{4}(p_{T}) in %s",FileNameSuffix.c_str()),20,0.2,10.0);
+    Hist2->SetMinimum(0.);
+    Hist2->SetMaximum(0.3);
+    Hist2->GetXaxis()->SetRangeUser(0.2,5.0);
+    Hist2->SetXTitle("p_{T}");
+    Hist2->SetYTitle("v_{n}{4}");
+    Hist2->Draw();
+    fc->SetIDName("ChFull");
+    fc->SetPropagateErrors(kTRUE);
+    TH1D* hV24pt = (TH1D*)fc->GetVN4VsPt(2,CentMin,CentMax);
+    hV24pt->SetName("pTDiffv24");
+    if(!hV24pt){
+        Printf("Can't get hV24");
+        return;
+    }
+
+    SetMarkerAndLine(hV24pt,kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
+    hV24pt->Draw("ESames");
+    TLegend* legend2 = new TLegend(0.2,0.8,0.5,0.9);
+    legend2->AddEntry(hV24pt,Form("v_{2}{4}(p_{T}) |#Delta#eta|>1 cent:%d~%d%%",(int)CentMin,(int)CentMax));
+    legend2->Draw();
+
+    if(OutputRoot){
+        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv24Cent%dTo%d_%s%s.root",(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        hV24pt->Write();
         fout->Close();
     }
 }
@@ -965,11 +1005,11 @@ void CompareNSC32Corr(string FileNameSuffix, FlowContainer* fc){
 
 }
 
-void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_284143"){
+void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_308058"){
     // Produce flow results in root file for each subwagon
 
     TFile* f = new TFile(Form("./AnalysisResults/AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
-    vector<string> SubwagonNames = {""};
+    vector<string> SubwagonNames = {"","_pT5GeV","_ITSMatch"};
     for(uint i=0; i < SubwagonNames.size(); i++){
         FlowContainer* fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         if(!fc){
