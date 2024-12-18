@@ -9,7 +9,7 @@
 // granted to it by virtue of its status as an Intergovernmental Organization
 // or submit itself to any jurisdiction.
 
-/// \file	FlowTask.cxx
+/// \file   flowTask.cxx
 /// \author Zhiyong Lu (zhiyong.lu@cern.ch)
 /// \since  Dec/10/2023
 /// \brief  jira: PWGCF-254, task to measure flow observables with cumulant method
@@ -132,7 +132,6 @@ struct FlowTask {
   GFW* fGFW = new GFW();
   std::vector<GFW::CorrConfig> corrconfigs;
   TAxis* fPtAxis;
-  int nPtBins;
   TRandom3* fRndm = new TRandom3(0);
   std::vector<std::vector<std::shared_ptr<TProfile>>> bootstrapArray;
   enum ExtraProfile {
@@ -240,7 +239,7 @@ struct FlowTask {
     }
 
     o2::framework::AxisSpec axis = axisPt;
-    nPtBins = axis.binEdges.size() - 1;
+    int nPtBins = axis.binEdges.size() - 1;
     double* ptBins = &(axis.binEdges)[0];
     fPtAxis = new TAxis(nPtBins, ptBins);
 
@@ -257,29 +256,29 @@ struct FlowTask {
     oba->Add(new TNamed("ChFull42", "ChFull42"));
     oba->Add(new TNamed("ChFull24", "ChFull24"));
     oba->Add(new TNamed("ChFull26", "ChFull26"));
-    for (Int_t i = 0; i < nPtBins; i++)
+    for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("ChFull22_pt_%i", i + 1), "ChFull22_pTDiff"));
-    for (Int_t i = 0; i < nPtBins; i++)
+    for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("ChFull24_pt_%i", i + 1), "ChFull24_pTDiff"));
     oba->Add(new TNamed("Ch04Gap22", "Ch04Gap22"));
     oba->Add(new TNamed("Ch06Gap22", "Ch06Gap22"));
     oba->Add(new TNamed("Ch08Gap22", "Ch08Gap22"));
     oba->Add(new TNamed("Ch10Gap22", "Ch10Gap22"));
-    for (Int_t i = 0; i < nPtBins; i++)
+    for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("Ch10Gap22_pt_%i", i + 1), "Ch10Gap22_pTDiff"));
     oba->Add(new TNamed("Ch12Gap22", "Ch12Gap22"));
     oba->Add(new TNamed("Ch04Gap32", "Ch04Gap32"));
     oba->Add(new TNamed("Ch06Gap32", "Ch06Gap32"));
     oba->Add(new TNamed("Ch08Gap32", "Ch08Gap32"));
     oba->Add(new TNamed("Ch10Gap32", "Ch10Gap32"));
-    for (Int_t i = 0; i < nPtBins; i++)
+    for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("Ch10Gap32_pt_%i", i + 1), "Ch10Gap32_pTDiff"));
     oba->Add(new TNamed("Ch12Gap32", "Ch12Gap32"));
     oba->Add(new TNamed("Ch04Gap42", "Ch04Gap42"));
     oba->Add(new TNamed("Ch06Gap42", "Ch06Gap42"));
     oba->Add(new TNamed("Ch08Gap42", "Ch08Gap42"));
     oba->Add(new TNamed("Ch10Gap42", "Ch10Gap42"));
-    for (Int_t i = 0; i < nPtBins; i++)
+    for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("Ch10Gap42_pt_%i", i + 1), "Ch10Gap42_pTDiff"));
     oba->Add(new TNamed("Ch12Gap42", "Ch12Gap42"));
     oba->Add(new TNamed("ChFull422", "ChFull422"));
@@ -328,9 +327,9 @@ struct FlowTask {
     fGFW->AddRegion("refN", -0.8, -0.4, 1, 1);
     fGFW->AddRegion("refP", 0.4, 0.8, 1, 1);
     fGFW->AddRegion("refM", -0.4, 0.4, 1, 1);
-    fGFW->AddRegion("poiN", -0.8, -0.4, 1 + nPtBins, 2);
-    fGFW->AddRegion("poiN10", -0.8, -0.5, 1 + nPtBins, 2);
-    fGFW->AddRegion("poifull", -0.8, 0.8, 1 + nPtBins, 2);
+    fGFW->AddRegion("poiN", -0.8, -0.4, 1 + fPtAxis->GetNbins(), 2);
+    fGFW->AddRegion("poiN10", -0.8, -0.5, 1 + fPtAxis->GetNbins(), 2);
+    fGFW->AddRegion("poifull", -0.8, 0.8, 1 + fPtAxis->GetNbins(), 2);
     fGFW->AddRegion("olN", -0.8, -0.4, 1, 4);
     fGFW->AddRegion("olN10", -0.8, -0.5, 1, 4);
     fGFW->AddRegion("olfull", -0.8, 0.8, 1, 4);
@@ -485,7 +484,7 @@ struct FlowTask {
         fFC->fillProfile(corrconf.Head.c_str(), cent, val, dnx, rndm);
       return;
     }
-    for (Int_t i = 1; i <= nPtBins; i++) {
+    for (auto i = 1; i <= fPtAxis->GetNbins(); i++) {
       dnx = fGFW->Calculate(corrconf, i - 1, kTRUE).real();
       if (dnx == 0)
         continue;
@@ -616,8 +615,9 @@ struct FlowTask {
     if (phimodn < 0)
       LOGF(warning, "phi < 0: %g", phimodn);
 
-    phimodn += TMath::Pi() / 18.0; // to center gap in the middle
-    phimodn = fmod(phimodn, TMath::Pi() / 9.0);
+    float middle = o2::constants::math::TwoPI / 18.0;
+    phimodn += middle; // to center gap in the middle
+    phimodn = fmod(phimodn, o2::constants::math::TwoPI / 9.0);
     registry.fill(HIST("pt_phi_bef"), track.pt(), phimodn);
     if (cfgRejectionTPCsectorOverlap) {
       if (phimodn < fPhiCutHigh->Eval(track.pt()) && phimodn > fPhiCutLow->Eval(track.pt()))
