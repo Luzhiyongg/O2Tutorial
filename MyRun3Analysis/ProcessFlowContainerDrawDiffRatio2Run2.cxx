@@ -140,19 +140,19 @@ enum kObservable{
 
 std::map<kObservable,bool> IfCheckObservable = {
     {kVn,true},
-    {kV24,true},
-    {kV26,true},
-    {kV28,true},
-    {kV422,true},
-    {kChi422,true},
-    {kRho422,true},
-    {kNSC,true},
-    {kSC23,true},
-    {kSC24,true},
-    {kSC234,true},
-    {kSC235,true},
-    {kSC246,true},
-    {kSC345,true},
+    {kV24,false},
+    {kV26,false},
+    {kV28,false},
+    {kV422,false},
+    {kChi422,false},
+    {kRho422,false},
+    {kNSC,false},
+    {kSC23,false},
+    {kSC24,false},
+    {kSC234,false},
+    {kSC235,false},
+    {kSC246,false},
+    {kSC345,false},
     {kpTDiffv2Cent0To5,true},
     {kpTDiffv2Cent5To10,true},
     {kpTDiffv2Cent10To20,true},
@@ -162,6 +162,7 @@ std::map<kObservable,bool> IfCheckObservable = {
         
 void ProcessFlowContainerDrawDiffRatio2Run2(){
     vector<string> FileNameSuffixs;
+    vector<string> legendNames;
     vector<TFile*> resultsFiles_vn;
     vector<TFile*> resultsFiles_v24;
     vector<TFile*> resultsFiles_v26;
@@ -181,7 +182,21 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     vector<TFile*> resultsFiles_pTDiffv2Cent10To20;
     vector<TFile*> resultsFiles_pTDiffv2Cent20To30;
     vector<TFile*> resultsFiles_pTDiffv2Cent30To40;
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_305042");
     FileNameSuffixs.push_back("LHC23zzh_pass4_285891");
+    legendNames.push_back("previous results: with TPC rejection");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058");
+    legendNames.push_back("this update: no TPC rejection");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058_pT5GeV");
+    // legendNames.push_back("this update: pT 0.2-5 GeV/c");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058_ITSMatch");
+    // legendNames.push_back("this update: global + Run3ITSall7Layers");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306992");
+    // legendNames.push_back("this update: default (global)");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306992_ITSMatch");
+    // legendNames.push_back("this update: global + Run3ITSall7Layers");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306755");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306755_NUECheck");
     // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260_midOcc");
     // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260_highOcc");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_279536");
@@ -367,6 +382,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     gStyle->SetOptStat(0); 
 
     TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
+    TFile* publish_1671792 = new TFile("./HEPData-ins1671792-v1-root.root","READ");
+    TFile* publish_Run2pass2 = new TFile("./vn_Run2Pass2.root","READ");
     int index = 0;
     TF1* One = new TF1("One","1",0,60);
     // =================
@@ -387,15 +404,16 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_v22 = (TH1D*)resultsFiles_vn[i]->Get("Corr_corr_22_hist");
             SetMarkerAndLine(h_v22,GetColor(index),kFullCircle,kSolid,1.0);
             h_v22->Draw("ESames");
-            leg->AddEntry(h_v22,Form("v_{2}{2} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg->AddEntry(h_v22,Form("v_{2}{2} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
-        TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get("v2/Graph1D_y1");
+
+        TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v2{2}_Gap10_TPCPileUp");
         // TFile* publish_v2 = new TFile("./v2_Gap10_TPCPileUp.root","READ");
         // TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish_v2->Get("v2{2}_Gap10_TPCPileUp");
         SetMarkerAndLine(g_v2,kBlack,kOpenSquare,kSolid,1.0);
         g_v2->Draw("PE");
-        leg->AddEntry(g_v2,Form("v_{2}{2} JHEP 05 (2020) 085, 2020"));
+        leg->AddEntry(g_v2,Form("v_{2}{2} arXiv:2409.04343"));
         leg->Draw();
         
         TH1D* pub_v22 = new TH1D("pub_v22","pub_v22",7,x_v2);
@@ -403,6 +421,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             pub_v22->SetBinContent(i+1,g_v2->GetPointY(i));
             pub_v22->SetBinError(i+1,g_v2->GetErrorY(i));
         }
+
 
         c1->cd(2);
         gPad->SetTopMargin(0.05);
@@ -439,14 +458,14 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_v32 = (TH1D*)resultsFiles_vn[i]->Get("Corr_corr_32_hist");
             SetMarkerAndLine(h_v32,GetColor(index),kFullCircle,kSolid,1.0);
             h_v32->Draw("ESAMES");
-            leg_v32->AddEntry(h_v32,Form("v_{3}{2} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_v32->AddEntry(h_v32,Form("v_{3}{2} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
         // TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
-        TGraphAsymmErrors* g_v32 = (TGraphAsymmErrors*)publish->Get("v3/Graph1D_y1");
+        TGraphAsymmErrors* g_v32 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v3{2}_Gap10_TPCPileUp");
         SetMarkerAndLine(g_v32,kBlack,kOpenSquare,kSolid,1.0);
         g_v32->Draw("PE");
-        leg_v32->AddEntry(g_v32,Form("v_{3}{2} JHEP 05 (2020) 085, 2020"));
+        leg_v32->AddEntry(g_v32,Form("v_{3}{2} arXiv:2409.04343"));
         leg_v32->Draw();
 
         TH1D* pub_v32 = new TH1D("pub_v32","pub_v32",7,x_v2);
@@ -488,14 +507,15 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_v42 = (TH1D*)resultsFiles_vn[i]->Get("Corr_corr_42_hist");
             SetMarkerAndLine(h_v42,GetColor(index),kFullCircle,kSolid,1.0);
             h_v42->Draw("ESAMES");
-            leg_v42->AddEntry(h_v42,Form("v_{4}{2} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_v42->AddEntry(h_v42,Form("v_{4}{2} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
         // TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
-        TGraphAsymmErrors* g_v42 = (TGraphAsymmErrors*)publish->Get("v4/Graph1D_y1");
+        // TGraphAsymmErrors* g_v42 = (TGraphAsymmErrors*)publish->Get("v4/Graph1D_y1");
+        TGraphAsymmErrors* g_v42 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v4{2}_Gap10_TPCPileUp");
         SetMarkerAndLine(g_v42,kBlack,kOpenSquare,kSolid,1.0);
         g_v42->Draw("PE");
-        leg_v42->AddEntry(g_v42,Form("v_{4}{2} JHEP 05 (2020) 085, 2020"));
+        leg_v42->AddEntry(g_v42,Form("v_{4}{2} arXiv:2409.04343"));
         leg_v42->Draw();
 
         TH1D* pub_v42 = new TH1D("pub_v42","pub_v42",7,x_v2);
@@ -540,21 +560,21 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_v24 = (TH1D*)resultsFiles_v24[i]->Get("Corr_corr_24_hist");
             SetMarkerAndLine(h_v24,GetColor(index),kFullCircle,kSolid,1.0);
             h_v24->Draw("ESAMES");
-            leg_v24->AddEntry(h_v24,Form("v_{2}{4} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_v24->AddEntry(h_v24,Form("v_{2}{4} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
         for(int i=0;i<FileNameSuffixs.size();i++){
             TH1D* h_v26 = (TH1D*)resultsFiles_v26[i]->Get("corr_26_hist");
             SetMarkerAndLine(h_v26,GetColor(index),kFullSquare,kSolid,1.0);
             h_v26->Draw("ESAMES");
-            leg_v24->AddEntry(h_v26,Form("v_{2}{6} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_v24->AddEntry(h_v26,Form("v_{2}{6} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
         for(int i=0;i<FileNameSuffixs.size();i++){
             TH1D* h_v28 = (TH1D*)resultsFiles_v28[i]->Get("corr_28_hist");
             SetMarkerAndLine(h_v28,GetColor(index),kFullStar,kSolid,1.0);
             h_v28->Draw("ESAMES");
-            leg_v24->AddEntry(h_v28,Form("v_{2}{8} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_v24->AddEntry(h_v28,Form("v_{2}{8} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
         TGraphAsymmErrors* g_v24 = (TGraphAsymmErrors*)publish_ins1666817->Get("Table 194/Graph1D_y1");
@@ -615,7 +635,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_v422 = (TH1D*)resultsFiles_v422[i]->Get("hCorr422_mean");
             SetMarkerAndLine(h_v422,GetColor(index),kFullCircle,kSolid,1.0);
             h_v422->Draw("ESAMES");
-            leg2->AddEntry(h_v422,Form("v_{4,22} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg2->AddEntry(h_v422,Form("v_{4,22} (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         // TFile* publish = new TFile("./HEPData-ins1778342-v1-root.root","READ");
@@ -666,7 +686,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_chi422 = (TH1D*)resultsFiles_chi422[i]->Get("hCorr422_mean");
             SetMarkerAndLine(h_chi422,GetColor(index),kFullCircle,kSolid,1.0);
             h_chi422->Draw("ESAMES");
-            leg4->AddEntry(h_chi422,Form("#chi_{4,22} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg4->AddEntry(h_chi422,Form("#chi_{4,22} (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg4->Draw();
@@ -719,7 +739,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_rho422 = (TH1D*)resultsFiles_rho422[i]->Get("hCorr422_mean");
             SetMarkerAndLine(h_rho422,GetColor(index),kFullCircle,kSolid,1.0);
             h_rho422->Draw("ESAMES");
-            leg_rho422->AddEntry(h_rho422,Form("#rho_{4,22} (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_rho422->AddEntry(h_rho422,Form("#rho_{4,22} (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg_rho422->Draw();
@@ -773,7 +793,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_NSC = (TH1D*)resultsFiles_NSC[i]->Get("NSC32");
             SetMarkerAndLine(h_NSC,GetColor(index),kFullCircle,kSolid,1.0);
             h_NSC->Draw("ESAMES");
-            leg3->AddEntry(h_NSC,Form("NSC(3,2) (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg3->AddEntry(h_NSC,Form("NSC(3,2) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg3->Draw();
@@ -826,7 +846,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_sc23 = (TH1D*)resultsFiles_SC23[i]->Get("SC23");
             SetMarkerAndLine(h_sc23,GetColor(index),kFullCircle,kSolid,1.0);
             h_sc23->Draw("ESAMES");
-            leg_sc23->AddEntry(h_sc23,Form("SC(2,3) (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_sc23->AddEntry(h_sc23,Form("SC(2,3) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg_sc23->Draw();
@@ -878,7 +898,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_sc24 = (TH1D*)resultsFiles_SC24[i]->Get("SC24");
             SetMarkerAndLine(h_sc24,GetColor(index),kFullCircle,kSolid,1.0);
             h_sc24->Draw("ESAMES");
-            leg_sc24->AddEntry(h_sc24,Form("SC(2,4) (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_sc24->AddEntry(h_sc24,Form("SC(2,4) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg_sc24->Draw();
@@ -933,7 +953,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_sc234 = (TH1D*)resultsFiles_SC234[i]->Get("SC234");
             SetMarkerAndLine(h_sc234,GetColor(index),kFullCircle,kSolid,1.0);
             h_sc234->Draw("ESAMES");
-            leg_sc234->AddEntry(h_sc234,Form("SC(2,3,4) (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_sc234->AddEntry(h_sc234,Form("SC(2,3,4) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg_sc234->Draw();
@@ -985,7 +1005,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_sc235 = (TH1D*)resultsFiles_SC235[i]->Get("SC235");
             SetMarkerAndLine(h_sc235,GetColor(index),kFullCircle,kSolid,1.0);
             h_sc235->Draw("ESAMES");
-            leg_sc235->AddEntry(h_sc235,Form("SC(2,3,5) (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_sc235->AddEntry(h_sc235,Form("SC(2,3,5) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg_sc235->Draw();
@@ -1037,7 +1057,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_sc246 = (TH1D*)resultsFiles_SC246[i]->Get("SC246");
             SetMarkerAndLine(h_sc246,GetColor(index),kFullCircle,kSolid,1.0);
             h_sc246->Draw("ESAMES");
-            leg_sc246->AddEntry(h_sc246,Form("SC(2,4,6) (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_sc246->AddEntry(h_sc246,Form("SC(2,4,6) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg_sc246->Draw();
@@ -1089,7 +1109,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_sc345 = (TH1D*)resultsFiles_SC345[i]->Get("SC345");
             SetMarkerAndLine(h_sc345,GetColor(index),kFullCircle,kSolid,1.0);
             h_sc345->Draw("ESAMES");
-            leg_sc345->AddEntry(h_sc345,Form("SC(3,4,5) (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg_sc345->AddEntry(h_sc345,Form("SC(3,4,5) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg_sc345->Draw();
@@ -1143,7 +1163,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_pTDiffv2Cent0To5 = (TH1D*)resultsFiles_pTDiffv2Cent0To5[i]->Get("pTDiffv2");
             SetMarkerAndLine(h_pTDiffv2Cent0To5,GetColor(index),kFullCircle,kSolid,1.0);
             h_pTDiffv2Cent0To5->Draw("ESAMES");
-            leg6->AddEntry(h_pTDiffv2Cent0To5,Form("v_{2}{2,|#Delta#eta|>0.8}(p_{T}) Cent:0~5%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg6->AddEntry(h_pTDiffv2Cent0To5,Form("v_{2}{2,|#Delta#eta|>1.0}(p_{T}) Cent:0~5%% (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         // TFile* publish_ins1666817 = new TFile("./HEPData-ins1419244-v2-root.root","READ");
@@ -1199,7 +1219,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_pTDiffv2Cent5To10 = (TH1D*)resultsFiles_pTDiffv2Cent5To10[i]->Get("pTDiffv2");
             SetMarkerAndLine(h_pTDiffv2Cent5To10,GetColor(index),kFullCircle,kSolid,1.0);
             h_pTDiffv2Cent5To10->Draw("ESAMES");
-            leg5->AddEntry(h_pTDiffv2Cent5To10,Form("v_{2}{2,|#Delta#eta|>0.8}(p_{T}) Cent:5~10%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg5->AddEntry(h_pTDiffv2Cent5To10,Form("v_{2}{2,|#Delta#eta|>1.0}(p_{T}) Cent:5~10%% (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         TGraphAsymmErrors* g_pt510=(TGraphAsymmErrors*)publish_ins1666817->Get("Table 23/Graph1D_y1");
@@ -1217,8 +1237,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         c5->cd(2);
         gPad->SetTopMargin(0.05);
         TH1D* frame_ratio_pt510 = new TH1D("frame_ratio_pt510", "frame_ratio_pt510",50,0.,10.);
-        frame_ratio_pt510->SetMaximum(1.2);
-        frame_ratio_pt510->SetMinimum(0.8);
+        frame_ratio_pt510->SetMaximum(2);
+        frame_ratio_pt510->SetMinimum(0.);
         frame_ratio_pt510->SetYTitle("Ratio to Run 2");
         frame_ratio_pt510->Draw("AXIS");
         One->Draw("sames");
@@ -1249,7 +1269,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_pTDiffv2Cent10To20 = (TH1D*)resultsFiles_pTDiffv2Cent10To20[i]->Get("pTDiffv2");
             SetMarkerAndLine(h_pTDiffv2Cent10To20,GetColor(index),kFullCircle,kSolid,1.0);
             h_pTDiffv2Cent10To20->Draw("ESAMES");
-            leg10To20->AddEntry(h_pTDiffv2Cent10To20,Form("v_{2}{2,|#Delta#eta|>0.8}(p_{T}) Cent:10~20%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg10To20->AddEntry(h_pTDiffv2Cent10To20,Form("v_{2}{2,|#Delta#eta|>1.0}(p_{T}) Cent:10~20%% (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         TGraphAsymmErrors* g_pt1020=(TGraphAsymmErrors*)publish_ins1666817->Get("Table 33/Graph1D_y1");
@@ -1267,8 +1287,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         c10To20->cd(2);
         gPad->SetTopMargin(0.05);
         TH1D* frame_ratio_pt1020 = new TH1D("frame_ratio_pt1020", "frame_ratio_pt1020",50,0.,10.);
-        frame_ratio_pt1020->SetMaximum(1.2);
-        frame_ratio_pt1020->SetMinimum(0.8);
+        frame_ratio_pt1020->SetMaximum(2);
+        frame_ratio_pt1020->SetMinimum(0.);
         frame_ratio_pt1020->SetYTitle("Ratio to Run 2");
         frame_ratio_pt1020->Draw("AXIS");
         One->Draw("sames");
@@ -1300,7 +1320,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_pTDiffv2Cent20To30 = (TH1D*)resultsFiles_pTDiffv2Cent20To30[i]->Get("pTDiffv2");
             SetMarkerAndLine(h_pTDiffv2Cent20To30,GetColor(index),kFullCircle,kSolid,1.0);
             h_pTDiffv2Cent20To30->Draw("ESAMES");
-            leg20To30->AddEntry(h_pTDiffv2Cent20To30,Form("v_{2}{2,|#Delta#eta|>0.8}(p_{T}) Cent:20~30%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg20To30->AddEntry(h_pTDiffv2Cent20To30,Form("v_{2}{2,|#Delta#eta|>1.0}(p_{T}) Cent:20~30%% (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         TGraphAsymmErrors* g_pt2030=(TGraphAsymmErrors*)publish_ins1666817->Get("Table 43/Graph1D_y1");
@@ -1318,8 +1338,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         c20To30->cd(2);
         gPad->SetTopMargin(0.05);
         TH1D* frame_ratio_pt2030 = new TH1D("frame_ratio_pt2030", "frame_ratio_pt2030",50,0.,10.);
-        frame_ratio_pt2030->SetMaximum(1.2);
-        frame_ratio_pt2030->SetMinimum(0.8);
+        frame_ratio_pt2030->SetMaximum(2);
+        frame_ratio_pt2030->SetMinimum(0.);
         frame_ratio_pt2030->SetYTitle("Ratio to Run 2");
         frame_ratio_pt2030->Draw("AXIS");
         One->Draw("sames");
@@ -1351,7 +1371,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             TH1D* h_pTDiffv2Cent30To40 = (TH1D*)resultsFiles_pTDiffv2Cent30To40[i]->Get("pTDiffv2");
             SetMarkerAndLine(h_pTDiffv2Cent30To40,GetColor(index),kFullCircle,kSolid,1.0);
             h_pTDiffv2Cent30To40->Draw("ESAMES");
-            leg7->AddEntry(h_pTDiffv2Cent30To40,Form("v_{2}{2,|#Delta#eta|>0.8}(p_{T}) Cent:30~40%% (%s)",FileNameSuffixs[i].c_str()),"lp");
+            leg7->AddEntry(h_pTDiffv2Cent30To40,Form("v_{2}{2,|#Delta#eta|>1.0}(p_{T}) Cent:30~40%% (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         TGraphAsymmErrors* g_pT3040=(TGraphAsymmErrors*)publish_ins1666817->Get("Table 53/Graph1D_y1");
@@ -1369,8 +1389,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         c7->cd(2);
         gPad->SetTopMargin(0.05);
         TH1D* frame_ratio_pT3040 = new TH1D("frame_ratio_pT3040", "frame_ratio_pT3040",50,0.,10.);
-        frame_ratio_pT3040->SetMaximum(1.2);
-        frame_ratio_pT3040->SetMinimum(0.8);
+        frame_ratio_pT3040->SetMaximum(2);
+        frame_ratio_pT3040->SetMinimum(0.);
         frame_ratio_pT3040->SetYTitle("Ratio to Run 2");
         frame_ratio_pT3040->Draw("AXIS");
         One->Draw("sames");
