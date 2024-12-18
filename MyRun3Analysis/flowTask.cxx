@@ -481,7 +481,7 @@ struct FlowTask {
     if (!corrconf.pTDif) {
       val = fGFW->Calculate(corrconf, 0, kFALSE).real() / dnx;
       if (std::fabs(val) < 1)
-        fFC->fillProfile(corrconf.Head.c_str(), cent, val, dnx, rndm);
+        fFC->FillProfile(corrconf.Head.c_str(), cent, val, dnx, rndm);
       return;
     }
     for (auto i = 1; i <= fPtAxis->GetNbins(); i++) {
@@ -490,7 +490,7 @@ struct FlowTask {
         continue;
       val = fGFW->Calculate(corrconf, i - 1, kFALSE).real() / dnx;
       if (std::fabs(val) < 1)
-        fFC->fillProfile(Form("%s_pt_%i", corrconf.Head.c_str(), i), cent, val, dnx, rndm);
+        fFC->FillProfile(Form("%s_pt_%i", corrconf.Head.c_str(), i), cent, val, dnx, rndm);
     }
     return;
   }
