@@ -109,9 +109,15 @@ void ProcessFlowContainerDrawDiffRatio(){
     vector<TFile*> resultsFiles_pTDiffv2Cent10To20;
     vector<TFile*> resultsFiles_pTDiffv2Cent20To30;
     vector<TFile*> resultsFiles_pTDiffv2Cent30To40;
-    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931");
-    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931_midOCC");
-    FileNameSuffixs.push_back("LHC23_PbPb_pass4_272931_highOcc");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306813");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_small_306992");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_small_306992_ITSMatch");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306755");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306755_NUECheck");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260_midOcc");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260_highOcc");
+    // FileNameSuffixs.push_back("LHC23zzh_PbPb_pass4_small_279536");
 
     for(auto& suffix : FileNameSuffixs){
         string fileName_vn = "./ProcessOutput/vn_" + suffix + ".root";
