@@ -16,10 +16,11 @@
 #include <map>
 #include <array>
 #include "include/ErrorPropagation.h"
+#include "include/GraphSetting.h"
 
 bool ComparewithPublish = true;
 bool OutputPNG = false;
-bool RebinpTDiff = true;
+bool RebinpTDiff = false;
 std::vector<Double_t> pTDiffOriginBinning = {0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.2, 2.4, 2.6, 2.8, 3, 3.5, 4, 5, 6, 8, 10};
 std::vector<Double_t> pTDiffTargetBinning = {0.2, 0.4, 0.6, 0.8, 1.0, 1.3, 1.5, 1.7, 2.0, 2.4, 3.0, 3.5, 4.0, 5.0};
 
@@ -180,8 +181,8 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc){
         TGraphAsymmErrors* g_v4 = (TGraphAsymmErrors*)publish->Get("v4/Graph1D_y1");
         SetMarkerAndLine(g_v4,kBlue,kOpenSquare,kSolid,1.0);
         g_v2->Draw("PE");
-        g_v3->Draw("PE");
-        g_v4->Draw("PE");
+        // g_v3->Draw("PE");
+        // g_v4->Draw("PE");
         legend->AddEntry(g_v2,Form("v_{2}{2} JHEP 05 (2020) 085, 2020"));
         legend->AddEntry(g_v3,Form("v_{3}{2} JHEP 05 (2020) 085, 2020"));
         legend->AddEntry(g_v4,Form("v_{4}{2} JHEP 05 (2020) 085, 2020"));
@@ -281,21 +282,24 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     if(gROOT->FindObject("canvas_ptDiffvn"))anotherCanvas = true;
     if(!anotherCanvas)canvas2 = new TCanvas("canvas_ptDiffvn","canvas_ptDiffvn",900,900);
     else canvas2 = new TCanvas("canvas_ptDiffvn_2","canvas_ptDiffvn_2",900,900);
-    TH1D* Hist2  = new TH1D(Form("v_{2}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),20,0.2,10.0);
+    TH1D* Hist2  = new TH1D(Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),20,0.2,10.0);
     Hist2->SetMinimum(0.);
     Hist2->SetMaximum(0.3);
     Hist2->GetXaxis()->SetRangeUser(0.2,5.0);
     Hist2->SetXTitle("p_{T}");
     Hist2->SetYTitle("v_{n}");
     Hist2->Draw();
-    fc->SetIDName("ChGap");
+    fc->SetIDName("Ch10Gap");
+    fc->SetPropagateErrors(kTRUE);
     TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(2,CentMin,CentMax);
+    hV22pt->SetName("pTDiffv2");
     if(!hV22pt){
         Printf("Can't get hV22");
         return;
     }
     if(RebinpTDiff){
         TH1D* pTMerge = new TH1D("pTMerge","pTMerge",pTDiffTargetBinning.size(),pTDiffTargetBinning.data());
+        pTMerge->SetName("pTDiffv2");
         for(int i=0;i<pTDiffTargetBinning.size()-1;i++){
             auto it = std::find(pTDiffOriginBinning.begin(), pTDiffOriginBinning.end(), pTDiffTargetBinning[i]);
             if (it == pTDiffOriginBinning.end()){
@@ -326,25 +330,11 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     legend2->AddEntry(hV22pt,Form("v_{2}{2}(p_{T}) |#Delta#eta|>1 cent:%d~%d%%",(int)CentMin,(int)CentMax));
     legend2->Draw();
 
-    if(ComparewithPublish){
-        Int_t table = 0;
-        if(CentMin==0. && CentMax==5.)table = 7;
-        else if(CentMin==30. && CentMax==40.)table = 8;
-        if(table>0){
-            TFile* publish = new TFile("./HEPData-ins1419244-v2-root.root","READ");
-            TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get(Form("Table %d/Graph1D_y1",table));
-            SetMarkerAndLine(g_v2,kRed,kOpenSquare,kSolid,1.0);
-            g_v2->Draw("PE");
-            legend2->AddEntry(g_v2,Form("v_{2}{2}(p_{T}) Phys.Rev.Lett. 116 (2016) 132302, 2016"));
-        }
-    }
-
-    if(OutputPNG){
-        if(!anotherCanvas)
-        canvas2->SaveAs("./ProcessOutput/ptDiffvn.png");
-        else
-        canvas2->SaveAs("./ProcessOutput/ptDiffvn_2.png");
-    }
+    // if(OutputRoot){
+    //     TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv2Cent%dTo%d_%s%s.root",(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+    //     hV22pt->Write();
+    //     fout->Close();
+    // }
 }
 
 void GetNonlinearHistogram(FlowContainer* fc, TH1D*& hCorr422, TH1D*& hCorr24, TH1D*& hCorr42, string GapName="Ch10Gap"){
@@ -743,23 +733,24 @@ void CompareNSC32Corr(string FileNameSuffix, FlowContainer* fc){
 
 }
 
-void ProcessFlowContainer(string FileNameSuffix = "LHC23zzn_pass3_I_A11_small_219651"){
-    TFile* f = new TFile(Form("./AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
-    FlowContainer* fc = (FlowContainer*)f->Get("flow-pb-pb-task/FlowContainer");
+void ProcessFlowContainer(string FileNameSuffix = "LHC24k2_302727"){
+    TFile* f = new TFile(Form("./AnalysisResults/AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
+    FlowContainer* fc = (FlowContainer*)f->Get("flow-task/FlowContainer");
     if(!fc){
         Printf("can not get flow container");
         return;
     }
     TObjArray* Subsamples = fc->GetSubProfiles();
 
+    SetStyle();
     Output_vn(FileNameSuffix, fc);
     Output_vn4(FileNameSuffix, fc);
-    Output_ptDiffvn(FileNameSuffix, fc);
-    Output_ptDiffvn(FileNameSuffix, fc,30,40);
-    Output_Nonlinear(FileNameSuffix, fc, v422);
-    Output_Nonlinear(FileNameSuffix, fc, chi422);
-    Output_Nonlinear(FileNameSuffix, fc, rho422);
-    Output_NSC(FileNameSuffix, fc);
+    Output_ptDiffvn(FileNameSuffix, fc,10,20);
+    // Output_ptDiffvn(FileNameSuffix, fc,30,40);
+    // Output_Nonlinear(FileNameSuffix, fc, v422);
+    // Output_Nonlinear(FileNameSuffix, fc, chi422);
+    // Output_Nonlinear(FileNameSuffix, fc, rho422);
+    // Output_NSC(FileNameSuffix, fc);
     // CompareNSC32Corr(FileNameSuffix, fc);
     // CompareNonlinearCorr(FileNameSuffix, fc);
     return;
