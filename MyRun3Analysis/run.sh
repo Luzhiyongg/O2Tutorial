@@ -1,6 +1,7 @@
 opt="-b --configuration json://configuration_run3.json"
-    aodfile="AO2D_LHC23zzh_apass1.root"   
+    aodfile="AO2D_LHC23zzh_apass4_544122.root"   
     o2-analysis-track-propagation ${opt} |
+    o2-analysis-tracks-extra-v002-converter ${opt} | 
     o2-analysis-timestamp ${opt} | 
     o2-analysis-multiplicity-table ${opt} | 
     o2-analysis-trackselection ${opt} | 
