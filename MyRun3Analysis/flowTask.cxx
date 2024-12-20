@@ -99,7 +99,7 @@ struct FlowTask {
   Configurable<std::vector<std::string>> cfgUserDefineGFWCorr{"cfgUserDefineGFWCorr", std::vector<std::string>{"refN02 {2} refP02 {-2}", "refN12 {2} refP12 {-2}"}, "User defined GFW CorrelatorConfig"};
   Configurable<std::vector<std::string>> cfgUserDefineGFWName{"cfgUserDefineGFWName", std::vector<std::string>{"Ch02Gap22", "Ch12Gap22"}, "User defined GFW Name"};
   Configurable<std::vector<int>> cfgRunRemoveList{"cfgRunRemoveList", std::vector<int>{-1}, "excluded run numbers"};
-  Configurable<std::vector<int>> cfgGroupSplitRunNumber{"cfgGroupSplitRunNumber", std::vector<int>{544510,544653}, "runnumbers for group splitting (suppose run numbers are increasing monotonically) "};
+  Configurable<std::vector<int>> cfgGroupSplitRunNumber{"cfgGroupSplitRunNumber", std::vector<int>{544510, 544653}, "runnumbers for group splitting (suppose run numbers are increasing monotonically) "};
 
   ConfigurableAxis axisVertex{"axisVertex", {40, -20, 20}, "vertex axis for histograms"};
   ConfigurableAxis axisPhi{"axisPhi", {60, 0.0, constants::math::TwoPI}, "phi axis for histograms"};
@@ -262,14 +262,14 @@ struct FlowTask {
     fGroupNUAList.setObject(groupNUAWeightlist);
 
     if (cfgOutputGroupNUAWeights) {
-      groupNUAWeightPtr.resize(cfgGroupSplitRunNumber.value.size()+1);
-      for (auto i = 0; i < cfgGroupSplitRunNumber.value.size()+1; i++) {
+      groupNUAWeightPtr.resize(cfgGroupSplitRunNumber.value.size() + 1);
+      for (auto i = 0; i < cfgGroupSplitRunNumber.value.size() + 1; i++) {
         GFWWeights* groupweight = nullptr;
         if (i < cfgGroupSplitRunNumber.value.size())
-          groupweight = new GFWWeights(Form("groupweight_%d",cfgGroupSplitRunNumber.value[i]));
+          groupweight = new GFWWeights(Form("groupweight_%d", cfgGroupSplitRunNumber.value[i]));
         else
           groupweight = new GFWWeights(Form("groupweight_last"));
-        
+
         groupweight->SetPtBins(nPtBins, ptBins);
         groupweight->Init(true, false);
         groupNUAWeightlist->Add(groupweight);
@@ -553,7 +553,7 @@ struct FlowTask {
     correctionsLoaded = true;
   }
 
-  bool setCurrentParticleWeights(float& weight_nue, float& weight_nua, float phi, float eta, float pt, float vtxz, int groupNUAIndex=0)
+  bool setCurrentParticleWeights(float& weight_nue, float& weight_nua, float phi, float eta, float pt, float vtxz, int groupNUAIndex = 0)
   {
     float eff = 1.;
     if (mEfficiency)
@@ -565,9 +565,8 @@ struct FlowTask {
     weight_nue = 1. / eff;
     if (cfgAcceptanceGroupUse) {
       if (mGroupAcceptanceList && mGroupAcceptanceList->At(groupNUAIndex)) {
-        weight_nua = ((GFWWeights*) mGroupAcceptanceList->At(groupNUAIndex))->GetNUA(phi, eta, vtxz);
-      }
-      else {
+        weight_nua = ((GFWWeights*)mGroupAcceptanceList->At(groupNUAIndex))->GetNUA(phi, eta, vtxz);
+      } else {
         weight_nua = 1;
       }
       return true;
@@ -762,14 +761,13 @@ struct FlowTask {
     float independent = cent;
     if (cfgUseNch)
       independent = static_cast<float>(tracks.size());
-    
+
     int groupNUAIndex = 0;
     if (cfgOutputGroupNUAWeights || cfgAcceptanceGroupUse) {
       for (auto i = 0; i < cfgGroupSplitRunNumber.value.size(); i++) {
         if (currentRunNumber < cfgGroupSplitRunNumber.value.at(i)) {
           break;
-        }
-        else {
+        } else {
           groupNUAIndex++;
         }
       }
