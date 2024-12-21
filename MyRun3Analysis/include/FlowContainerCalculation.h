@@ -28,7 +28,7 @@ TH1D* mergeCentralityToTargetBin(TH1D* h, const std::vector<float>& targetCentra
             double error = sqrt(1./weightSum)/sqrt(count);
             h_target->SetBinContent(i,content);
             h_target->SetBinError(i,error);
-            Printf("Bin %f, content=%f, error=%f",(targetCentralityBins[i-1]+targetCentralityBins[i])/2,content,error);
+            // Printf("Bin %f, content=%f, error=%f",(targetCentralityBins[i-1]+targetCentralityBins[i])/2,content,error);
         }
         else{
             h_target->SetBinContent(i,-1);
@@ -39,20 +39,36 @@ TH1D* mergeCentralityToTargetBin(TH1D* h, const std::vector<float>& targetCentra
     return h_target;
 }
 
-void CalculateBootstrapError(std::vector<std::vector<double>>& ValueArray, std::vector<std::vector<double>>& ValueErrorArray, std::vector<double>& ErrorArray){
+void CalculateBootstrapError(const std::vector<std::vector<double>>& ValueArray, const std::vector<std::vector<double>>& ValueErrorArray, std::vector<double>& ErrorArray){
     int Nsample = ValueArray.size();
     int Nbin = ValueArray[0].size();
     std::vector<int> Count;
     std::vector<double> Mean;
     std::vector<double> SumWeight;
+    std::vector<std::vector<bool>> MaskArray;
     Count.resize(Nbin);
     Mean.resize(Nbin);
     SumWeight.resize(Nbin);
+    MaskArray.resize(Nsample);
+    for(int i=0;i<Nsample;i++){
+        MaskArray[i].resize(Nbin);
+        for(int j=0;j<Nbin;j++){
+            if (ValueArray[i][j]==-1 && ValueErrorArray[i][j]==10) {
+                MaskArray[i][j] = false;
+                continue;
+            }
+            if (isZero(ValueArray[i][j]) && isZero(ValueErrorArray[i][j])) {
+                MaskArray[i][j] = false;
+                continue;
+            }
+            MaskArray[i][j] = true;
+        }
+    }
     for(int i=0;i<Nbin;i++){
         SumWeight[i]=0;
         Mean[i]=0;
         for(int j=0;j<Nsample;j++){
-            if (ValueArray[j][i]==-1 && ValueErrorArray[j][i]==10) continue;
+            if (!MaskArray[j][i]) continue;
             Count[i]++;
             Mean[i] += ValueArray[j][i] * (1./(ValueErrorArray[j][i]*ValueErrorArray[j][i]));
             // Printf("ValueArray[%d][%d]=%f, ValueErrorArray[%d][%d]=%f",j,i,ValueArray[j][i],j,i,ValueErrorArray[j][i]);
@@ -65,14 +81,19 @@ void CalculateBootstrapError(std::vector<std::vector<double>>& ValueArray, std::
     {
         for (Int_t j = 0; j < Nbin; j++)
         {
-            if (ValueArray[j][i]==-1 && ValueErrorArray[j][i]==10) continue;
+            if (!MaskArray[i][j]) continue;
             ErrorArray[j] += (ValueArray[i][j] - Mean[j]) * (ValueArray[i][j] - Mean[j]);
         }
     }
     for (Int_t i = 0; i < Nbin; i++)
     {
-        if (Count[i] > 1)
+        if (Count[i] > 2){
             ErrorArray[i] = TMath::Sqrt(ErrorArray[i] / (Count[i] - 1));
+        }
+        else {
+            ErrorArray[i] = 10;
+            Printf("Bin %d has only %d samples, set error to 10",i,Count[i]);
+        }
         // Printf("ErrorArray[%d]=%f",i,ErrorArray[i]);
     }
     
@@ -278,10 +299,10 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     if(gROOT->FindObject("canvas_ptDiffvn"))anotherCanvas = true;
     if(!anotherCanvas)canvas2 = new TCanvas("canvas_ptDiffvn","canvas_ptDiffvn",900,900);
     else canvas2 = new TCanvas("canvas_ptDiffvn_2","canvas_ptDiffvn_2",900,900);
-    TH1D* Hist2  = new TH1D(Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),20,0.2,10.0);
+    TH1D* Hist2  = new TH1D(Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}(p_{T}) in %s",FileNameSuffix.c_str()),200,0,200.0);
     Hist2->SetMinimum(0.);
     Hist2->SetMaximum(0.3);
-    Hist2->GetXaxis()->SetRangeUser(0.2,5.0);
+    Hist2->GetXaxis()->SetRangeUser(0.2,200.0);
     Hist2->SetXTitle("p_{T}");
     Hist2->SetYTitle("v_{n}");
     Hist2->Draw();
@@ -293,32 +314,39 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
         Printf("Can't get hV22");
         return;
     }
-    if(RebinpTDiff){
-        TH1D* pTMerge = new TH1D("pTMerge","pTMerge",pTDiffTargetBinning.size(),pTDiffTargetBinning.data());
-        pTMerge->SetName("pTDiffv2");
-        for(int i=0;i<pTDiffTargetBinning.size()-1;i++){
-            auto it = std::find(pTDiffOriginBinning.begin(), pTDiffOriginBinning.end(), pTDiffTargetBinning[i]);
-            if (it == pTDiffOriginBinning.end()){
-                Printf("Can't find bin %f in origin binning",pTDiffTargetBinning[i]);
-                break;
+
+    std::vector<std::vector<std::vector<double>>> ValueArray;
+    std::vector<std::vector<std::vector<double>>> ValueErrorArray;
+    std::vector<std::vector<double>> ErrorArray;
+    int Nobs=1;//v22(pT)
+    TObjArray* subsamples = fc->GetSubProfiles();
+    int NofSample = subsamples->GetEntries();
+    int Nbin = hV22pt->GetNbinsX();
+    ResizeValueArray(ValueArray,ValueErrorArray,ErrorArray,Nobs,NofSample,Nbin);
+    
+    for(int sample=0;sample<NofSample;sample++){
+        fc->OverrideMainWithSub(sample,false);
+        for(int i=0;i<Nobs;i++){
+            TH1D* temp = (TH1D*)fc->GetVN2VsPt(2,CentMin,CentMax);
+            temp->SetName(Form("pTDiffv2_%d",sample));
+            if(!temp){
+                Printf("Can't get pTDiffv2_%d",sample);
+                return;
             }
-            Int_t StartBin = it - pTDiffOriginBinning.begin();
-            auto it2 = std::find(pTDiffOriginBinning.begin(), pTDiffOriginBinning.end(), pTDiffTargetBinning[i+1]);
-            Int_t EndBin = it2 - pTDiffOriginBinning.begin();
-            Double_t value = 0;
-            Double_t weight =0;
-            for(Int_t bin=StartBin+1;bin<=EndBin;bin++){
-                value += hV22pt->GetBinContent(bin)/(hV22pt->GetBinError(bin)*hV22pt->GetBinError(bin));
-                weight += 1./(hV22pt->GetBinError(bin)*hV22pt->GetBinError(bin));
+            for(int j=0;j<temp->GetNbinsX();j++){
+                ValueArray[i][sample][j] = temp->GetBinContent(j+1);
+                ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
+                // Printf("pTDiffv2_%d_%d = %f +- %f",sample,j,ValueArray[i][sample][j],ValueErrorArray[i][sample][j]);
             }
-            value /= weight;
-            weight = 1./weight;
-            pTMerge->SetBinContent(i+1,value);
-            Printf("pTMerge bin %d: %f",i+1,value);
-            pTMerge->SetBinError(i+1,sqrt(weight));
         }
-        hV22pt = pTMerge;
     }
+    for(int i=0;i<Nobs;i++){
+        CalculateBootstrapError(ValueArray[i],ValueErrorArray[i],ErrorArray[i]);
+    }
+    for(int i=0;i<Nbin;i++){
+        hV22pt->SetBinError(i+1, ErrorArray[0][i]);
+    }
+
     SetMarkerAndLine(hV22pt,kBlack,kFullCircle,kSolid,1.0);
     gStyle->SetOptStat("");
     hV22pt->Draw("ESames");
