@@ -23,7 +23,7 @@ TH1D* mergeCentralityToTargetBin(TH1D* h, const std::vector<float>& targetCentra
                 count++;
             }
         }
-        if(count > 0 && !std::isinf(content)){
+        if(count > 0 && !std::isinf(content) && content==content){
             content = content/weightSum;
             double error = sqrt(1./weightSum)/sqrt(count);
             h_target->SetBinContent(i,content);
@@ -205,6 +205,45 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     }
 }
 
+TH1D* GetVN10(FlowContainer* fc, Int_t n) {
+    TH1D *corrN2, *corrN4, *corrN6, *corrN8, *corrN10;
+    corrN2 = fc->GetHistCorrXXVsMulti(Form("%i2", n));
+    corrN4 = fc->GetHistCorrXXVsMulti(Form("%i4", n));
+    corrN6 = fc->GetHistCorrXXVsMulti(Form("%i6", n));
+    corrN8 = fc->GetHistCorrXXVsMulti(Form("%i8", n));
+    corrN10 = fc->GetHistCorrXXVsMulti(Form("%i10", n));
+    TH1D* rethist = dynamic_cast<TH1D*>(corrN10->Clone(Form("cN10_%s", corrN10->GetName())));
+    rethist->Reset();
+    for (int i = 1; i <= corrN10->GetNbinsX(); i++) {
+        double cor10v = corrN10->GetBinContent(i);
+        double cor10e = corrN10->GetBinError(i);
+        double cor8v = corrN8->GetBinContent(i);
+        double cor8e = corrN8->GetBinError(i);
+        double cor6v = corrN6->GetBinContent(i);
+        double cor6e = corrN6->GetBinError(i);
+        double cor4v = corrN4->GetBinContent(i);
+        double cor4e = corrN4->GetBinError(i);
+        double cor2v = corrN2->GetBinContent(i);
+        double cor2e = corrN2->GetBinError(i);
+        double cn10 = cor10v - 25.*cor8v*cor2v - 100.*cor6v*cor4v + 400.*cor6v*cor2v*cor2v
+        + 900.*cor4v*cor4v*cor2v - 3600.*cor4v*cor2v*cor2v*cor2v
+        + 2800.*cor2v*cor2v*cor2v*cor2v*cor2v;
+        double cn10e = Error_CN10(cor10v, cor10e, cor8v, cor8e, cor6v, cor6e, cor4v, cor4e, cor2v, cor2e);
+        double vn10 = 0.;
+        double vn10e = 0.;
+        if (cn10 > 0.) {
+            vn10 = TMath::Power(cn10/456., 0.1);
+            vn10e = TMath::Abs(TMath::Power(1./456., 0.1)*0.1*TMath::Power(cn10, -0.9)*cn10e);
+        }
+        rethist->SetBinContent(i, vn10);
+        rethist->SetBinError(i, vn10e);
+    }
+
+    rethist->SetBinContent(0, 0);
+    rethist->SetBinError(0, 0);
+    return rethist;
+}
+
 TH1D* GetVnm(FlowContainer* fc, Int_t n, Int_t m_particle = 4){
     if (m_particle == 2)
         return (TH1D*)fc->GetVN2VsMulti(n);
@@ -215,7 +254,7 @@ TH1D* GetVnm(FlowContainer* fc, Int_t n, Int_t m_particle = 4){
     else if (m_particle == 8)
         return (TH1D*)fc->GetVN8VsMulti(n);
     else if (m_particle == 10){
-        return nullptr;
+        return GetVN10(fc, n);
     }
     
     return nullptr;
@@ -368,10 +407,10 @@ void Output_ptDiffvn4(string FileNameSuffix, FlowContainer* fc, Double_t CentMin
     if(gROOT->FindObject("canvas_ptDiffvn4"))anotherCanvas = true;
     if(!anotherCanvas)canvas2 = new TCanvas("canvas_ptDiffvn4","canvas_ptDiffvn4",900,900);
     else canvas2 = new TCanvas("canvas_ptDiffvn4_2","canvas_ptDiffvn4_2",900,900);
-    TH1D* Hist2  = new TH1D(Form("v_{n}{4}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}{4}(p_{T}) in %s",FileNameSuffix.c_str()),20,0.2,10.0);
-    Hist2->SetMinimum(0.);
-    Hist2->SetMaximum(0.3);
-    Hist2->GetXaxis()->SetRangeUser(0.2,5.0);
+    TH1D* Hist2  = new TH1D(Form("v_{n}{4}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}{4}(p_{T}) in %s",FileNameSuffix.c_str()),100,0,100.0);
+    Hist2->SetMinimum(-1);
+    Hist2->SetMaximum(2.);
+    Hist2->GetXaxis()->SetRangeUser(0.,100.0);
     Hist2->SetXTitle("p_{T}");
     Hist2->SetYTitle("v_{n}{4}");
     Hist2->Draw();

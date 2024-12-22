@@ -89,4 +89,17 @@ double Error_NSC(double N, double eN, double N1, double eN1, double N2, double e
     return err;
 }
 
+double Error_CN10(double cor10, double cor10e, double cor8, double cor8e, double cor6, double cor6e, double cor4, double cor4e, double cor2, double cor2e){
+    double parts[5];
+    parts[0] = cor10e;
+    parts[1] = -25.*cor2*cor8e;
+    parts[2] = -100.*cor4*cor6e + 400.*cor2*cor2*cor6e;
+    parts[3] = -100.*cor6*cor4e + 900.*2.*cor4*cor2*cor4e - 3600.*cor2*cor2*cor2*cor4e;
+    parts[4] = -25*cor8*cor2e + 400*cor6*2.*cor2*cor2e - 900.*cor4*cor4*cor2e - 3600.*cor4*3.*cor2*cor2*cor2e + 2880.*5.*cor2*cor2*cor2*cor2*cor2e;
+    double retval = 0;
+    for (int i = 0; i < 5; i++)
+        retval += TMath::Power(parts[i], 2);
+    return TMath::Sqrt(retval);
+}
+
 #endif
