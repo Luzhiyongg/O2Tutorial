@@ -86,7 +86,7 @@ struct FlowTask {
   O2_DEFINE_CONFIGURABLE(cfgNbootstrap, int, 10, "Number of subsamples")
   O2_DEFINE_CONFIGURABLE(cfgOutputNUAWeights, bool, false, "Fill and output NUA weights")
   O2_DEFINE_CONFIGURABLE(cfgOutputNUAWeightsRefPt, bool, false, "NUA weights are filled in ref pt bins")
-  O2_DEFINE_CONFIGURABLE(cfgOutputGroupNUAWeights, bool, true, "Fill and output group NUA weights")
+  O2_DEFINE_CONFIGURABLE(cfgOutputGroupNUAWeights, bool, false, "Fill and output group NUA weights")
   O2_DEFINE_CONFIGURABLE(cfgEfficiency, std::string, "", "CCDB path to efficiency object")
   O2_DEFINE_CONFIGURABLE(cfgAcceptance, std::string, "", "CCDB path to acceptance object")
   O2_DEFINE_CONFIGURABLE(cfgAcceptanceGroup, std::string, "", "CCDB path to group acceptance object")
@@ -263,7 +263,7 @@ struct FlowTask {
 
     if (cfgOutputGroupNUAWeights) {
       groupNUAWeightPtr.resize(cfgGroupSplitRunNumber.value.size() + 1);
-      for (auto i = 0; i < cfgGroupSplitRunNumber.value.size() + 1; i++) {
+      for (uint i = 0; i < cfgGroupSplitRunNumber.value.size() + 1; i++) {
         GFWWeights* groupweight = nullptr;
         if (i < cfgGroupSplitRunNumber.value.size())
           groupweight = new GFWWeights(Form("groupweight_%d", cfgGroupSplitRunNumber.value[i]));
@@ -565,7 +565,7 @@ struct FlowTask {
     weight_nue = 1. / eff;
     if (cfgAcceptanceGroupUse) {
       if (mGroupAcceptanceList && mGroupAcceptanceList->At(groupNUAIndex)) {
-        weight_nua = ((GFWWeights*)mGroupAcceptanceList->At(groupNUAIndex))->GetNUA(phi, eta, vtxz);
+        weight_nua = reinterpret_cast<GFWWeights*>(mGroupAcceptanceList->At(groupNUAIndex))->GetNUA(phi, eta, vtxz);
       } else {
         weight_nua = 1;
       }
@@ -764,7 +764,7 @@ struct FlowTask {
 
     int groupNUAIndex = 0;
     if (cfgOutputGroupNUAWeights || cfgAcceptanceGroupUse) {
-      for (auto i = 0; i < cfgGroupSplitRunNumber.value.size(); i++) {
+      for (uint i = 0; i < cfgGroupSplitRunNumber.value.size(); i++) {
         if (currentRunNumber < cfgGroupSplitRunNumber.value.at(i)) {
           break;
         } else {
