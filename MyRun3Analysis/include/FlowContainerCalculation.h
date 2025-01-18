@@ -325,7 +325,7 @@ void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_p
     }
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/v%d%d_%s.root", n, m_particle, FileNameSuffix.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("./ProcessOutput/v%d%d_%s%s.root", n, m_particle, FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         hVn[0]->Write();
         fout->Close();
     }
@@ -953,6 +953,194 @@ void Output_SCklm(string FileNameSuffix, FlowContainer* fc, Int_t k, Int_t l, In
         if (m < 0) fout = new TFile(Form("./ProcessOutput/SC%d%d_%s%s.root",k,l,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         else fout = new TFile(Form("./ProcessOutput/SC%d%d%d_%s%s.root",k,l,m,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         SCklm->Write();
+        fout->Close();
+    }
+}
+
+TH1D* GetNSCklm(FlowContainer* fc, Int_t k, Int_t l, Int_t m){
+
+    TH1D* hCorrklkl=nullptr;
+    TH1D* hCorrk2_Full=nullptr;
+    TH1D* hCorrl2_Full=nullptr;
+    TH1D* hCorrk2_Gap=nullptr;
+    TH1D* hCorrl2_Gap=nullptr;
+
+    fc->SetIDName(Form("ChFull"));
+    hCorrklkl = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d%d%d%d", k, l, k, l));
+    if (!hCorrklkl) {Printf("Can't get hCorrklkl"); return nullptr;}
+
+    TH1D* temp_k2_Full= (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", k));
+    if(!temp_k2_Full){Printf("Can't get temp_k2_Full");return nullptr;}
+    hCorrk2_Full = (TH1D*)temp_k2_Full->Clone();
+    hCorrk2_Full->SetName("hCorrk2_Full");
+    delete temp_k2_Full;
+
+    TH1D* temp_l2_Full= (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", l));
+    if(!temp_l2_Full){Printf("Can't get temp_l2_Full");return nullptr;}
+    hCorrl2_Full = (TH1D*)temp_l2_Full->Clone();
+    hCorrl2_Full->SetName("hCorrl2_Full");
+    delete temp_l2_Full;
+
+    fc->SetIDName(Form("Ch10Gap"));
+    TH1D* temp_k2_Gap= (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", k));
+    if(!temp_k2_Gap){Printf("Can't get temp_k2_Gap");return nullptr;}
+    hCorrk2_Gap = (TH1D*)temp_k2_Gap->Clone();
+    hCorrk2_Gap->SetName("hCorrk2_Gap");
+    delete temp_k2_Gap;
+
+    TH1D* temp_l2_Gap= (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", l));
+    if(!temp_l2_Gap){Printf("Can't get temp_l2_Gap");return nullptr;}
+    hCorrl2_Gap = (TH1D*)temp_l2_Gap->Clone();
+    hCorrl2_Gap->SetName("hCorrl2_Gap");
+    delete temp_l2_Gap;
+    if (m < 0) {
+        TH1D* out = (TH1D*)hCorrklkl->Clone();
+        for (int i = 1; i <= hCorrklkl->GetNbinsX(); i++) {
+            out->SetBinContent(i, 
+            (hCorrklkl->GetBinContent(i) - hCorrk2_Full->GetBinContent(i) * hCorrl2_Full->GetBinContent(i))
+            /(hCorrk2_Gap->GetBinContent(i)*hCorrl2_Gap->GetBinContent(i)));
+
+            double err = Error_NSC(hCorrklkl->GetBinContent(i), hCorrklkl->GetBinError(i), 
+            hCorrk2_Full->GetBinContent(i), hCorrk2_Full->GetBinError(i), 
+            hCorrl2_Full->GetBinContent(i), hCorrl2_Full->GetBinError(i), 
+            hCorrk2_Gap->GetBinContent(i), hCorrk2_Gap->GetBinError(i), 
+            hCorrl2_Gap->GetBinContent(i), hCorrl2_Gap->GetBinError(i));
+
+            out->SetBinError(i, err);
+        }
+        return out;
+    }
+
+    TH1D* hCorrklmklm=nullptr;
+    TH1D* hCorrkmkm=nullptr;
+    TH1D* hCorrlmlm=nullptr;
+    TH1D* hCorrm2_Full=nullptr;
+    TH1D* hCorrm2_Gap=nullptr;
+
+    fc->SetIDName(Form("ChFull"));
+    hCorrklmklm = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d%d%d%d%d%d", k, l, m, k, l, m));
+    if (!hCorrklmklm) {Printf("Can't get hCorrklmklm"); return nullptr;}
+    hCorrkmkm = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d%d%d%d", k, m, k, m));
+    if (!hCorrkmkm) {Printf("Can't get hCorrkmkm"); return nullptr;}
+    hCorrlmlm = (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d%d%d%d", l, m, l, m));
+    if (!hCorrlmlm) {Printf("Can't get hCorrlmlm"); return nullptr;}
+    TH1D* temp_m2_Full= (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", m));
+    if(!temp_m2_Full){Printf("Can't get temp_m2_Full");return nullptr;}
+    hCorrm2_Full = (TH1D*)temp_m2_Full->Clone();
+    hCorrm2_Full->SetName("hCorrm2_Full");
+    delete temp_m2_Full;
+
+    fc->SetIDName(Form("Ch10Gap"));
+    TH1D* temp_m2_Gap= (TH1D*)fc->GetHistCorrXXVsMulti(Form("%d2", m));
+    if(!temp_m2_Gap){Printf("Can't get temp_m2_Gap");return nullptr;}
+    hCorrm2_Gap = (TH1D*)temp_m2_Gap->Clone();
+    hCorrm2_Gap->SetName("hCorrm2_Gap");
+    delete temp_m2_Gap;
+
+    TH1D* out = (TH1D*)hCorrklmklm->Clone();
+    for (int i = 1; i <= hCorrklmklm->GetNbinsX(); i++) {
+        double scklm = hCorrklmklm->GetBinContent(i) 
+        - hCorrklkl->GetBinContent(i) * hCorrm2_Full->GetBinContent(i)
+        - hCorrkmkm->GetBinContent(i) * hCorrl2_Full->GetBinContent(i)
+        - hCorrlmlm->GetBinContent(i) * hCorrk2_Full->GetBinContent(i)
+        + 2*hCorrk2_Full->GetBinContent(i)*hCorrl2_Full->GetBinContent(i)*hCorrm2_Full->GetBinContent(i);
+
+        double bottom = hCorrk2_Gap->GetBinContent(i)*hCorrl2_Gap->GetBinContent(i)*hCorrm2_Gap->GetBinContent(i);
+        out->SetBinContent(i, scklm/bottom);
+        double err = Error_NSCklm(
+            hCorrklmklm->GetBinContent(i), hCorrklmklm->GetBinError(i),
+            hCorrklkl->GetBinContent(i), hCorrklkl->GetBinError(i),
+            hCorrkmkm->GetBinContent(i), hCorrkmkm->GetBinError(i),
+            hCorrlmlm->GetBinContent(i), hCorrlmlm->GetBinError(i),
+            hCorrk2_Full->GetBinContent(i), hCorrk2_Full->GetBinError(i),
+            hCorrl2_Full->GetBinContent(i), hCorrl2_Full->GetBinError(i),
+            hCorrm2_Full->GetBinContent(i), hCorrm2_Full->GetBinError(i),
+            hCorrk2_Gap->GetBinContent(i), hCorrk2_Gap->GetBinError(i),
+            hCorrl2_Gap->GetBinContent(i), hCorrl2_Gap->GetBinError(i),
+            hCorrm2_Gap->GetBinContent(i), hCorrm2_Gap->GetBinError(i)
+        );
+        out->SetBinError(i, err);
+    }
+    return out;
+    
+}
+
+
+void Output_NSCklm(string FileNameSuffix, FlowContainer* fc, Int_t k, Int_t l, Int_t m=-1, string Subwagon=""){
+    
+    TCanvas* canvas1 = nullptr;
+    if (m < 0) canvas1 = new TCanvas(Form("Canvas_NSC%d%d",k,l),Form("Canvas_NSC%d%d",k,l),900,900);
+    else canvas1 = new TCanvas(Form("Canvas_NSC%d%d%d",k,l,m),Form("Canvas_NSC%d%d%d",k,l,m),900,900);
+    TH1D* Hist  = nullptr;
+    if (m < 0) Hist = new TH1D(Form("NSC%d%d in %s",k,l,FileNameSuffix.c_str()),Form("NSC%d%d in %s",k,l,FileNameSuffix.c_str()),8,0,80);
+    else Hist = new TH1D(Form("NSC%d%d%d in %s",k,l,m,FileNameSuffix.c_str()),Form("NSC%d%d%d in %s",k,l,m,FileNameSuffix.c_str()),8,0,80);
+    if (m<0){
+        Hist->SetMinimum(-1e-5);
+        Hist->SetMaximum(1e-5);
+    }
+    else{
+        Hist->SetMinimum(-1e-8);
+        Hist->SetMaximum(1e-8);
+    }
+    Hist->SetXTitle("Centrality (%)");
+    if(m<0) Hist->SetYTitle(Form("NSC(%d,%d)",k,l));
+    else Hist->SetYTitle(Form("NSC(%d,%d,%d)",k,l,m));
+    Hist->Draw();
+
+    fc->SetPropagateErrors(kTRUE);
+    TH1D* NSCklm = GetNSCklm(fc, k, l, m);
+    if (!NSCklm) {Printf("Can't get NSCklm"); return;}
+    NSCklm = mergeCentralityToTargetBin(NSCklm, targetCentralityBins);
+    if (m < 0) NSCklm->SetName(Form("NSC%d%d",k,l));
+    else NSCklm->SetName(Form("NSC%d%d%d",k,l,m));
+    
+
+    std::vector<std::vector<std::vector<double>>> ValueArray;
+    std::vector<std::vector<std::vector<double>>> ValueErrorArray;
+    std::vector<std::vector<double>> ErrorArray;
+    int Nobs=1;//NSC
+    TObjArray* subsamples = fc->GetSubProfiles();
+    int NofSample = subsamples->GetEntries();
+    int Nbin = NSCklm->GetNbinsX();
+    ResizeValueArray(ValueArray,ValueErrorArray,ErrorArray,Nobs,NofSample,Nbin);
+    
+    for(int sample=0;sample<NofSample;sample++){
+        fc->OverrideMainWithSub(sample,false);
+        for(int i=0;i<Nobs;i++){
+            TH1D* temp = GetNSCklm(fc, k, l, m);
+            temp = mergeCentralityToTargetBin(temp, targetCentralityBins);
+            temp->SetName(Form("NSC%d%d%d_%d",k,l,m,sample));
+            if(!temp){
+                Printf("Can't get NSC%d%d%d_%d",k,l,m,sample);
+                return;
+            }
+            for(int j=0;j<temp->GetNbinsX();j++){
+                ValueArray[i][sample][j] = temp->GetBinContent(j+1);
+                ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
+            }
+            delete temp;
+        }
+    }
+    for(int i=0;i<Nobs;i++){
+        CalculateBootstrapError(ValueArray[i],ValueErrorArray[i],ErrorArray[i]);
+    }
+    for(int i=0;i<Nbin;i++){
+        NSCklm->SetBinError(i+1, ErrorArray[0][i]);
+    }
+
+    SetMarkerAndLine(NSCklm,kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
+    NSCklm->Draw("ESames");
+    TLegend* legend2 = new TLegend(0.2,0.85,0.5,0.9);
+    if (m < 0) legend2->AddEntry(NSCklm,Form("NSC(%d,%d)",k,l));
+    else legend2->AddEntry(NSCklm,Form("NSC(%d,%d,%d)",k,l,m));
+    legend2->Draw();
+
+    if(OutputRoot){
+        TFile* fout = nullptr;
+        if (m < 0) fout = new TFile(Form("./ProcessOutput/NSC%d%d_%s%s.root",k,l,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        else fout = new TFile(Form("./ProcessOutput/NSC%d%d%d_%s%s.root",k,l,m,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        NSCklm->Write();
         fout->Close();
     }
 }
