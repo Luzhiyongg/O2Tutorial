@@ -331,7 +331,7 @@ void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_p
     }
 }
 
-void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=0., Double_t CentMax=5., string Subwagon=""){
+void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double_t CentMin=0., Double_t CentMax=5., string Subwagon=""){
     TCanvas* canvas2 = nullptr;
     bool anotherCanvas = false;
     // if canvas_ptDiffvn exist, new a canvas with different name
@@ -347,7 +347,7 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     Hist2->Draw();
     fc->SetIDName("Ch10Gap");
     fc->SetPropagateErrors(kTRUE);
-    TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(2,CentMin,CentMax);
+    TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(n,CentMin,CentMax);
     hV22pt->SetName("pTDiffv2");
     if(!hV22pt){
         Printf("Can't get hV22");
@@ -366,7 +366,7 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     for(int sample=0;sample<NofSample;sample++){
         fc->OverrideMainWithSub(sample,false);
         for(int i=0;i<Nobs;i++){
-            TH1D* temp = (TH1D*)fc->GetVN2VsPt(2,CentMin,CentMax);
+            TH1D* temp = (TH1D*)fc->GetVN2VsPt(n,CentMin,CentMax);
             temp->SetName(Form("pTDiffv2_%d",sample));
             if(!temp){
                 Printf("Can't get pTDiffv2_%d",sample);
@@ -390,11 +390,11 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=
     gStyle->SetOptStat("");
     hV22pt->Draw("ESames");
     TLegend* legend2 = new TLegend(0.2,0.8,0.5,0.9);
-    legend2->AddEntry(hV22pt,Form("v_{2}{2}(p_{T}) |#Delta#eta|>1 cent:%d~%d%%",(int)CentMin,(int)CentMax));
+    legend2->AddEntry(hV22pt,Form("v_{%d}{2}(p_{T}) |#Delta#eta|>1 cent:%d~%d%%",n,(int)CentMin,(int)CentMax));
     legend2->Draw();
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv2Cent%dTo%d_%s%s.root",(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv%dCent%dTo%d_%s%s.root",n,(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         hV22pt->Write();
         fout->Close();
     }

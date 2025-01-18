@@ -23,6 +23,8 @@ void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_
 
     TFile* f = new TFile(Form("./AnalysisResults/AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
     vector<string> SubwagonNames = {"","_kIsGoodITSLayersAll"};
+    vector<double> pTDiffCent={0,5,10,20,30,40,50,60,70,80};
+
     for(uint i=0; i < SubwagonNames.size(); i++){
         FlowContainer* fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         if(!fc){
@@ -38,26 +40,18 @@ void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_
         Output_Vnm(FileNameSuffix, fc, 2, 8, "ChFull", SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         Output_Vnm(FileNameSuffix, fc, 2, 10, "ChFull", SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 0, 5, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 30, 40, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 5, 10, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 10, 20, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 20, 30, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 30, 40, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 40, 50, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 50, 60, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 60, 70, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_ptDiffvn(FileNameSuffix, fc, 70, 80, SubwagonNames[i]);
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+            Output_ptDiffvn(FileNameSuffix, fc, 2, pTDiffCent[j], pTDiffCent[j+1], SubwagonNames[i]);
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+            Output_ptDiffvn(FileNameSuffix, fc, 3, pTDiffCent[j], pTDiffCent[j+1], SubwagonNames[i]);
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+            Output_ptDiffvn(FileNameSuffix, fc, 4, pTDiffCent[j], pTDiffCent[j+1], SubwagonNames[i]);
+        }
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         Output_Nonlinear(FileNameSuffix, fc, v422, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
