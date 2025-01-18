@@ -18,11 +18,11 @@
 #include "include/ErrorPropagation.h"
 #include "include/FlowContainerCalculation.h"
 
-void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC24ar_pass1_medium_318934"){
+void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_327815"){
     // Produce flow results in root file for each subwagon
 
     TFile* f = new TFile(Form("./AnalysisResults/AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
-    vector<string> SubwagonNames = {""};
+    vector<string> SubwagonNames = {"","_kIsGoodITSLayersAll"};
     for(uint i=0; i < SubwagonNames.size(); i++){
         FlowContainer* fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         if(!fc){
@@ -67,17 +67,17 @@ void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC24ar_pass1_medium_
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         Output_NSC(FileNameSuffix, fc, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_SCklm(FileNameSuffix, fc, 2, 3, -1, SubwagonNames[i]);
+        Output_NSCklm(FileNameSuffix, fc, 2, 3, -1, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_SCklm(FileNameSuffix, fc, 2, 4, -1, SubwagonNames[i]);
+        Output_NSCklm(FileNameSuffix, fc, 2, 4, -1, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_SCklm(FileNameSuffix, fc, 2, 3, 4, SubwagonNames[i]);
+        Output_NSCklm(FileNameSuffix, fc, 2, 3, 4, SubwagonNames[i]);
+        // fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+        // Output_SCklm(FileNameSuffix, fc, 2, 3, 5, SubwagonNames[i]);
+        // fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+        // Output_SCklm(FileNameSuffix, fc, 2, 4, 6, SubwagonNames[i]);
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_SCklm(FileNameSuffix, fc, 2, 3, 5, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_SCklm(FileNameSuffix, fc, 2, 4, 6, SubwagonNames[i]);
-        fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
-        Output_SCklm(FileNameSuffix, fc, 3, 4, 5, SubwagonNames[i]);
+        Output_NSCklm(FileNameSuffix, fc, 3, 4, 5, SubwagonNames[i]);
     }
 
     return;
