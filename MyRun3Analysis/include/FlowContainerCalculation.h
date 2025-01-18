@@ -348,7 +348,7 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double
     fc->SetIDName("Ch10Gap");
     fc->SetPropagateErrors(kTRUE);
     TH1D* hV22pt = (TH1D*)fc->GetVN2VsPt(n,CentMin,CentMax);
-    hV22pt->SetName("pTDiffv2");
+    hV22pt->SetName(Form("pTDiffv%d",n));
     if(!hV22pt){
         Printf("Can't get hV22");
         return;

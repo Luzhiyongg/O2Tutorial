@@ -150,8 +150,8 @@ std::map<kObservable,bool> IfCheckObservable = {
     {kNSC234,true},
     {kNSC345,true},
     {kpTDiffv2,true},
-    {kpTDiffv3,true},
-    {kpTDiffv4,true}
+    {kpTDiffv3,false},
+    {kpTDiffv4,false}
 };
         
 void ProcessFlowContainerDrawDiffRatio2Run2(){
@@ -254,9 +254,19 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         string fileName_SC234 = "./ProcessOutput/NSC234_" + suffix + ".root";
         string fileName_SC345 = "./ProcessOutput/NSC345_" + suffix + ".root";
         vector<string> fileName_pTDiffv2(pTDiffCent.size()-1);
+        vector<string> fileName_pTDiffv3(pTDiffCent.size()-1);
+        vector<string> fileName_pTDiffv4(pTDiffCent.size()-1);
         for (uint j=0; j<pTDiffCent.size()-1; j++) {
             string temp_s = Form("./ProcessOutput/pTDiffv2Cent%dTo%d_",(int)pTDiffCent[j],(int)pTDiffCent[j+1]) + suffix + ".root";
             fileName_pTDiffv2[j] = temp_s;
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            string temp_s = Form("./ProcessOutput/pTDiffv3Cent%dTo%d_",(int)pTDiffCent[j],(int)pTDiffCent[j+1]) + suffix + ".root";
+            fileName_pTDiffv3[j] = temp_s;
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            string temp_s = Form("./ProcessOutput/pTDiffv4Cent%dTo%d_",(int)pTDiffCent[j],(int)pTDiffCent[j+1]) + suffix + ".root";
+            fileName_pTDiffv4[j] = temp_s;
         }
 
         TFile* resultsFile = nullptr;
@@ -364,6 +374,26 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
                     return;
                 }
                 resultsFiles_pTDiffv2[j].push_back(resultsFile);
+            }
+        }
+        if (IfCheckObservable[kpTDiffv3]) {
+            for (uint j=0; j<pTDiffCent.size()-1; j++) {
+                resultsFile = TFile::Open(fileName_pTDiffv3[j].c_str(), "READ");
+                if(!resultsFile || resultsFile->IsZombie()){
+                    cout << "Error: cannot open file " << fileName_pTDiffv3[j] << endl;
+                    return;
+                }
+                resultsFiles_pTDiffv3[j].push_back(resultsFile);
+            }
+        }
+        if (IfCheckObservable[kpTDiffv4]) {
+            for (uint j=0; j<pTDiffCent.size()-1; j++) {
+                resultsFile = TFile::Open(fileName_pTDiffv4[j].c_str(), "READ");
+                if(!resultsFile || resultsFile->IsZombie()){
+                    cout << "Error: cannot open file " << fileName_pTDiffv4[j] << endl;
+                    return;
+                }
+                resultsFiles_pTDiffv4[j].push_back(resultsFile);
             }
         }
         pTCentIndex++;
@@ -1016,7 +1046,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // =================
     // pTDiffv2
     // =================
-    vector<int> PubTable = {15, 23, 33, 43, 53, 63, 73, 83};
+    vector<int> PubTable_pTDiffv2 = {15, 23, 33, 43, 53, 63, 73, 83};
     if (IfCheckObservable[kpTDiffv2]) {
         for (uint j=0;j<pTDiffCent.size()-1;j++) {
             index = 0;
@@ -1025,7 +1055,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             cpTDiffv2->cd(1);
             gPad->SetBottomMargin(0.05);
             TLegend* leg_pTDiffv2 = new TLegend(0.2,0.7,0.9,0.9);
-            TH1D* frame_pTDiffv2 = new TH1D(Form("frame_pTDiffv2_%d",j), Form("frame_pTDiffv2_%d",j), 50,0,10.);
+            TH1D* frame_pTDiffv2 = new TH1D(Form("frame_pTDiffv2_%d",j), Form("frame_pTDiffv2_%d",j), 50,0,5.);
             frame_pTDiffv2->SetMaximum(0.3);
             frame_pTDiffv2->SetMinimum(0.);
             frame_pTDiffv2->Draw("AXIS");
@@ -1038,8 +1068,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             }
 
             TGraphAsymmErrors* g_pTDiffv2 = nullptr;
-            if (j<PubTable.size()) {
-                g_pTDiffv2 = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable[j]));
+            if (j<PubTable_pTDiffv2.size()) {
+                g_pTDiffv2 = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable_pTDiffv2[j]));
                 if(!g_pTDiffv2) continue;
                 SetMarkerAndLine(g_pTDiffv2,kBlack,kOpenSquare,kSolid,1.0);
                 g_pTDiffv2->Draw("PE");
@@ -1056,7 +1086,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
 
             cpTDiffv2->cd(2);
             gPad->SetTopMargin(0.05);
-            TH1D* frame_ratio_pTDiffv2 = new TH1D(Form("frame_ratio_pTDiffv2_%d",j), Form("frame_ratio_pTDiffv2_%d",j),50,0.,10.);
+            TH1D* frame_ratio_pTDiffv2 = new TH1D(Form("frame_ratio_pTDiffv2_%d",j), Form("frame_ratio_pTDiffv2_%d",j),50,0.,5.);
             frame_ratio_pTDiffv2->SetMaximum(1.4);
             frame_ratio_pTDiffv2->SetMinimum(0.6);
             frame_ratio_pTDiffv2->SetYTitle("Ratio to Run 2");
@@ -1072,6 +1102,128 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             cpTDiffv2->SaveAs(Form("./OutputPDF/pTDiffv2Cent%dTo%d_RatioToRun2.pdf",(int)pTDiffCent[j],(int)pTDiffCent[j+1]));
         }
     }
+
+
+    // =================
+    // pTDiffv3
+    // =================
+    vector<int> PubTable_pTDiffv3 = {17, 25, 35, 45, 55, 65, 75, 85};
+    if (IfCheckObservable[kpTDiffv3]) {
+        for (uint j=0;j<pTDiffCent.size()-1;j++) {
+            index = 0;
+            TCanvas* cpTDiffv3 = new TCanvas(Form("cpTDiffv3_%d",j), Form("cpTDiffv3_%d",j), 800, 1200);
+            cpTDiffv3->Divide(1,2);
+            cpTDiffv3->cd(1);
+            gPad->SetBottomMargin(0.05);
+            TLegend* leg_pTDiffv3 = new TLegend(0.2,0.7,0.9,0.9);
+            TH1D* frame_pTDiffv3 = new TH1D(Form("frame_pTDiffv3_%d",j), Form("frame_pTDiffv3_%d",j), 50,0,3.);
+            frame_pTDiffv3->SetMaximum(0.15);
+            frame_pTDiffv3->SetMinimum(0.);
+            frame_pTDiffv3->Draw("AXIS");
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* h_pTDiffv3 = (TH1D*)resultsFiles_pTDiffv3[j][i]->Get(Form("pTDiffv3"));
+                SetMarkerAndLine(h_pTDiffv3,GetColor(index),kFullCircle,kSolid,1.0);
+                h_pTDiffv3->Draw("ESAMES");
+                leg_pTDiffv3->AddEntry(h_pTDiffv3,Form("v_{3}{2,|#Delta#eta|>1.0}(p_{T}) Cent:%d~%d%% (%s)",(int)pTDiffCent[j],(int)pTDiffCent[j+1],legendNames[i].c_str()),"lp");
+                index+=1;
+            }
+
+            TGraphAsymmErrors* g_pTDiffv3 = nullptr;
+            if (j<PubTable_pTDiffv3.size()) {
+                g_pTDiffv3 = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable_pTDiffv3[j]));
+                if(!g_pTDiffv3) continue;
+                SetMarkerAndLine(g_pTDiffv3,kBlack,kOpenSquare,kSolid,1.0);
+                g_pTDiffv3->Draw("PE");
+                leg_pTDiffv3->AddEntry(g_pTDiffv3,Form("JHEP 07 (2018) 103"));
+            }
+            leg_pTDiffv3->Draw();
+
+            if(!g_pTDiffv3) continue;
+            TH1D* pub_pTDiffv3 = new TH1D(Form("pub_pTDiffv3_%d",j),Form("pub_pTDiffv3_%d",j),20,x_pTDiff);
+            for(int i=0;i<28;i++){
+                pub_pTDiffv3->SetBinContent(i+1,g_pTDiffv3->GetPointY(i));
+                pub_pTDiffv3->SetBinError(i+1,g_pTDiffv3->GetErrorY(i));
+            }
+
+            cpTDiffv3->cd(2);
+            gPad->SetTopMargin(0.05);
+            TH1D* frame_ratio_pTDiffv3 = new TH1D(Form("frame_ratio_pTDiffv3_%d",j), Form("frame_ratio_pTDiffv3_%d",j),50,0.,3.);
+            frame_ratio_pTDiffv3->SetMaximum(1.4);
+            frame_ratio_pTDiffv3->SetMinimum(0.6);
+            frame_ratio_pTDiffv3->SetYTitle("Ratio to Run 2");
+            frame_ratio_pTDiffv3->Draw("AXIS");
+            One->Draw("sames");
+            index=0;
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* ratio_pTDiffv3 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv3[j][i]->Get(Form("pTDiffv3")),pub_pTDiffv3,true);
+                SetMarkerAndLine(ratio_pTDiffv3,GetColor(index),kFullCircle,kSolid,1.0);
+                ratio_pTDiffv3->Draw("ESAMES");
+                index++;
+            }
+            cpTDiffv3->SaveAs(Form("./OutputPDF/pTDiffv3Cent%dTo%d_RatioToRun2.pdf",(int)pTDiffCent[j],(int)pTDiffCent[j+1]));
+        }
+    }
+
+    // =================
+    // pTDiffv4
+    // =================
+    vector<int> PubTable_pTDiffv4 = {19, 27, 37, 47, 57, 67, 77, 87};
+    if (IfCheckObservable[kpTDiffv4]) {
+        for (uint j=0;j<pTDiffCent.size()-1;j++) {
+            index = 0;
+            TCanvas* cpTDiffv4 = new TCanvas(Form("cpTDiffv4_%d",j), Form("cpTDiffv4_%d",j), 800, 1200);
+            cpTDiffv4->Divide(1,2);
+            cpTDiffv4->cd(1);
+            gPad->SetBottomMargin(0.05);
+            TLegend* leg_pTDiffv4 = new TLegend(0.2,0.7,0.9,0.9);
+            TH1D* frame_pTDiffv4 = new TH1D(Form("frame_pTDiffv4_%d",j), Form("frame_pTDiffv4_%d",j), 50,0,3.);
+            frame_pTDiffv4->SetMaximum(0.15);
+            frame_pTDiffv4->SetMinimum(0.);
+            frame_pTDiffv4->Draw("AXIS");
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* h_pTDiffv4 = (TH1D*)resultsFiles_pTDiffv4[j][i]->Get(Form("pTDiffv4"));
+                SetMarkerAndLine(h_pTDiffv4,GetColor(index),kFullCircle,kSolid,1.0);
+                h_pTDiffv4->Draw("ESAMES");
+                leg_pTDiffv4->AddEntry(h_pTDiffv4,Form("v_{4}{2,|#Delta#eta|>1.0}(p_{T}) Cent:%d~%d%% (%s)",(int)pTDiffCent[j],(int)pTDiffCent[j+1],legendNames[i].c_str()),"lp");
+                index+=1;
+            }
+
+            TGraphAsymmErrors* g_pTDiffv4 = nullptr;
+            if (j<PubTable_pTDiffv4.size()) {
+                g_pTDiffv4 = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable_pTDiffv4[j]));
+                if(!g_pTDiffv4) continue;
+                SetMarkerAndLine(g_pTDiffv4,kBlack,kOpenSquare,kSolid,1.0);
+                g_pTDiffv4->Draw("PE");
+                leg_pTDiffv4->AddEntry(g_pTDiffv4,Form("JHEP 07 (2018) 103"));
+            }
+            leg_pTDiffv4->Draw();
+
+            if(!g_pTDiffv4) continue;
+            TH1D* pub_pTDiffv4 = new TH1D(Form("pub_pTDiffv4_%d",j),Form("pub_pTDiffv4_%d",j),20,x_pTDiff);
+            for(int i=0;i<28;i++){
+                pub_pTDiffv4->SetBinContent(i+1,g_pTDiffv4->GetPointY(i));
+                pub_pTDiffv4->SetBinError(i+1,g_pTDiffv4->GetErrorY(i));
+            }
+
+            cpTDiffv4->cd(2);
+            gPad->SetTopMargin(0.05);
+            TH1D* frame_ratio_pTDiffv4 = new TH1D(Form("frame_ratio_pTDiffv4_%d",j), Form("frame_ratio_pTDiffv4_%d",j),50,0.,3.);
+            frame_ratio_pTDiffv4->SetMaximum(1.4);
+            frame_ratio_pTDiffv4->SetMinimum(0.6);
+            frame_ratio_pTDiffv4->SetYTitle("Ratio to Run 2");
+            frame_ratio_pTDiffv4->Draw("AXIS");
+            One->Draw("sames");
+            index=0;
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* ratio_pTDiffv4 = GetRatio(28,(TH1D*)resultsFiles_pTDiffv4[j][i]->Get(Form("pTDiffv4")),pub_pTDiffv4,true);
+                SetMarkerAndLine(ratio_pTDiffv4,GetColor(index),kFullCircle,kSolid,1.0);
+                ratio_pTDiffv4->Draw("ESAMES");
+                index++;
+            }
+            cpTDiffv4->SaveAs(Form("./OutputPDF/pTDiffv4Cent%dTo%d_RatioToRun2.pdf",(int)pTDiffCent[j],(int)pTDiffCent[j+1]));
+        }
+    }
+
 
     return;
     
