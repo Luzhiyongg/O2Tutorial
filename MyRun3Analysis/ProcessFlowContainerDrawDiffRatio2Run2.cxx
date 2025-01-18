@@ -120,16 +120,14 @@ enum kObservable{
     kV24,
     kV26,
     kV28,
+    kV210,
     kV422,
     kChi422,
     kRho422,
-    kNSC,
-    kSC23,
-    kSC24,
-    kSC234,
-    kSC235,
-    kSC246,
-    kSC345,
+    kNSC23,
+    kNSC24,
+    kNSC234,
+    kNSC345,
     kpTDiffv2Cent0To5,
     kpTDiffv2Cent5To10,
     kpTDiffv2Cent10To20,
@@ -143,19 +141,17 @@ enum kObservable{
 
 std::map<kObservable,bool> IfCheckObservable = {
     {kVn,true},
-    {kV24,false},
-    {kV26,false},
-    {kV28,false},
-    {kV422,false},
-    {kChi422,false},
-    {kRho422,false},
-    {kNSC,false},
-    {kSC23,false},
-    {kSC24,false},
-    {kSC234,false},
-    {kSC235,false},
-    {kSC246,false},
-    {kSC345,false},
+    {kV24,true},
+    {kV26,true},
+    {kV28,true},
+    {kV210,false},
+    {kV422,true},
+    {kChi422,true},
+    {kRho422,true},
+    {kNSC23,true},
+    {kNSC24,true},
+    {kNSC234,true},
+    {kNSC345,true},
     {kpTDiffv2Cent0To5,true},
     {kpTDiffv2Cent5To10,true},
     {kpTDiffv2Cent10To20,true},
@@ -173,16 +169,14 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     vector<TFile*> resultsFiles_v24;
     vector<TFile*> resultsFiles_v26;
     vector<TFile*> resultsFiles_v28;
+    vector<TFile*> resultsFiles_v210;
     vector<TFile*> resultsFiles_v422;
     vector<TFile*> resultsFiles_chi422;
     vector<TFile*> resultsFiles_rho422;
-    vector<TFile*> resultsFiles_NSC;
-    vector<TFile*> resultsFiles_SC23;
-    vector<TFile*> resultsFiles_SC24;
-    vector<TFile*> resultsFiles_SC234;
-    vector<TFile*> resultsFiles_SC235;
-    vector<TFile*> resultsFiles_SC246;
-    vector<TFile*> resultsFiles_SC345;
+    vector<TFile*> resultsFiles_NSC23;
+    vector<TFile*> resultsFiles_NSC24;
+    vector<TFile*> resultsFiles_NSC234;
+    vector<TFile*> resultsFiles_NSC345;
     vector<TFile*> resultsFiles_pTDiffv2Cent0To5;
     vector<TFile*> resultsFiles_pTDiffv2Cent5To10;
     vector<TFile*> resultsFiles_pTDiffv2Cent10To20;
@@ -192,14 +186,23 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     vector<TFile*> resultsFiles_pTDiffv2Cent50To60;
     vector<TFile*> resultsFiles_pTDiffv2Cent60To70;
     // FileNameSuffixs.push_back("LHC23zzh_pass4_305042");
+    // legendNames.push_back("LHC23zzh_pass4_305042");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_285891");
     // legendNames.push_back("previous results: with TPC rejection");
-    FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058");
-    legendNames.push_back("2023 data");
-    FileNameSuffixs.push_back("LHC24ar_pass1_medium_318934");
-    legendNames.push_back("2024 data");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327042");
+    // legendNames.push_back("default");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_326471");
+    // legendNames.push_back("default bad NUA");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_277299");
+    // legendNames.push_back("default");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_277299_VtxZ6");
+    // legendNames.push_back("VtxZ6");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_277299_VtxZ8");
+    // legendNames.push_back("VtxZ8");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058");
+    // legendNames.push_back("default");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058_pT5GeV");
-    // legendNames.push_back("this update: pT 0.2-5 GeV/c");
+    // legendNames.push_back("pT 0.2-5 GeV/c");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058_ITSMatch");
     // legendNames.push_back("this update: global + Run3ITSall7Layers");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306992");
@@ -207,27 +210,61 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306992_ITSMatch");
     // legendNames.push_back("this update: global + Run3ITSall7Layers");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306755");
+    // legendNames.push_back("default");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_306755_NUECheck");
+    // legendNames.push_back("default change NUE");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260");
+    // legendNames.push_back("default");
     // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260_midOcc");
+    // legendNames.push_back("mid-occupancy");
     // FileNameSuffixs.push_back("LHC23_PbPb_pass4_279260_highOcc");
+    // legendNames.push_back("high-occupancy");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_279536");
+    // legendNames.push_back("remove kTVXinTRD");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_279536_Mult_Cor");
+    // legendNames.push_back("remove kTVXinTRD w/o MultCor");
+    // FileNameSuffixs.push_back("LHC23zzn_pass3_I_A11_218295");
+    // legendNames.push_back("mixed interaction rate");
+    // FileNameSuffixs.push_back("LHC23zzn_pass3_I_A11_small_219651");
+    // legendNames.push_back("low interaction rate");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327042");
+    // legendNames.push_back("default");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327042_kIsGoodITSLayersAll");
+    // legendNames.push_back("default + kIsGoodITSLayersAll");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_306468_FineCentBin");
+    // legendNames.push_back("full 2023 data");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058");
+    // legendNames.push_back("2023 data");
+    // FileNameSuffixs.push_back("LHC24ar_pass1_medium_318934");
+    // legendNames.push_back("2024 data");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815");
+    legendNames.push_back("default");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815_kIsGoodITSLayersAll");
+    legendNames.push_back("default+kIsGoodITSLayersAll");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815_GoodZvtxFT0vsPV");
+    // legendNames.push_back("default+GoodZvtxFT0vsPV");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815_kNoCollInTimeRangeStandard");
+    // legendNames.push_back("default+kNoCollInTimeRangeStandard");
+
+
+    if (FileNameSuffixs.empty() || legendNames.empty()) {
+        Printf("Error: no input files specified.");
+        return;
+    }
 
     for(auto& suffix : FileNameSuffixs){
         string fileName_vn = "./ProcessOutput/vn_" + suffix + ".root";
         string fileName_v24 = "./ProcessOutput/v24_" + suffix + ".root";
         string fileName_v26 = "./ProcessOutput/v26_" + suffix + ".root";
         string fileName_v28 = "./ProcessOutput/v28_" + suffix + ".root";
+        string fileName_v210 = "./ProcessOutput/v210_" + suffix + ".root";
         string fileName_v422 = "./ProcessOutput/v422_" + suffix + ".root";
         string fileName_chi422 = "./ProcessOutput/chi422_" + suffix + ".root";
         string fileName_rho422 = "./ProcessOutput/rho422_" + suffix + ".root";
-        string fileName_NSC = "./ProcessOutput/NSC_" + suffix + ".root";
-        string fileName_SC23 = "./ProcessOutput/SC23_" + suffix + ".root";
-        string fileName_SC24 = "./ProcessOutput/SC24_" + suffix + ".root";
-        string fileName_SC234 = "./ProcessOutput/SC234_" + suffix + ".root";
-        string fileName_SC235 = "./ProcessOutput/SC235_" + suffix + ".root";
-        string fileName_SC246 = "./ProcessOutput/SC246_" + suffix + ".root";
-        string fileName_SC345 = "./ProcessOutput/SC345_" + suffix + ".root";
+        string fileName_SC23 = "./ProcessOutput/NSC23_" + suffix + ".root";
+        string fileName_SC24 = "./ProcessOutput/NSC24_" + suffix + ".root";
+        string fileName_SC234 = "./ProcessOutput/NSC234_" + suffix + ".root";
+        string fileName_SC345 = "./ProcessOutput/NSC345_" + suffix + ".root";
         string fileName_pTDiffv2Cent0To5 = "./ProcessOutput/pTDiffv2Cent0To5_" + suffix + ".root";
         string fileName_pTDiffv2Cent5To10 = "./ProcessOutput/pTDiffv2Cent5To10_" + suffix + ".root";
         string fileName_pTDiffv2Cent10To20 = "./ProcessOutput/pTDiffv2Cent10To20_" + suffix + ".root";
@@ -270,6 +307,14 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             }
             resultsFiles_v28.push_back(resultsFile);
         }
+        if (IfCheckObservable[kV210]) {
+            resultsFile = TFile::Open(fileName_v210.c_str(), "READ");
+            if(!resultsFile || resultsFile->IsZombie()){
+                cout << "Error: cannot open file " << fileName_v210 << endl;
+                return;
+            }
+            resultsFiles_v210.push_back(resultsFile);
+        }
         if (IfCheckObservable[kV422]) {
             resultsFile = TFile::Open(fileName_v422.c_str(), "READ");
             if(!resultsFile || resultsFile->IsZombie()){
@@ -294,61 +339,37 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             }
             resultsFiles_rho422.push_back(resultsFile);
         }
-        if (IfCheckObservable[kNSC]) {
-            resultsFile = TFile::Open(fileName_NSC.c_str(), "READ");
-            if(!resultsFile || resultsFile->IsZombie()){
-                cout << "Error: cannot open file " << fileName_NSC << endl;
-                return;
-            }
-            resultsFiles_NSC.push_back(resultsFile);
-        }
-        if (IfCheckObservable[kSC23]) {
+        if (IfCheckObservable[kNSC23]) {
             resultsFile = TFile::Open(fileName_SC23.c_str(), "READ");
             if(!resultsFile || resultsFile->IsZombie()){
                 cout << "Error: cannot open file " << fileName_SC23 << endl;
                 return;
             }
-            resultsFiles_SC23.push_back(resultsFile);
+            resultsFiles_NSC23.push_back(resultsFile);
         }
-        if (IfCheckObservable[kSC24]) {
+        if (IfCheckObservable[kNSC24]) {
             resultsFile = TFile::Open(fileName_SC24.c_str(), "READ");
             if(!resultsFile || resultsFile->IsZombie()){
                 cout << "Error: cannot open file " << fileName_SC24 << endl;
                 return;
             }
-            resultsFiles_SC24.push_back(resultsFile);
+            resultsFiles_NSC24.push_back(resultsFile);
         }
-        if (IfCheckObservable[kSC234]) {
+        if (IfCheckObservable[kNSC234]) {
             resultsFile = TFile::Open(fileName_SC234.c_str(), "READ");
             if(!resultsFile || resultsFile->IsZombie()){
                 cout << "Error: cannot open file " << fileName_SC234 << endl;
                 return;
             }
-            resultsFiles_SC234.push_back(resultsFile);
+            resultsFiles_NSC234.push_back(resultsFile);
         }
-        if (IfCheckObservable[kSC235]) {
-            resultsFile = TFile::Open(fileName_SC235.c_str(), "READ");
-            if(!resultsFile || resultsFile->IsZombie()){
-                cout << "Error: cannot open file " << fileName_SC235 << endl;
-                return;
-            }
-            resultsFiles_SC235.push_back(resultsFile);
-        }
-        if (IfCheckObservable[kSC246]) {
-            resultsFile = TFile::Open(fileName_SC246.c_str(), "READ");
-            if(!resultsFile || resultsFile->IsZombie()){
-                cout << "Error: cannot open file " << fileName_SC246 << endl;
-                return;
-            }
-            resultsFiles_SC246.push_back(resultsFile);
-        }
-        if (IfCheckObservable[kSC345]) {
+        if (IfCheckObservable[kNSC345]) {
             resultsFile = TFile::Open(fileName_SC345.c_str(), "READ");
             if(!resultsFile || resultsFile->IsZombie()){
                 cout << "Error: cannot open file " << fileName_SC345 << endl;
                 return;
             }
-            resultsFiles_SC345.push_back(resultsFile);
+            resultsFiles_NSC345.push_back(resultsFile);
         }
         if (IfCheckObservable[kpTDiffv2Cent0To5]) {
             resultsFile = TFile::Open(fileName_pTDiffv2Cent0To5.c_str(), "READ");
@@ -464,7 +485,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         c1->cd(2);
         gPad->SetTopMargin(0.05);
         TH1D* frame_ratio = new TH1D("frame_ratio", "frame_ratio", 90,0,90);
-        frame_ratio->SetMaximum(1.05);
+        frame_ratio->SetMaximum(1.5);
         frame_ratio->SetMinimum(0.7);
         frame_ratio->SetYTitle("Ratio to Run 2");
         frame_ratio->Draw("AXIS");
@@ -478,6 +499,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio->Draw("ESAMES");
             index++;
         }
+        c1->SaveAs(Form("./OutputPDF/v22_RatioToRun2.pdf"));
 
         // =================
         // v3{2}
@@ -515,7 +537,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         c_v32->cd(2);
         gPad->SetTopMargin(0.05);
         TH1D* frame_ratio_v32 = new TH1D("frame_ratio_v32", "frame_ratio_v32", 90,0,90);
-        frame_ratio_v32->SetMaximum(1.05);
+        frame_ratio_v32->SetMaximum(1.5);
         frame_ratio_v32->SetMinimum(0.7);
         frame_ratio_v32->SetYTitle("Ratio to Run 2");
         frame_ratio_v32->Draw("AXIS");
@@ -527,6 +549,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_v32->Draw("ESAMES");
             index++;
         }
+        c_v32->SaveAs(Form("./OutputPDF/v32_RatioToRun2.pdf"));
 
         // =================
         // v4{2}
@@ -565,7 +588,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         c_v42->cd(2);
         gPad->SetTopMargin(0.05);
         TH1D* frame_ratio_v42 = new TH1D("frame_ratio_v42", "frame_ratio_v42", 90,0,90);
-        frame_ratio_v42->SetMaximum(1.05);
+        frame_ratio_v42->SetMaximum(1.5);
         frame_ratio_v42->SetMinimum(0.7);
         frame_ratio_v42->SetYTitle("Ratio to Run 2");
         frame_ratio_v42->Draw("AXIS");
@@ -577,6 +600,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_v42->Draw("ESAMES");
             index++;
         }
+        c_v42->SaveAs(Form("./OutputPDF/v42_RatioToRun2.pdf"));
     }
 
     TFile* publish_ins1666817 = new TFile("./PublicData/HEPData-ins1666817-v1-root.root","READ");
@@ -601,6 +625,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             leg_v24->AddEntry(h_v24,Form("v_{2}{4} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
+        if (IfCheckObservable[kV26]) 
         for(int i=0;i<FileNameSuffixs.size();i++){
             TH1D* h_v26 = (TH1D*)resultsFiles_v26[i]->Get("corr_26_hist");
             SetMarkerAndLine(h_v26,GetColor(index),kFullSquare,kSolid,1.0);
@@ -608,6 +633,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             leg_v24->AddEntry(h_v26,Form("v_{2}{6} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
+        if (IfCheckObservable[kV28]) 
         for(int i=0;i<FileNameSuffixs.size();i++){
             TH1D* h_v28 = (TH1D*)resultsFiles_v28[i]->Get("corr_28_hist");
             SetMarkerAndLine(h_v28,GetColor(index),kFullStar,kSolid,1.0);
@@ -615,10 +641,20 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             leg_v24->AddEntry(h_v28,Form("v_{2}{8} (%s)",legendNames[i].c_str()),"lp");
             index++;
         }
-        TGraphAsymmErrors* g_v24 = (TGraphAsymmErrors*)publish_ins1666817->Get("Table 194/Graph1D_y1");
+        if (IfCheckObservable[kV210]) 
+        for(int i=0;i<FileNameSuffixs.size();i++){
+            TH1D* h_v210 = (TH1D*)resultsFiles_v210[i]->Get("cN10_corr_210_hist");
+            SetMarkerAndLine(h_v210,GetColor(index),kFullTriangleUp,kSolid,1.0);
+            h_v210->Draw("ESAMES");
+            leg_v24->AddEntry(h_v210,Form("v_{2}{10} (%s)",legendNames[i].c_str()),"lp");
+            index++;
+        }
+        // TGraphAsymmErrors* g_v24 = (TGraphAsymmErrors*)publish_ins1666817->Get("Table 194/Graph1D_y1");
+        TGraphAsymmErrors* g_v24 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v24_TPCPileUp");
         SetMarkerAndLine(g_v24,kBlack,kOpenSquare,kSolid,1.0);
         g_v24->Draw("PE");
-        leg_v24->AddEntry(g_v24,Form("v_{2}{4} JHEP 07 (2018) 103"));
+        // leg_v24->AddEntry(g_v24,Form("v_{2}{4} JHEP 07 (2018) 103"));
+        leg_v24->AddEntry(g_v24,Form("v_{2}{4} arXiv:2409.04343"));
         leg_v24->Draw();
 
         TH1D* pub_v24 = new TH1D("pub_v24","pub_v24",7,x_v2);
@@ -637,21 +673,32 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         One->Draw("sames");
         TLegend* leg_ratio_v24 = new TLegend(0.2,0.7,0.8,0.9);
         index=1;
+        if (IfCheckObservable[kV26]) 
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* ratio_v26 = GetRatio(7,(TH1D*)resultsFiles_v26[i]->Get("corr_26_hist"),(TH1D*)resultsFiles_v24[i]->Get("Corr_corr_24_hist"));
+            TH1D* ratio_v26 = GetRatio(10,(TH1D*)resultsFiles_v26[i]->Get("corr_26_hist"),(TH1D*)resultsFiles_v24[i]->Get("Corr_corr_24_hist"));
             SetMarkerAndLine(ratio_v26,GetColor(index),kFullSquare,kSolid,1.0);
             ratio_v26->Draw("ESAMES");
             leg_ratio_v24->AddEntry(ratio_v26,Form("v_{2}{6}/v_{2}{4}"),"lp");
             index++;
         }
+        if (IfCheckObservable[kV28]) 
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* ratio_v28 = GetRatio(7,(TH1D*)resultsFiles_v28[i]->Get("corr_28_hist"),(TH1D*)resultsFiles_v24[i]->Get("Corr_corr_24_hist")); 
+            TH1D* ratio_v28 = GetRatio(10,(TH1D*)resultsFiles_v28[i]->Get("corr_28_hist"),(TH1D*)resultsFiles_v24[i]->Get("Corr_corr_24_hist")); 
             SetMarkerAndLine(ratio_v28,GetColor(index),kFullStar,kSolid,1.0);
             ratio_v28->Draw("ESAMES");
             leg_ratio_v24->AddEntry(ratio_v28,Form("v_{2}{8}/v_{2}{4}"),"lp");
             index++;
         }
+        if (IfCheckObservable[kV210]) 
+        for(int i=0;i<FileNameSuffixs.size();i++){
+            TH1D* ratio_v210 = GetRatio(10,(TH1D*)resultsFiles_v210[i]->Get("cN10_corr_210_hist"),(TH1D*)resultsFiles_v24[i]->Get("Corr_corr_24_hist"));
+            SetMarkerAndLine(ratio_v210,GetColor(index),kFullTriangleUp,kSolid,1.0);
+            ratio_v210->Draw("ESAMES");
+            leg_ratio_v24->AddEntry(ratio_v210,Form("v_{2}{10}/v_{2}{4}"),"lp");
+            index++;
+        }
         leg_ratio_v24->Draw();
+        c_v24->SaveAs(Form("./OutputPDF/v2m_RatioToRun2.pdf"));
     }
 
 
@@ -677,10 +724,12 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             index+=1;
         }
         // TFile* publish = new TFile("./PublicData/HEPData-ins1778342-v1-root.root","READ");
-        TGraphAsymmErrors* g_v422 = (TGraphAsymmErrors*)publish->Get("v422/Graph1D_y1");
+        // TGraphAsymmErrors* g_v422 = (TGraphAsymmErrors*)publish->Get("v422/Graph1D_y1");
+        TGraphAsymmErrors* g_v422 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v422_Gap10_TPCPileUp");
         SetMarkerAndLine(g_v422,kBlack,kOpenSquare,kSolid,1.0);
         g_v422->Draw("PE");
-        leg2->AddEntry(g_v422,Form("v_{4,22} JHEP 05 (2020) 085, 2020"));
+        // leg2->AddEntry(g_v422,Form("v_{4,22} JHEP 05 (2020) 085, 2020"));
+        leg2->AddEntry(g_v422,Form("v_{4,22} arXiv:2409.04343"));
         leg2->Draw();
         
         TH1D* pub_v422 = new TH1D("pub_v422","pub_v422",7,x_v2);
@@ -704,6 +753,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_v422->Draw("ESAMES");
             index++;
         }
+        c2->SaveAs(Form("./OutputPDF/v422_RatioToRun2.pdf"));
     }
 
     // =================
@@ -729,10 +779,12 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         }
         leg4->Draw();
 
-        TGraphAsymmErrors* g_chi422 = (TGraphAsymmErrors*)publish->Get("chi422/Graph1D_y1");
+        // TGraphAsymmErrors* g_chi422 = (TGraphAsymmErrors*)publish->Get("chi422/Graph1D_y1");
+        TGraphAsymmErrors* g_chi422 = (TGraphAsymmErrors*)publish_Run2pass2->Get("chi422_Gap10_TPCPileUp");
         SetMarkerAndLine(g_chi422,kBlack,kOpenSquare,kSolid,1.0);
         g_chi422->Draw("PE");
-        leg4->AddEntry(g_chi422,Form("#chi_{4,22} JHEP 05 (2020) 085, 2020"));
+        // leg4->AddEntry(g_chi422,Form("#chi_{4,22} JHEP 05 (2020) 085, 2020"));
+        leg4->AddEntry(g_chi422,Form("#chi_{4,22} arXiv:2409.04343"));
         leg4->Draw();
 
         TH1D* pub_chi422 = new TH1D("pub_chi422","pub_chi422",7,x_v2);
@@ -756,6 +808,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_chi422->Draw("ESAMES");
             index++;
         }
+        c4->SaveAs(Form("./OutputPDF/chi422_RatioToRun2.pdf"));
     }
 
 
@@ -782,10 +835,12 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         }
         leg_rho422->Draw();
 
-        TGraphAsymmErrors* g_rho422 = (TGraphAsymmErrors*)publish->Get("rho422/Graph1D_y1");
+        // TGraphAsymmErrors* g_rho422 = (TGraphAsymmErrors*)publish->Get("rho422/Graph1D_y1");
+        TGraphAsymmErrors* g_rho422 = (TGraphAsymmErrors*)publish_Run2pass2->Get("rho422_Gap10_TPCPileUp");
         SetMarkerAndLine(g_rho422,kBlack,kOpenSquare,kSolid,1.0);
         g_rho422->Draw("PE");
-        leg_rho422->AddEntry(g_rho422,Form("#rho_{4,22} JHEP 05 (2020) 085, 2020"));
+        // leg_rho422->AddEntry(g_rho422,Form("#rho_{4,22} JHEP 05 (2020) 085, 2020"));
+        leg_rho422->AddEntry(g_rho422,Form("#rho_{4,22} arXiv:2409.04343"));
         leg_rho422->Draw();
 
         TH1D* pub_rho422 = new TH1D("pub_rho422","pub_rho422",7,x_v2);
@@ -809,14 +864,15 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_rho422->Draw("ESAMES");
             index++;
         }
+        c_rho422->SaveAs(Form("./OutputPDF/rho422_RatioToRun2.pdf"));
     }
 
 
-    TFile* publish_NSC32 = new TFile("./PublicData/HEPData-ins1848215-v1-root.root","READ");
+    TFile* publish_1848215 = new TFile("./PublicData/HEPData-ins1848215-v1-root.root","READ");
     // =================
-    // NSC(3,2)
+    // NSC(2,3)
     // =================
-    if (IfCheckObservable[kNSC]) {
+    if (IfCheckObservable[kNSC23]) {
         index = 0;
         TCanvas* c3 = new TCanvas("c3", "c3", 800, 1200);
         c3->Divide(1,2);
@@ -824,361 +880,205 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         gPad->SetBottomMargin(0.05);
         TLegend* leg3 = new TLegend(0.2,0.7,0.5,0.9);
         TH1D* frame_NSC = new TH1D("frame_NSC", "frame_NSC", 90,0,90);
-        frame_NSC->SetMaximum(1.);
-        frame_NSC->SetMinimum(-1);
+        frame_NSC->SetMaximum(2.);
+        frame_NSC->SetMinimum(-2);
         frame_NSC->Draw("AXIS");
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* h_NSC = (TH1D*)resultsFiles_NSC[i]->Get("NSC32");
+            TH1D* h_NSC = (TH1D*)resultsFiles_NSC23[i]->Get("NSC23");
             SetMarkerAndLine(h_NSC,GetColor(index),kFullCircle,kSolid,1.0);
             h_NSC->Draw("ESAMES");
-            leg3->AddEntry(h_NSC,Form("NSC(3,2) (%s)",legendNames[i].c_str()),"lp");
+            leg3->AddEntry(h_NSC,Form("NSC(2,3) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
         leg3->Draw();
 
-        TGraphAsymmErrors* g_NSC32 = (TGraphAsymmErrors*)publish_NSC32->Get("Table 1/Graph1D_y1");
-        SetMarkerAndLine(g_NSC32,kBlack,kOpenSquare,kSolid,1.0);
-        g_NSC32->Draw("PE");
-        leg3->AddEntry(g_NSC32,Form("NSC(3,2) PLB 818 (2021) 136354, 2021"));
+        TGraphAsymmErrors* g_NSC23 = (TGraphAsymmErrors*)publish_1848215->Get("Table 1/Graph1D_y1");
+        SetMarkerAndLine(g_NSC23,kBlack,kOpenSquare,kSolid,1.0);
+        g_NSC23->Draw("PE");
+        leg3->AddEntry(g_NSC23,Form("NSC(2,3) PLB 818 (2021) 136354, 2021"));
         leg3->Draw();
 
-        TH1D* pub_NSC32 = new TH1D("pub_NSC32","pub_NSC32",7,x_v2);
+        TH1D* pub_NSC23 = new TH1D("pub_NSC23","pub_NSC23",7,x_v2);
         for(int i=0;i<7;i++){
-            pub_NSC32->SetBinContent(i+1,g_NSC32->GetPointY(i));
-            pub_NSC32->SetBinError(i+1,g_NSC32->GetErrorY(i));
+            pub_NSC23->SetBinContent(i+1,g_NSC23->GetPointY(i));
+            pub_NSC23->SetBinError(i+1,g_NSC23->GetErrorY(i));
         }
 
         c3->cd(2);
         gPad->SetTopMargin(0.05);
-        TH1D* frame_ratio_NSC32 = new TH1D("frame_ratio_NSC32", "frame_ratio_NSC32", 90,0,90);
-        frame_ratio_NSC32->SetMaximum(1.5);
-        frame_ratio_NSC32->SetMinimum(0.5);
-        frame_ratio_NSC32->SetYTitle("Ratio to Run 2");
-        frame_ratio_NSC32->Draw("AXIS");
+        TH1D* frame_ratio_NSC23 = new TH1D("frame_ratio_NSC23", "frame_ratio_NSC23", 90,0,90);
+        frame_ratio_NSC23->SetMaximum(1.5);
+        frame_ratio_NSC23->SetMinimum(0.5);
+        frame_ratio_NSC23->SetYTitle("Ratio to Run 2");
+        frame_ratio_NSC23->Draw("AXIS");
         One->Draw("sames");
         index=0;
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* ratio_NSC32 = GetRatio(7,(TH1D*)resultsFiles_NSC[i]->Get("NSC32"),pub_NSC32);
-            SetMarkerAndLine(ratio_NSC32,GetColor(index),kFullCircle,kSolid,1.0);
-            ratio_NSC32->Draw("ESAMES");
+            TH1D* ratio_NSC23 = GetRatio(7,(TH1D*)resultsFiles_NSC23[i]->Get("NSC23"),pub_NSC23);
+            SetMarkerAndLine(ratio_NSC23,GetColor(index),kFullCircle,kSolid,1.0);
+            ratio_NSC23->Draw("ESAMES");
             index++;
         }
-    }
-
-    TFile* publish_ins1452590 = new TFile("./PublicData/HEPData-ins1452590-v1-root.root","READ");
-    // =================
-    // SC(2,3)
-    // =================
-    if (IfCheckObservable[kSC23]) {
-        index = 0;
-        TCanvas* c_sc23 = new TCanvas("c_sc23","c_sc23", 800, 1200);
-        c_sc23->Divide(1,2);
-        c_sc23->cd(1);
-        gPad->SetBottomMargin(0.05);
-        TLegend* leg_sc23 = new TLegend(0.2,0.7,0.5,0.9);
-        TH1D* frame_sc23 = new TH1D("frame_sc23", "frame_sc23", 90,0,90);
-        frame_sc23->SetMaximum(5e-6);
-        frame_sc23->SetMinimum(-5e-6);
-        frame_sc23->Draw("AXIS");
-        for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* h_sc23 = (TH1D*)resultsFiles_SC23[i]->Get("SC23");
-            SetMarkerAndLine(h_sc23,GetColor(index),kFullCircle,kSolid,1.0);
-            h_sc23->Draw("ESAMES");
-            leg_sc23->AddEntry(h_sc23,Form("SC(2,3) (%s)",legendNames[i].c_str()),"lp");
-            index+=1;
-        }
-        leg_sc23->Draw();
-
-        TGraphAsymmErrors* g_sc23 = (TGraphAsymmErrors*)publish_ins1452590->Get("Table 1/Graph1D_y1");
-        SetMarkerAndLine(g_sc23,kBlack,kOpenSquare,kSolid,1.0);
-        g_sc23->Draw("PE");
-        leg_sc23->AddEntry(g_sc23,Form("SC(2,3) PRL. 117 (2016) 182301"));
-        leg_sc23->Draw();
-
-        TH1D* pub_sc23 = new TH1D("pub_sc23","pub_sc23",7,x_v2);
-        for(int i=0;i<7;i++){
-            pub_sc23->SetBinContent(i+1,g_sc23->GetPointY(i));
-            pub_sc23->SetBinError(i+1,g_sc23->GetErrorY(i));
-        }
-
-        c_sc23->cd(2);
-        gPad->SetTopMargin(0.05);
-        TH1D* frame_AbsValue_sc23 = new TH1D("frame_AbsValue_sc23", "frame_AbsValue_sc23", 90,0,90);
-        frame_AbsValue_sc23->SetMaximum(1e-6);
-        frame_AbsValue_sc23->SetMinimum(-1e-6);
-        frame_AbsValue_sc23->SetYTitle("Run3 - Run 2");
-        frame_AbsValue_sc23->Draw("AXIS");
-        One->Draw("sames");
-        index=0;
-        for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* AbsValue_sc23 = GetAbsValue(7,(TH1D*)resultsFiles_SC23[i]->Get("SC23"),pub_sc23);
-            SetMarkerAndLine(AbsValue_sc23,GetColor(index),kFullCircle,kSolid,1.0);
-            AbsValue_sc23->Draw("ESAMES");
-            index++;
-        }
+        c3->SaveAs(Form("./OutputPDF/NSC23_RatioToRun2.pdf"));
     }
 
     // =================
-    // SC(2,4)
+    // NSC(2,4)
     // =================
-    if (IfCheckObservable[kSC24]) {
+    if (IfCheckObservable[kNSC24]) {
         index = 0;
-        TCanvas* c_sc24 = new TCanvas("c_sc24","c_sc24", 800, 1200);
-        c_sc24->Divide(1,2);
-        c_sc24->cd(1);
+        TCanvas* c_NSC24 = new TCanvas("c_NSC24", "c_NSC24", 800, 1200);
+        c_NSC24->Divide(1,2);
+        c_NSC24->cd(1);
         gPad->SetBottomMargin(0.05);
-        TLegend* leg_sc24 = new TLegend(0.2,0.7,0.5,0.9);
-        TH1D* frame_sc24 = new TH1D("frame_sc24", "frame_sc24", 90,0,90);
-        frame_sc24->SetMaximum(5e-6);
-        frame_sc24->SetMinimum(-5e-6);
-        frame_sc24->Draw("AXIS");
+        TLegend* leg_NSC24 = new TLegend(0.2,0.7,0.5,0.9);
+        TH1D* frame_NSC24 = new TH1D("frame_NSC24", "frame_NSC24", 90,0,90);
+        frame_NSC24->SetMaximum(2.);
+        frame_NSC24->SetMinimum(-2);
+        frame_NSC24->Draw("AXIS");
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* h_sc24 = (TH1D*)resultsFiles_SC24[i]->Get("SC24");
-            SetMarkerAndLine(h_sc24,GetColor(index),kFullCircle,kSolid,1.0);
-            h_sc24->Draw("ESAMES");
-            leg_sc24->AddEntry(h_sc24,Form("SC(2,4) (%s)",legendNames[i].c_str()),"lp");
+            TH1D* h_NSC24 = (TH1D*)resultsFiles_NSC24[i]->Get("NSC24");
+            SetMarkerAndLine(h_NSC24,GetColor(index),kFullCircle,kSolid,1.0);
+            h_NSC24->Draw("ESAMES");
+            leg_NSC24->AddEntry(h_NSC24,Form("NSC(2,4) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
-        leg_sc24->Draw();
+        leg_NSC24->Draw();
 
-        // TFile* publish_ins1452590 = new TFile("./PublicData/HEPData-ins1452590-v1-root.root","READ");
-        TGraphAsymmErrors* g_sc24 = (TGraphAsymmErrors*)publish_ins1452590->Get("Table 1/Graph1D_y2");
-        SetMarkerAndLine(g_sc24,kBlack,kOpenSquare,kSolid,1.0);
-        g_sc24->Draw("PE");
-        leg_sc24->AddEntry(g_sc24,Form("SC(2,4) PRL. 117 (2016) 182301"));
-        leg_sc24->Draw();
+        TGraphAsymmErrors* g_NSC24 = (TGraphAsymmErrors*)publish_1848215->Get("Table 2/Graph1D_y1");
+        SetMarkerAndLine(g_NSC24,kBlack,kOpenSquare,kSolid,1.0);
+        g_NSC24->Draw("PE");
+        leg_NSC24->AddEntry(g_NSC24,Form("NSC(2,4) PLB 818 (2021) 136354, 2021"));
+        leg_NSC24->Draw();
 
-        TH1D* pub_sc24 = new TH1D("pub_sc24","pub_sc24",7,x_v2);
+        TH1D* pub_NSC24 = new TH1D("pub_NSC24","pub_NSC24",7,x_v2);
         for(int i=0;i<7;i++){
-            pub_sc24->SetBinContent(i+1,g_sc24->GetPointY(i));
-            pub_sc24->SetBinError(i+1,g_sc24->GetErrorY(i));
+            pub_NSC24->SetBinContent(i+1,g_NSC24->GetPointY(i));
+            pub_NSC24->SetBinError(i+1,g_NSC24->GetErrorY(i));
         }
 
-        c_sc24->cd(2);
+        c_NSC24->cd(2);
         gPad->SetTopMargin(0.05);
-        TH1D* frame_AbsValue_sc24 = new TH1D("frame_AbsValue_sc24", "frame_AbsValue_sc24", 90,0,90);
-        frame_AbsValue_sc24->SetMaximum(1e-6);
-        frame_AbsValue_sc24->SetMinimum(-1e-6);
-        frame_AbsValue_sc24->SetYTitle("Run3 - Run 2");
-        frame_AbsValue_sc24->Draw("AXIS");
+        TH1D* frame_ratio_NSC24 = new TH1D("frame_ratio_NSC24", "frame_ratio_NSC24", 90,0,90);
+        frame_ratio_NSC24->SetMaximum(1.5);
+        frame_ratio_NSC24->SetMinimum(0.5);
+        frame_ratio_NSC24->SetYTitle("Ratio to Run 2");
+        frame_ratio_NSC24->Draw("AXIS");
         One->Draw("sames");
         index=0;
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* AbsValue_sc24 = GetAbsValue(7,(TH1D*)resultsFiles_SC24[i]->Get("SC24"),pub_sc24);
-            SetMarkerAndLine(AbsValue_sc24,GetColor(index),kFullCircle,kSolid,1.0);
-            AbsValue_sc24->Draw("ESAMES");
+            TH1D* ratio_NSC24 = GetRatio(7,(TH1D*)resultsFiles_NSC24[i]->Get("NSC24"),pub_NSC24);
+            SetMarkerAndLine(ratio_NSC24,GetColor(index),kFullCircle,kSolid,1.0);
+            ratio_NSC24->Draw("ESAMES");
             index++;
         }
-    }
-
-
-    TFile* publish_ins1839720 = new TFile("./PublicData/HEPData-ins1839720-v1-root.root","READ");
-    // =================
-    // SC(2,3,4)
-    // =================
-    if (IfCheckObservable[kSC234]) {
-        index = 0;
-        TCanvas* c_sc234 = new TCanvas("c_sc234", "c_sc234", 800, 1200);
-        c_sc234->Divide(1,2);
-        c_sc234->cd(1);
-        gPad->SetBottomMargin(0.05);
-        TLegend* leg_sc234 = new TLegend(0.2,0.7,0.5,0.9);
-        TH1D* frame_sc234 = new TH1D("frame_sc234", "frame_sc234", 90,0,90);
-        frame_sc234->SetMaximum(5e-9);
-        frame_sc234->SetMinimum(-5e-9);
-        frame_sc234->Draw("AXIS");
-        for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* h_sc234 = (TH1D*)resultsFiles_SC234[i]->Get("SC234");
-            SetMarkerAndLine(h_sc234,GetColor(index),kFullCircle,kSolid,1.0);
-            h_sc234->Draw("ESAMES");
-            leg_sc234->AddEntry(h_sc234,Form("SC(2,3,4) (%s)",legendNames[i].c_str()),"lp");
-            index+=1;
-        }
-        leg_sc234->Draw();
-
-        TGraphAsymmErrors* g_sc234 = (TGraphAsymmErrors*)publish_ins1839720->Get("Table 1/Graph1D_y1");
-        SetMarkerAndLine(g_sc234,kBlack,kOpenSquare,kSolid,1.0);
-        g_sc234->Draw("PE");
-        leg_sc234->AddEntry(g_sc234,Form("SC(2,3,4) PRL. 127 (2021) 092302"));
-        leg_sc234->Draw();
-
-        TH1D* pub_sc234 = new TH1D("pub_sc234","pub_sc234",7,x_v2);
-        for(int i=0;i<7;i++){
-            pub_sc234->SetBinContent(i+1,g_sc234->GetPointY(i));
-            pub_sc234->SetBinError(i+1,g_sc234->GetErrorY(i));
-        }
-
-        c_sc234->cd(2);
-        gPad->SetTopMargin(0.05);
-        TH1D* frame_AbsValue_sc234 = new TH1D("frame_AbsValue_sc234", "frame_AbsValue_sc234", 90,0,90);
-        frame_AbsValue_sc234->SetMaximum(1e-9);
-        frame_AbsValue_sc234->SetMinimum(-1e-9);
-        frame_AbsValue_sc234->SetYTitle("Run3 - Run 2");
-        frame_AbsValue_sc234->Draw("AXIS");
-        One->Draw("sames");
-        index=0;
-        for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* AbsValue_sc234 = GetAbsValue(7,(TH1D*)resultsFiles_SC234[i]->Get("SC234"),pub_sc234);
-            SetMarkerAndLine(AbsValue_sc234,GetColor(index),kFullCircle,kSolid,1.0);
-            AbsValue_sc234->Draw("ESAMES");
-            index++;
-        }
-    }
-    
-    // =================
-    // SC(2,3,5)
-    // =================
-    if (IfCheckObservable[kSC235]) {
-        index = 0;
-        TCanvas* c_sc235 = new TCanvas("c_sc235", "c_sc235", 800, 1200);
-        c_sc235->Divide(1,2);
-        c_sc235->cd(1);
-        gPad->SetBottomMargin(0.05);
-        TLegend* leg_sc235 = new TLegend(0.2,0.7,0.5,0.9);
-        TH1D* frame_sc235 = new TH1D("frame_sc235", "frame_sc235", 90,0,90);
-        frame_sc235->SetMaximum(5e-9);
-        frame_sc235->SetMinimum(-5e-9);
-        frame_sc235->Draw("AXIS");
-        for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* h_sc235 = (TH1D*)resultsFiles_SC235[i]->Get("SC235");
-            SetMarkerAndLine(h_sc235,GetColor(index),kFullCircle,kSolid,1.0);
-            h_sc235->Draw("ESAMES");
-            leg_sc235->AddEntry(h_sc235,Form("SC(2,3,5) (%s)",legendNames[i].c_str()),"lp");
-            index+=1;
-        }
-        leg_sc235->Draw();
-
-        TGraphAsymmErrors* g_sc235 = (TGraphAsymmErrors*)publish_ins1839720->Get("Table 2/Graph1D_y1");
-        SetMarkerAndLine(g_sc235,kBlack,kOpenSquare,kSolid,1.0);
-        g_sc235->Draw("PE");
-        leg_sc235->AddEntry(g_sc235,Form("SC(2,3,5) PRL. 127 (2021) 092302"));
-        leg_sc235->Draw();
-
-        TH1D* pub_sc235 = new TH1D("pub_sc235","pub_sc235",7,x_v2);
-        for(int i=0;i<7;i++){
-            pub_sc235->SetBinContent(i+1,g_sc235->GetPointY(i));
-            pub_sc235->SetBinError(i+1,g_sc235->GetErrorY(i));
-        }
-
-        c_sc235->cd(2);
-        gPad->SetTopMargin(0.05);
-        TH1D* frame_AbsValue_sc235 = new TH1D("frame_AbsValue_sc235", "frame_AbsValue_sc235", 90,0,90);
-        frame_AbsValue_sc235->SetMaximum(1e-9);
-        frame_AbsValue_sc235->SetMinimum(-1e-9);
-        frame_AbsValue_sc235->SetYTitle("Run3 - Run 2");
-        frame_AbsValue_sc235->Draw("AXIS");
-        One->Draw("sames");
-        index=0;
-        for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* AbsValue_sc235 = GetAbsValue(7,(TH1D*)resultsFiles_SC235[i]->Get("SC235"),pub_sc235);
-            SetMarkerAndLine(AbsValue_sc235,GetColor(index),kFullCircle,kSolid,1.0);
-            AbsValue_sc235->Draw("ESAMES");
-            index++;
-        }
+        c_NSC24->SaveAs(Form("./OutputPDF/NSC24_RatioToRun2.pdf"));
     }
 
     // =================
-    // SC(2,4,6)
+    // NSC(2,3,4)
     // =================
-    if (IfCheckObservable[kSC246]) {
+    if (IfCheckObservable[kNSC234]) {
         index = 0;
-        TCanvas* c_sc246 = new TCanvas("c_sc246", "c_sc246", 800, 1200);
-        c_sc246->Divide(1,2);
-        c_sc246->cd(1);
+        TCanvas* c_NSC234 = new TCanvas("c_NSC234", "c_NSC234", 800, 1200);
+        c_NSC234->Divide(1,2);
+        c_NSC234->cd(1);
         gPad->SetBottomMargin(0.05);
-        TLegend* leg_sc246 = new TLegend(0.2,0.7,0.5,0.9);
-        TH1D* frame_sc246 = new TH1D("frame_sc246", "frame_sc246", 90,0,90);
-        frame_sc246->SetMaximum(5e-9);
-        frame_sc246->SetMinimum(-5e-9);
-        frame_sc246->Draw("AXIS");
+        TLegend* leg_NSC234 = new TLegend(0.2,0.7,0.5,0.9);
+        TH1D* frame_NSC234 = new TH1D("frame_NSC234", "frame_NSC234", 90,0,90);
+        frame_NSC234->SetMaximum(2.);
+        frame_NSC234->SetMinimum(-2);
+        frame_NSC234->Draw("AXIS");
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* h_sc246 = (TH1D*)resultsFiles_SC246[i]->Get("SC246");
-            SetMarkerAndLine(h_sc246,GetColor(index),kFullCircle,kSolid,1.0);
-            h_sc246->Draw("ESAMES");
-            leg_sc246->AddEntry(h_sc246,Form("SC(2,4,6) (%s)",legendNames[i].c_str()),"lp");
+            TH1D* h_NSC234 = (TH1D*)resultsFiles_NSC234[i]->Get("NSC234");
+            SetMarkerAndLine(h_NSC234,GetColor(index),kFullCircle,kSolid,1.0);
+            h_NSC234->Draw("ESAMES");
+            leg_NSC234->AddEntry(h_NSC234,Form("NSC(2,3,4) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
-        leg_sc246->Draw();
+        leg_NSC234->Draw();
 
-        TGraphAsymmErrors* g_sc246 = (TGraphAsymmErrors*)publish_ins1839720->Get("Table 3/Graph1D_y1");
-        SetMarkerAndLine(g_sc246,kBlack,kOpenSquare,kSolid,1.0);
-        g_sc246->Draw("PE");
-        leg_sc246->AddEntry(g_sc246,Form("SC(2,4,6) PRL. 127 (2021) 092302"));
-        leg_sc246->Draw();
+        TGraphAsymmErrors* g_NSC234 = (TGraphAsymmErrors*)publish_1848215->Get("Table 4/Graph1D_y1");
+        SetMarkerAndLine(g_NSC234,kBlack,kOpenSquare,kSolid,1.0);
+        g_NSC234->Draw("PE");
+        leg_NSC234->AddEntry(g_NSC234,Form("NSC(2,3,4) PLB 818 (2021) 136354, 2021"));
+        leg_NSC234->Draw();
 
-        TH1D* pub_sc246 = new TH1D("pub_sc246","pub_sc246",7,x_v2);
+        TH1D* pub_NSC234 = new TH1D("pub_NSC234","pub_NSC234",7,x_v2);
         for(int i=0;i<7;i++){
-            pub_sc246->SetBinContent(i+1,g_sc246->GetPointY(i));
-            pub_sc246->SetBinError(i+1,g_sc246->GetErrorY(i));
+            pub_NSC234->SetBinContent(i+1,g_NSC234->GetPointY(i));
+            pub_NSC234->SetBinError(i+1,g_NSC234->GetErrorY(i));
         }
 
-        c_sc246->cd(2);
+        c_NSC234->cd(2);
         gPad->SetTopMargin(0.05);
-        TH1D* frame_AbsValue_sc246 = new TH1D("frame_AbsValue_sc246", "frame_AbsValue_sc246", 90,0,90);
-        frame_AbsValue_sc246->SetMaximum(1e-9);
-        frame_AbsValue_sc246->SetMinimum(-1e-9);
-        frame_AbsValue_sc246->SetYTitle("Run3 - Run 2");
-        frame_AbsValue_sc246->Draw("AXIS");
+        TH1D* frame_ratio_NSC234 = new TH1D("frame_ratio_NSC234", "frame_ratio_NSC234", 90,0,90);
+        frame_ratio_NSC234->SetMaximum(1.5);
+        frame_ratio_NSC234->SetMinimum(0.5);
+        frame_ratio_NSC234->SetYTitle("Ratio to Run 2");
+        frame_ratio_NSC234->Draw("AXIS");
         One->Draw("sames");
         index=0;
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* AbsValue_sc246 = GetAbsValue(7,(TH1D*)resultsFiles_SC246[i]->Get("SC246"),pub_sc246);
-            SetMarkerAndLine(AbsValue_sc246,GetColor(index),kFullCircle,kSolid,1.0);
-            AbsValue_sc246->Draw("ESAMES");
+            TH1D* ratio_NSC234 = GetRatio(7,(TH1D*)resultsFiles_NSC234[i]->Get("NSC234"),pub_NSC234);
+            SetMarkerAndLine(ratio_NSC234,GetColor(index),kFullCircle,kSolid,1.0);
+            ratio_NSC234->Draw("ESAMES");
             index++;
         }
+        c_NSC234->SaveAs(Form("./OutputPDF/NSC234_RatioToRun2.pdf"));
     }
 
     // =================
-    // SC(3,4,5)
+    // NSC(3,4,5)
     // =================
-    if (IfCheckObservable[kSC345]) {
+    if (IfCheckObservable[kNSC345]) {
         index = 0;
-        TCanvas* c_sc345 = new TCanvas("c_sc345", "c_sc345", 800, 1200);
-        c_sc345->Divide(1,2);
-        c_sc345->cd(1);
+        TCanvas* c_NSC345 = new TCanvas("c_NSC345", "c_NSC345", 800, 1200);
+        c_NSC345->Divide(1,2);
+        c_NSC345->cd(1);
         gPad->SetBottomMargin(0.05);
-        TLegend* leg_sc345 = new TLegend(0.2,0.7,0.5,0.9);
-        TH1D* frame_sc345 = new TH1D("frame_sc345", "frame_sc345", 90,0,90);
-        frame_sc345->SetMaximum(5e-9);
-        frame_sc345->SetMinimum(-5e-9);
-        frame_sc345->Draw("AXIS");
+        TLegend* leg_NSC345 = new TLegend(0.2,0.7,0.5,0.9);
+        TH1D* frame_NSC345 = new TH1D("frame_NSC345", "frame_NSC345", 90,0,90);
+        frame_NSC345->SetMaximum(2.);
+        frame_NSC345->SetMinimum(-2);
+        frame_NSC345->Draw("AXIS");
         for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* h_sc345 = (TH1D*)resultsFiles_SC345[i]->Get("SC345");
-            SetMarkerAndLine(h_sc345,GetColor(index),kFullCircle,kSolid,1.0);
-            h_sc345->Draw("ESAMES");
-            leg_sc345->AddEntry(h_sc345,Form("SC(3,4,5) (%s)",legendNames[i].c_str()),"lp");
+            TH1D* h_NSC345 = (TH1D*)resultsFiles_NSC345[i]->Get("NSC345");
+            SetMarkerAndLine(h_NSC345,GetColor(index),kFullCircle,kSolid,1.0);
+            h_NSC345->Draw("ESAMES");
+            leg_NSC345->AddEntry(h_NSC345,Form("NSC(3,4,5) (%s)",legendNames[i].c_str()),"lp");
             index+=1;
         }
-        leg_sc345->Draw();
+        leg_NSC345->Draw();
 
-        TGraphAsymmErrors* g_sc345 = (TGraphAsymmErrors*)publish_ins1839720->Get("Table 4/Graph1D_y1");
-        SetMarkerAndLine(g_sc345,kBlack,kOpenSquare,kSolid,1.0);
-        g_sc345->Draw("PE");
-        leg_sc345->AddEntry(g_sc345,Form("SC(3,4,5) PRL. 127 (2021) 092302"));
-        leg_sc345->Draw();
+        // TGraphAsymmErrors* g_NSC345 = (TGraphAsymmErrors*)publish_1848215->Get("Table 6/Graph1D_y1");
+        // SetMarkerAndLine(g_NSC345,kBlack,kOpenSquare,kSolid,1.0);
+        // g_NSC345->Draw("PE");
+        // leg_NSC345->AddEntry(g_NSC345,Form("NSC(3,4,5) PLB 818 (2021) 136354, 2021"));
+        // leg_NSC345->Draw();
 
-        TH1D* pub_sc345 = new TH1D("pub_sc345","pub_sc345",7,x_v2);
-        for(int i=0;i<7;i++){
-            pub_sc345->SetBinContent(i+1,g_sc345->GetPointY(i));
-            pub_sc345->SetBinError(i+1,g_sc345->GetErrorY(i));
-        }
+        // TH1D* pub_NSC345 = new TH1D("pub_NSC345","pub_NSC345",7,x_v2);
+        // for(int i=0;i<7;i++){
+        //     pub_NSC345->SetBinContent(i+1,g_NSC345->GetPointY(i));
+        //     pub_NSC345->SetBinError(i+1,g_NSC345->GetErrorY(i));
+        // }
 
-        c_sc345->cd(2);
-        gPad->SetTopMargin(0.05);
-        TH1D* frame_AbsValue_sc345 = new TH1D("frame_AbsValue_sc345", "frame_AbsValue_sc345", 90,0,90);
-        frame_AbsValue_sc345->SetMaximum(1e-9);
-        frame_AbsValue_sc345->SetMinimum(-1e-9);
-        frame_AbsValue_sc345->SetYTitle("Run3 - Run 2");
-        frame_AbsValue_sc345->Draw("AXIS");
-        One->Draw("sames");
-        index=0;
-        for(int i=0;i<FileNameSuffixs.size();i++){
-            TH1D* AbsValue_sc345 = GetAbsValue(7,(TH1D*)resultsFiles_SC345[i]->Get("SC345"),pub_sc345);
-            SetMarkerAndLine(AbsValue_sc345,GetColor(index),kFullCircle,kSolid,1.0);
-            AbsValue_sc345->Draw("ESAMES");
-            index++;
-        }
+        // c_NSC345->cd(2);
+        // gPad->SetTopMargin(0.05);
+        // TH1D* frame_ratio_NSC345 = new TH1D("frame_ratio_NSC345", "frame_ratio_NSC345", 90,0,90);
+        // frame_ratio_NSC345->SetMaximum(1.5);
+        // frame_ratio_NSC345->SetMinimum(0.5);
+        // frame_ratio_NSC345->SetYTitle("Ratio to Run 2");
+        // frame_ratio_NSC345->Draw("AXIS");
+        // One->Draw("sames");
+        // index=0;
+        // for(int i=0;i<FileNameSuffixs.size();i++){
+        //     TH1D* ratio_NSC345 = GetRatio(7,(TH1D*)resultsFiles_NSC345[i]->Get("NSC345"),pub_NSC345);
+        //     SetMarkerAndLine(ratio_NSC345,GetColor(index),kFullCircle,kSolid,1.0);
+        //     ratio_NSC345->Draw("ESAMES");
+        //     index++;
+        // }
+        c_NSC345->SaveAs(Form("./OutputPDF/NSC345_RatioToRun2.pdf"));
     }
 
 
@@ -1237,6 +1137,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_pt05->Draw("ESAMES");
             index++;
         }
+        c6->SaveAs(Form("./OutputPDF/pTDiffv2Cent0To5_RatioToRun2.pdf"));
     }
 
     // =================
@@ -1287,6 +1188,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_pt510->Draw("ESAMES");
             index++;
         }
+        c5->SaveAs(Form("./OutputPDF/pTDiffv2Cent5To10_RatioToRun2.pdf"));
     }
 
     // =================
@@ -1337,6 +1239,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_pt1020->Draw("ESAMES");
             index++;
         }
+        c10To20->SaveAs(Form("./OutputPDF/pTDiffv2Cent10To20_RatioToRun2.pdf"));
     }
 
 
@@ -1388,6 +1291,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_pt2030->Draw("ESAMES");
             index++;
         }
+        c20To30->SaveAs(Form("./OutputPDF/pTDiffv2Cent20To30_RatioToRun2.pdf"));
     }
 
 
@@ -1439,6 +1343,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_pT3040->Draw("ESAMES");
             index++;
         }
+        c7->SaveAs(Form("./OutputPDF/pTDiffv2Cent30To40_RatioToRun2.pdf"));
     }
 
 
@@ -1490,6 +1395,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_pT4050->Draw("ESAMES");
             index++;
         }
+        c_40To50->SaveAs(Form("./OutputPDF/pTDiffv2Cent40To50_RatioToRun2.pdf"));
     }
 
 
@@ -1541,6 +1447,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_pT5060->Draw("ESAMES");
             index++;
         }
+        c_50To60->SaveAs(Form("./OutputPDF/pTDiffv2Cent50To60_RatioToRun2.pdf"));
     }
 
     // =================
@@ -1591,6 +1498,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             ratio_pT6070->Draw("ESAMES");
             index++;
         }
+        c_60To70->SaveAs(Form("./OutputPDF/pTDiffv2Cent60To70_RatioToRun2.pdf"));
     }
 
 
