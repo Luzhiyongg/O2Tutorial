@@ -227,7 +227,7 @@ TH1D* GetVN10(FlowContainer* fc, Int_t n) {
         double cor2e = corrN2->GetBinError(i);
         double cn10 = cor10v - 25.*cor8v*cor2v - 100.*cor6v*cor4v + 400.*cor6v*cor2v*cor2v
         + 900.*cor4v*cor4v*cor2v - 3600.*cor4v*cor2v*cor2v*cor2v
-        + 2800.*cor2v*cor2v*cor2v*cor2v*cor2v;
+        + 2880.*cor2v*cor2v*cor2v*cor2v*cor2v;
         double cn10e = Error_CN10(cor10v, cor10e, cor8v, cor8e, cor6v, cor6e, cor4v, cor4e, cor2v, cor2e);
         double vn10 = 0.;
         double vn10e = 0.;
