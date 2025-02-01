@@ -214,7 +214,7 @@ struct FlowTask {
     }
     registry.add("hVtxZ", "Vexter Z distribution", {HistType::kTH1D, {axisVertex}});
     registry.add("hMult", "Multiplicity distribution", {HistType::kTH1D, {{3000, 0.5, 3000.5}}});
-    std::string hCentTitle = "Centrality distribution, Estimator "+std::to_string(cfgCentEstimator);
+    std::string hCentTitle = "Centrality distribution, Estimator " + std::to_string(cfgCentEstimator);
     registry.add("hCent", hCentTitle.c_str(), {HistType::kTH1D, {{90, 0, 90}}});
     if (!cfgUseSmallMemory) {
       registry.add("BeforeSel8_globalTracks_centT0C", "before sel8;Centrality T0C;mulplicity global tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
