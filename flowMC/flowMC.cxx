@@ -41,7 +41,6 @@ struct flowMC {
   Configurable<float> maxB{"maxB", 20.0f, "max impact parameter"};
 
   ConfigurableAxis axisB{"axisB", {100, 0.0f, 20.0f}, ""};
-  ConfigurableAxis axisCent{"axisCent", {100, 0.0f, 100.0f}, ""};
   ConfigurableAxis axisPhi{"axisPhi", {100, 0.0f, 2.0f * TMath::Pi()}, ""};
   ConfigurableAxis axisNch{"axisNch", {300, 0.0f, 3000.0f}, "Nch in |eta|<0.8"};
 
@@ -54,7 +53,6 @@ struct flowMC {
     histos.add<TH2>("hNchVsImpactParameter", "hNchVsImpactParameter", HistType::kTH2D, {axisB, axisNch});
     histos.add<TH1>("hEventPlaneAngle", "hEventPlaneAngle", HistType::kTH1D, {axisPhi});
     histos.add<TH2>("hPtVsPhiGenerated", "hPtVsPhiGenerated", HistType::kTH2D, {axisPhi, axisPt});
-    histos.add<TH2>("hPtVsCentGenerated", "hPtVsCentGenerated", HistType::kTH2D, {axisPhi, axisCent});
     histos.add<TH2>("hPtVsPhiGlobal", "hPtVsPhiGlobal", HistType::kTH2D, {axisPhi, axisPt});
     histos.add<TH3>("hBVsPtVsPhiGenerated", "hBVsPtVsPhiGenerated", HistType::kTH3D, {axisB, axisPhi, axisPt});
     histos.add<TH3>("hBVsPtVsPhiGlobal", "hBVsPtVsPhiGlobal", HistType::kTH3D, {axisB, axisPhi, axisPt});
