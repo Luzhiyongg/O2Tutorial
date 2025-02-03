@@ -37,6 +37,7 @@ struct FlowPtEfficiency {
   O2_DEFINE_CONFIGURABLE(cfgCutPtMin, float, 0.2f, "Minimal pT for tracks")
   O2_DEFINE_CONFIGURABLE(cfgCutPtMax, float, 1000.0f, "Maximal pT for tracks")
   O2_DEFINE_CONFIGURABLE(cfgCutEta, float, 0.8f, "Eta range for tracks")
+  O2_DEFINE_CONFIGURABLE(cfgkIsTrackGlobal, bool, false, "GlobalTrack requirement for tracks")
   O2_DEFINE_CONFIGURABLE(cfgTrkSelRun3ITSMatch, bool, false, "GlobalTrackRun3ITSMatching::Run3ITSall7Layers selection")
   O2_DEFINE_CONFIGURABLE(cfgCutChi2prTPCcls, float, 2.5f, "max chi2 per TPC clusters")
   O2_DEFINE_CONFIGURABLE(cfgCutTPCclu, float, 70.0f, "minimum TPC clusters")
@@ -118,6 +119,8 @@ struct FlowPtEfficiency {
   template <typename TTrack>
   bool trackSelected(TTrack track)
   {
+    if (cfgkIsTrackGlobal && !track.isGlobalTrack())
+      return false;
     if (cfgCutDCAzPtDepEnabled && (track.dcaZ() > (0.004f + 0.013f / track.pt())))
       return false;
     return myTrackSel.IsSelected(track);
