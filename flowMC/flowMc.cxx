@@ -244,7 +244,7 @@ struct FlowMc {
     auto mcCollision = mcParticle.mcCollision();
     float imp = mcCollision.impactParameter();
 
-    int pdgCode = std:abs(mcParticle.pdgCode());
+    int pdgCode = std::abs(mcParticle.pdgCode());
     if (pdgCode != 3312 && pdgCode != 3334)
       return;
 
