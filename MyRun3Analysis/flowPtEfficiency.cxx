@@ -269,10 +269,9 @@ struct FlowPtEfficiency {
         LOGF(info, "Loaded CentVsIPTruth weights from %s (%p)", cfgCentVsIPTruth.value.c_str(), (void*)mCentVsIPTruth);
       else
         LOGF(fatal, "Failed to load CentVsIPTruth weights from %s", cfgCentVsIPTruth.value.c_str());
-      
+
       centVsIPTruthLoaded = true;
-    }
-    else {
+    } else {
       LOGF(fatal, "when calculate flow, Cent Vs IP distribution must be provided");
     }
   }
@@ -289,8 +288,7 @@ struct FlowPtEfficiency {
         LOGF(fatal, "Failed to load CentVsIPReco weights from %s", cfgCentVsIPReco.value.c_str());
 
       centVsIPRecoLoaded = true;
-    }
-    else {
+    } else {
       LOGF(fatal, "when calculate flow, Cent Vs IP distribution must be provided");
     }
   }
@@ -356,8 +354,8 @@ struct FlowPtEfficiency {
       if (!std::count(cfgRunNumberList.value.begin(), cfgRunNumberList.value.end(), runNumber))
         return;
     }
-    
-    float imp; 
+
+    float imp;
     bool impFetched = false;
     float centrality = 0.;
     float lRandom = fRndm->Rndm();
