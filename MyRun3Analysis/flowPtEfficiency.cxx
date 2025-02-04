@@ -359,7 +359,7 @@ struct FlowPtEfficiency {
     
     float imp; 
     bool impFetched = false;
-    float centrality;
+    float centrality = 0.;
     float lRandom = fRndm->Rndm();
     float vtxz = collision.posZ();
     float wacc = 1.0f;
@@ -420,7 +420,7 @@ struct FlowPtEfficiency {
     }
 
     float imp = collision.impactParameter();
-    float centrality;
+    float centrality = 0.;
     if (cfgFlowEnabled) {
       registry.fill(HIST("hImpactParameterTruth"), imp);
       auto bc = collision.bc_as<aod::BCsWithTimestamps>();
