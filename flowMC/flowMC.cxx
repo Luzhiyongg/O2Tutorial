@@ -13,38 +13,61 @@
 // cross-PWG effort in tracking studies
 // includes basic tracking, V0s and Cascades
 
+#include "CCDB/BasicCCDBManager.h"
 #include "Framework/AnalysisDataModel.h"
 #include "Framework/AnalysisTask.h"
 #include "Framework/HistogramRegistry.h"
+#include "Framework/runDataProcessing.h"
+#include "Framework/ASoAHelpers.h"
+#include "Framework/RunningWorkflowInfo.h"
 #include "Common/DataModel/TrackSelectionTables.h"
 #include "Common/Core/TrackSelection.h"
 #include "Common/Core/TrackSelectionDefaults.h"
-#include "ReconstructionDataFormats/Track.h"
 #include "Common/Core/trackUtilities.h"
-#include "CCDB/BasicCCDBManager.h"
+#include "ReconstructionDataFormats/Track.h"
 #include "DataFormatsParameters/GRPObject.h"
 #include "DataFormatsParameters/GRPMagField.h"
 #include "PWGLF/DataModel/LFStrangenessTables.h"
-
 #include "PWGMM/Mult/DataModel/Index.h" // for Particles2Tracks table
+#include "GFWPowerArray.h"
+#include "GFW.h"
+#include "GFWCumulant.h"
+#include "GFWWeights.h"
 
 using namespace o2;
 using namespace o2::framework;
 using namespace o2::framework::expressions;
 
-#include "Framework/runDataProcessing.h"
+#define O2_DEFINE_CONFIGURABLE(NAME, TYPE, DEFAULT, HELP) Configurable<TYPE> NAME{#NAME, DEFAULT, HELP};
 
 struct flowMC {
   HistogramRegistry histos{"Histos", {}, OutputObjHandlingPolicy::AnalysisObject};
 
   Configurable<float> minB{"minB", 0.0f, "min impact parameter"};
   Configurable<float> maxB{"maxB", 20.0f, "max impact parameter"};
+  O2_DEFINE_CONFIGURABLE(cfgOutputNUAWeights, bool, false, "Fill and output NUA weights")
+  O2_DEFINE_CONFIGURABLE(cfgCutPtRefMin, float, 0.2f, "Minimal pT for ref tracks")
+  O2_DEFINE_CONFIGURABLE(cfgCutPtRefMax, float, 3.0f, "Maximal pT for ref tracks")
+  O2_DEFINE_CONFIGURABLE(cfgFlowAcceptance, std::string, "", "CCDB path to acceptance object")
+  O2_DEFINE_CONFIGURABLE(cfgFlowEfficiency, std::string, "", "CCDB path to efficiency object")
 
   ConfigurableAxis axisB{"axisB", {100, 0.0f, 20.0f}, ""};
   ConfigurableAxis axisPhi{"axisPhi", {100, 0.0f, 2.0f * TMath::Pi()}, ""};
   ConfigurableAxis axisNch{"axisNch", {300, 0.0f, 3000.0f}, "Nch in |eta|<0.8"};
 
   ConfigurableAxis axisPt{"axisPt", {VARIABLE_WIDTH, 0.0f, 0.1f, 0.2f, 0.3f, 0.4f, 0.5f, 0.6f, 0.7f, 0.8f, 0.9f, 1.0f, 1.1f, 1.2f, 1.3f, 1.4f, 1.5f, 1.6f, 1.7f, 1.8f, 1.9f, 2.0f, 2.2f, 2.4f, 2.6f, 2.8f, 3.0f, 3.2f, 3.4f, 3.6f, 3.8f, 4.0f, 4.4f, 4.8f, 5.2f, 5.6f, 6.0f, 6.5f, 7.0f, 7.5f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f}, "pt axis"};
+
+  // Corrections
+  TH1D* mEfficiency = nullptr;
+  GFWWeights* mAcceptance = nullptr;
+  bool correctionsLoaded = false;
+
+  // Connect to ccdb
+  Service<ccdb::BasicCCDBManager> ccdb;
+  Configurable<int64_t> ccdbNoLaterThan{"ccdbNoLaterThan", std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count(), "latest acceptable timestamp of creation for the object"};
+  Configurable<std::string> ccdbUrl{"ccdbUrl", "http://alice-ccdb.cern.ch", "url of the ccdb repository"};
+
+  OutputObj<GFWWeights> fWeights{GFWWeights("weights")};
 
   void init(InitContext&)
   {
@@ -70,7 +93,55 @@ struct flowMC {
     histos.add<TH3>("hBVsPtVsPhiGlobalXi", "hBVsPtVsPhiGlobalXi", HistType::kTH3D, {axisB, axisPhi, axisPt});
     histos.add<TH3>("hBVsPtVsPhiGeneratedOmega", "hBVsPtVsPhiGeneratedOmega", HistType::kTH3D, {axisB, axisPhi, axisPt});
     histos.add<TH3>("hBVsPtVsPhiGlobalOmega", "hBVsPtVsPhiGlobalOmega", HistType::kTH3D, {axisB, axisPhi, axisPt});
+
+    if (cfgOutputNUAWeights) {
+      o2::framework::AxisSpec axis = axisPt;
+      int nPtBins = axis.binEdges.size() - 1;
+      double* ptBins = &(axis.binEdges)[0];
+
+      fWeights->SetPtBins(nPtBins, ptBins);
+      fWeights->Init(true, false);
+    }
   }
+
+  void loadCorrections(uint64_t timestamp)
+  {
+    if (correctionsLoaded)
+      return;
+    if (cfgFlowAcceptance.value.empty() == false) {
+      mAcceptance = ccdb->getForTimeStamp<GFWWeights>(cfgFlowAcceptance, timestamp);
+      if (mAcceptance)
+        LOGF(info, "Loaded acceptance weights from %s (%p)", cfgFlowAcceptance.value.c_str(), (void*)mAcceptance);
+      else
+        LOGF(warning, "Could not load acceptance weights from %s (%p)", cfgFlowAcceptance.value.c_str(), (void*)mAcceptance);
+    }
+    if (cfgFlowEfficiency.value.empty() == false) {
+      mEfficiency = ccdb->getForTimeStamp<TH1D>(cfgFlowEfficiency, timestamp);
+      if (mEfficiency == nullptr) {
+        LOGF(fatal, "Could not load efficiency histogram for trigger particles from %s", cfgFlowEfficiency.value.c_str());
+      }
+      LOGF(info, "Loaded efficiency histogram from %s (%p)", cfgFlowEfficiency.value.c_str(), (void*)mEfficiency);
+    }
+    correctionsLoaded = true;
+  }
+
+  bool setCurrentParticleWeights(float& weight_nue, float& weight_nua, float phi, float eta, float pt, float vtxz)
+  {
+    float eff = 1.;
+    if (mEfficiency)
+      eff = mEfficiency->GetBinContent(mEfficiency->FindBin(pt));
+    else
+      eff = 1.0;
+    if (eff == 0)
+      return false;
+    weight_nue = 1. / eff;
+    if (mAcceptance)
+      weight_nua = mAcceptance->GetNUA(phi, eta, vtxz);
+    else
+      weight_nua = 1;
+    return true;
+  }
+
 
   using recoTracks = soa::Join<aod::TracksIU, aod::TracksExtra>;
 
@@ -79,10 +150,15 @@ struct flowMC {
 
     float imp = mcCollision.impactParameter();
     float evPhi = mcCollision.eventPlaneAngle();
+    float vtxz = mcCollision.posZ();
     if (evPhi < 0)
       evPhi += 2. * TMath::Pi();
 
     long nCh = 0;
+    float weff = 1.;
+    float wacc = 1.;
+    auto bc = mcCollision.bc_as<aod::BCsWithTimestamps>();
+    loadCorrections(bc.timestamp());
 
     if (imp > minB && imp < maxB) {
       // event within range
@@ -136,20 +212,26 @@ struct flowMC {
           }
         }
 
+        bool withinPtRef = (cfgCutPtRefMin < mcParticle.pt()) && (mcParticle.pt() < cfgCutPtRefMax); // within RF pT range
+        if (cfgOutputNUAWeights && withinPtRef)
+          fWeights->Fill(mcParticle.phi(), mcParticle.eta(), vtxz, mcParticle.pt(), 0, 0);
+        if (!setCurrentParticleWeights(weff, wacc, mcParticle.phi(), mcParticle.eta(), mcParticle.pt(), vtxz))
+              continue;
+
         // if valid global, fill
         if (validGlobal) {
-          histos.fill(HIST("hPtVsPhiGlobal"), deltaPhi, mcParticle.pt());
-          histos.fill(HIST("hBVsPtVsPhiGlobal"), imp, deltaPhi, mcParticle.pt());
+          histos.fill(HIST("hPtVsPhiGlobal"), deltaPhi, mcParticle.pt(), wacc * weff);
+          histos.fill(HIST("hBVsPtVsPhiGlobal"), imp, deltaPhi, mcParticle.pt(), wacc * weff);
         }
         // if any track present, fill
         if (validTrack)
-          histos.fill(HIST("hBVsPtVsPhiAny"), imp, deltaPhi, mcParticle.pt());
+          histos.fill(HIST("hBVsPtVsPhiAny"), imp, deltaPhi, mcParticle.pt(), wacc * weff);
         if (validTPCTrack)
-          histos.fill(HIST("hBVsPtVsPhiTPCTrack"), imp, deltaPhi, mcParticle.pt());
+          histos.fill(HIST("hBVsPtVsPhiTPCTrack"), imp, deltaPhi, mcParticle.pt(), wacc * weff);
         if (validITSTrack)
-          histos.fill(HIST("hBVsPtVsPhiITSTrack"), imp, deltaPhi, mcParticle.pt());
+          histos.fill(HIST("hBVsPtVsPhiITSTrack"), imp, deltaPhi, mcParticle.pt(), wacc * weff);
         if (validITSABTrack)
-          histos.fill(HIST("hBVsPtVsPhiITSABTrack"), imp, deltaPhi, mcParticle.pt());
+          histos.fill(HIST("hBVsPtVsPhiITSABTrack"), imp, deltaPhi, mcParticle.pt(), wacc * weff);
       }
     }
     histos.fill(HIST("hNchVsImpactParameter"), imp, nCh);
