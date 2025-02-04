@@ -40,7 +40,7 @@ using namespace o2::framework::expressions;
 
 #define O2_DEFINE_CONFIGURABLE(NAME, TYPE, DEFAULT, HELP) Configurable<TYPE> NAME{#NAME, DEFAULT, HELP};
 
-struct flowMC {
+struct flowMc {
   HistogramRegistry histos{"Histos", {}, OutputObjHandlingPolicy::AnalysisObject};
 
   Configurable<float> minB{"minB", 0.0f, "min impact parameter"};
@@ -269,7 +269,7 @@ struct flowMC {
         histos.fill(HIST("hBVsPtVsPhiGlobalOmega"), imp, deltaPhi, mcParticle.pt());
     }
   }
-  PROCESS_SWITCH(flowMC, processCascade, "Process cascades", true);
+  PROCESS_SWITCH(flowMc, processCascade, "Process cascades", true);
 
   using LabeledV0s = soa::Join<aod::V0Datas, aod::McV0Labels>;
 
@@ -304,11 +304,11 @@ struct flowMC {
         histos.fill(HIST("hBVsPtVsPhiGlobalLambda"), imp, deltaPhi, mcParticle.pt());
     }
   }
-  PROCESS_SWITCH(flowMC, processV0s, "Process V0s", true);
+  PROCESS_SWITCH(flowMc, processV0s, "Process V0s", true);
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
 {
   return WorkflowSpec{
-    adaptAnalysisTask<flowMC>(cfgc)};
+    adaptAnalysisTask<flowMc>(cfgc)};
 }
