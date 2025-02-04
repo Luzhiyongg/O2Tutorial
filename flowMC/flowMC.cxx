@@ -142,7 +142,6 @@ struct flowMC {
     return true;
   }
 
-
   using recoTracks = soa::Join<aod::TracksIU, aod::TracksExtra>;
 
   void process(aod::McCollision const& mcCollision, soa::Join<aod::McParticles, aod::ParticlesToTracks> const& mcParticles, recoTracks const&)
@@ -216,7 +215,7 @@ struct flowMC {
         if (cfgOutputNUAWeights && withinPtRef)
           fWeights->Fill(mcParticle.phi(), mcParticle.eta(), vtxz, mcParticle.pt(), 0, 0);
         if (!setCurrentParticleWeights(weff, wacc, mcParticle.phi(), mcParticle.eta(), mcParticle.pt(), vtxz))
-              continue;
+          continue;
 
         // if valid global, fill
         if (validGlobal) {
