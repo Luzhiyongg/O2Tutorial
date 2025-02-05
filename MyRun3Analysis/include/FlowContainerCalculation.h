@@ -400,39 +400,81 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double
     }
 }
 
-void Output_ptDiffvn4(string FileNameSuffix, FlowContainer* fc, Double_t CentMin=0., Double_t CentMax=5., string Subwagon=""){
-    TCanvas* canvas2 = nullptr;
-    bool anotherCanvas = false;
-    // if canvas_ptDiffvn exist, new a canvas with different name
-    if(gROOT->FindObject("canvas_ptDiffvn4"))anotherCanvas = true;
-    if(!anotherCanvas)canvas2 = new TCanvas("canvas_ptDiffvn4","canvas_ptDiffvn4",900,900);
-    else canvas2 = new TCanvas("canvas_ptDiffvn4_2","canvas_ptDiffvn4_2",900,900);
-    TH1D* Hist2  = new TH1D(Form("v_{n}{4}(p_{T}) in %s",FileNameSuffix.c_str()),Form("v_{n}{4}(p_{T}) in %s",FileNameSuffix.c_str()),100,0,100.0);
+TH1D* GetPtDiffVnm(FlowContainer* fc, string EtaGap, Int_t n, Int_t m_particle = 4, Double_t CentMin=0., Double_t CentMax=5.){
+    fc->SetIDName(EtaGap.c_str());
+    if (m_particle == 2)
+        return (TH1D*)fc->GetVN2VsPt(n,CentMin,CentMax);
+    else if (m_particle == 4)
+        return (TH1D*)fc->GetVN4VsPt(n,CentMin,CentMax);
+    else if (m_particle == 6)
+        return (TH1D*)fc->GetVN6VsPt(n,CentMin,CentMax);
+    else if (m_particle == 8)
+        return (TH1D*)fc->GetVN8VsPt(n,CentMin,CentMax);
+    
+    return nullptr;
+}
+
+void Output_PtDiffVnm(string FileNameSuffix, FlowContainer* fc, string EtaGap, Int_t n, Int_t m_particle = 4,
+    Double_t CentMin=0., Double_t CentMax=5., string Subwagon="") {
+    TCanvas* canvas = new TCanvas(Form("canvas_PtDiffV%d%d_cent%d_%d",n,m_particle,(int)CentMin,(int)CentMax),Form("canvas_PtDiffV%d%d_cent%d_%d",n,m_particle,(int)CentMin,(int)CentMax),900,900);
+    TH1D* Hist2  = new TH1D(Form("v_{%d}{%d}(p_{T}) cent(%d-%d) in %s",n,m_particle,(int)CentMin,(int)CentMax,FileNameSuffix.c_str()),Form("v_{%d}{%d}(p_{T}) cent(%d-%d) in %s",n,m_particle,(int)CentMin,(int)CentMax,FileNameSuffix.c_str()),100,0,100.0);
     Hist2->SetMinimum(-1);
     Hist2->SetMaximum(2.);
     Hist2->GetXaxis()->SetRangeUser(0.,100.0);
-    Hist2->SetXTitle("p_{T}");
-    Hist2->SetYTitle("v_{n}{4}");
+    Hist2->SetXTitle("p_{T} (GeV/c)");
+    Hist2->SetYTitle(Form("v_{%d}{%d}",n,m_particle));
     Hist2->Draw();
-    fc->SetIDName("ChFull");
+    fc->SetIDName(EtaGap.c_str());
     fc->SetPropagateErrors(kTRUE);
-    TH1D* hV24pt = (TH1D*)fc->GetVN4VsPt(2,CentMin,CentMax);
-    hV24pt->SetName("pTDiffv24");
-    if(!hV24pt){
-        Printf("Can't get hV24");
+    TH1D* hVnmPt = GetPtDiffVnm(fc,EtaGap,n,m_particle,CentMin,CentMax);
+    hVnmPt->SetName(Form("pTDiffv%d%d%s",n, m_particle, EtaGap.c_str()));
+    if(!hVnmPt){
+        Printf("Can't get hV%d%d",n,m_particle);
         return;
     }
 
-    SetMarkerAndLine(hV24pt,kBlack,kFullCircle,kSolid,1.0);
+    std::vector<std::vector<std::vector<double>>> ValueArray;
+    std::vector<std::vector<std::vector<double>>> ValueErrorArray;
+    std::vector<std::vector<double>> ErrorArray;
+    int Nobs=1;//vnm(pT)
+    TObjArray* subsamples = fc->GetSubProfiles();
+    int NofSample = subsamples->GetEntries();
+    int Nbin = hVnmPt->GetNbinsX();
+    ResizeValueArray(ValueArray,ValueErrorArray,ErrorArray,Nobs,NofSample,Nbin);
+    
+    for(int sample=0;sample<NofSample;sample++){
+        fc->OverrideMainWithSub(sample,false);
+        for(int i=0;i<Nobs;i++){
+            TH1D* temp = GetPtDiffVnm(fc,EtaGap,n,m_particle,CentMin,CentMax);
+            temp->SetName(Form("pTDiffv%d%d_%d",n,m_particle,sample));
+            if(!temp){
+                Printf("Can't get pTDiffv%d%d_%d",n,m_particle,sample);
+                return;
+            }
+            for(int j=0;j<temp->GetNbinsX();j++){
+                ValueArray[i][sample][j] = temp->GetBinContent(j+1);
+                ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
+                // Printf("pTDiffv%d%d_%d = %f +- %f",n,m_particle,sample,ValueArray[i][sample][j],ValueErrorArray[i][sample][j]);
+            }
+        }
+    }
+    for(int i=0;i<Nobs;i++){
+        CalculateBootstrapError(ValueArray[i],ValueErrorArray[i],ErrorArray[i]);
+    }
+    for(int i=0;i<Nbin;i++){
+        hVnmPt->SetBinError(i+1, ErrorArray[0][i]);
+    }
+
+    SetMarkerAndLine(hVnmPt,kBlack,kFullCircle,kSolid,1.0);
     gStyle->SetOptStat("");
-    hV24pt->Draw("ESames");
+    hVnmPt->Draw("ESames");
     TLegend* legend2 = new TLegend(0.2,0.8,0.5,0.9);
-    legend2->AddEntry(hV24pt,Form("v_{2}{4}(p_{T}) |#Delta#eta|>1 cent:%d~%d%%",(int)CentMin,(int)CentMax));
+    legend2->AddEntry(hVnmPt,Form("v_{2}{4}(p_{T}) %s cent:%d~%d%%",EtaGap.c_str(),(int)CentMin,(int)CentMax));
     legend2->Draw();
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv24Cent%dTo%d_%s%s.root",(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
-        hV24pt->Write();
+        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv%d%d%sCent%dTo%d_%s%s.root",n,m_particle,EtaGap.c_str(),(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        hVnmPt->Write();
         fout->Close();
     }
 }

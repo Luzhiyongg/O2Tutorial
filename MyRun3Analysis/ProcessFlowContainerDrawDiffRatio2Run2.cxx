@@ -133,6 +133,9 @@ enum kObservable{
     kpTDiffv2,
     kpTDiffv3,
     kpTDiffv4,
+    kpTDiffv24ChFull,
+    kpTDiffv24Ch10Gap,
+    kpTDiffv26ChFull,
     kNObservable
 };
 
@@ -151,7 +154,10 @@ std::map<kObservable,bool> IfCheckObservable = {
     {kNSC345,true},
     {kpTDiffv2,true},
     {kpTDiffv3,false},
-    {kpTDiffv4,false}
+    {kpTDiffv4,false},
+    {kpTDiffv24ChFull,false},
+    {kpTDiffv24Ch10Gap,false},
+    {kpTDiffv26ChFull,false}
 };
         
 void ProcessFlowContainerDrawDiffRatio2Run2(){
@@ -172,6 +178,9 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     vector<vector<TFile*>> resultsFiles_pTDiffv2(pTDiffCent.size());
     vector<vector<TFile*>> resultsFiles_pTDiffv3(pTDiffCent.size());
     vector<vector<TFile*>> resultsFiles_pTDiffv4(pTDiffCent.size());
+    vector<vector<TFile*>> resultsFiles_pTDiffv24ChFull(pTDiffCent.size());
+    vector<vector<TFile*>> resultsFiles_pTDiffv24Ch10Gap(pTDiffCent.size());
+    vector<vector<TFile*>> resultsFiles_pTDiffv26ChFull(pTDiffCent.size());
 
     // FileNameSuffixs.push_back("LHC23zzh_pass4_305042");
     // legendNames.push_back("LHC23zzh_pass4_305042");
@@ -221,18 +230,32 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // legendNames.push_back("default + kIsGoodITSLayersAll");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_306468_FineCentBin");
     // legendNames.push_back("full 2023 data");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_299557");
+    // legendNames.push_back("full 2023 data");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_308058");
     // legendNames.push_back("2023 data");
     // FileNameSuffixs.push_back("LHC24ar_pass1_medium_318934");
     // legendNames.push_back("2024 data");
-    FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815");
-    legendNames.push_back("default");
-    FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815_kIsGoodITSLayersAll");
-    legendNames.push_back("default+kIsGoodITSLayersAll");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815");
+    // legendNames.push_back("default");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815_kIsGoodITSLayersAll");
+    // legendNames.push_back("default");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815_GoodZvtxFT0vsPV");
     // legendNames.push_back("default+GoodZvtxFT0vsPV");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_327815_kNoCollInTimeRangeStandard");
     // legendNames.push_back("default+kNoCollInTimeRangeStandard");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_332826_kIsGoodITSLayersAll");
+    // legendNames.push_back("full 2023 data+kIsGoodITSLayersAll");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_334605_kIsGoodITSLayersAll");
+    // legendNames.push_back("default+NoColl+ITSclu");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_340172_kColl");
+    // legendNames.push_back("default+NoColl+ITSclu");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_small_340440");
+    legendNames.push_back("centrality estimator: FT0C");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_small_340440_FT0M");
+    legendNames.push_back("centrality estimator: FT0M");
+
+
 
 
     if (FileNameSuffixs.empty() || legendNames.empty()) {
@@ -256,6 +279,9 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         vector<string> fileName_pTDiffv2(pTDiffCent.size()-1);
         vector<string> fileName_pTDiffv3(pTDiffCent.size()-1);
         vector<string> fileName_pTDiffv4(pTDiffCent.size()-1);
+        vector<string> fileName_pTDiffv24ChFull(pTDiffCent.size()-1);
+        vector<string> fileName_pTDiffv24Ch10Gap(pTDiffCent.size()-1);
+        vector<string> fileName_pTDiffv26ChFull(pTDiffCent.size()-1);
         for (uint j=0; j<pTDiffCent.size()-1; j++) {
             string temp_s = Form("./ProcessOutput/pTDiffv2Cent%dTo%d_",(int)pTDiffCent[j],(int)pTDiffCent[j+1]) + suffix + ".root";
             fileName_pTDiffv2[j] = temp_s;
@@ -267,6 +293,18 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
         for (uint j=0; j<pTDiffCent.size()-1; j++) {
             string temp_s = Form("./ProcessOutput/pTDiffv4Cent%dTo%d_",(int)pTDiffCent[j],(int)pTDiffCent[j+1]) + suffix + ".root";
             fileName_pTDiffv4[j] = temp_s;
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            string temp_s = Form("./ProcessOutput/pTDiffv24ChFullCent%dTo%d_",(int)pTDiffCent[j],(int)pTDiffCent[j+1]) + suffix + ".root";
+            fileName_pTDiffv24ChFull[j] = temp_s;
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            string temp_s = Form("./ProcessOutput/pTDiffv24Ch10GapCent%dTo%d_",(int)pTDiffCent[j],(int)pTDiffCent[j+1]) + suffix + ".root";
+            fileName_pTDiffv24Ch10Gap[j] = temp_s;
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            string temp_s = Form("./ProcessOutput/pTDiffv26ChFullCent%dTo%d_",(int)pTDiffCent[j],(int)pTDiffCent[j+1]) + suffix + ".root";
+            fileName_pTDiffv26ChFull[j] = temp_s;
         }
 
         TFile* resultsFile = nullptr;
@@ -394,6 +432,36 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
                     return;
                 }
                 resultsFiles_pTDiffv4[j].push_back(resultsFile);
+            }
+        }
+        if (IfCheckObservable[kpTDiffv24ChFull]) {
+            for (uint j=0; j<pTDiffCent.size()-1; j++) {
+                resultsFile = TFile::Open(fileName_pTDiffv24ChFull[j].c_str(), "READ");
+                if(!resultsFile || resultsFile->IsZombie()){
+                    cout << "Error: cannot open file " << fileName_pTDiffv24ChFull[j] << endl;
+                    return;
+                }
+                resultsFiles_pTDiffv24ChFull[j].push_back(resultsFile);
+            }
+        }
+        if (IfCheckObservable[kpTDiffv24Ch10Gap]) {
+            for (uint j=0; j<pTDiffCent.size()-1; j++) {
+                resultsFile = TFile::Open(fileName_pTDiffv24Ch10Gap[j].c_str(), "READ");
+                if(!resultsFile || resultsFile->IsZombie()){
+                    cout << "Error: cannot open file " << fileName_pTDiffv24Ch10Gap[j] << endl;
+                    return;
+                }
+                resultsFiles_pTDiffv24Ch10Gap[j].push_back(resultsFile);
+            }
+        }
+        if (IfCheckObservable[kpTDiffv26ChFull]) {
+            for (uint j=0; j<pTDiffCent.size()-1; j++) {
+                resultsFile = TFile::Open(fileName_pTDiffv26ChFull[j].c_str(), "READ");
+                if(!resultsFile || resultsFile->IsZombie()){
+                    cout << "Error: cannot open file " << fileName_pTDiffv26ChFull[j] << endl;
+                    return;
+                }
+                resultsFiles_pTDiffv26ChFull[j].push_back(resultsFile);
             }
         }
         pTCentIndex++;
@@ -1221,6 +1289,184 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
                 index++;
             }
             cpTDiffv4->SaveAs(Form("./OutputPDF/pTDiffv4Cent%dTo%d_RatioToRun2.pdf",(int)pTDiffCent[j],(int)pTDiffCent[j+1]));
+        }
+    }
+
+    // =================
+    // pTDiffv24ChFull
+    // =================
+    if (IfCheckObservable[kpTDiffv24ChFull]) {
+        for (uint j=0;j<pTDiffCent.size()-1;j++) {
+            index = 0;
+            TCanvas* cpTDiffv24ChFull = new TCanvas(Form("cpTDiffv24ChFull_%d",j), Form("cpTDiffv24ChFull_%d",j), 800, 1200);
+            cpTDiffv24ChFull->Divide(1,2);
+            cpTDiffv24ChFull->cd(1);
+            gPad->SetBottomMargin(0.05);
+            TLegend* leg_pTDiffv24ChFull = new TLegend(0.2,0.7,0.9,0.9);
+            TH1D* frame_pTDiffv24ChFull = new TH1D(Form("frame_pTDiffv24ChFull_%d",j), Form("frame_pTDiffv24ChFull_%d",j), 50,0,3.);
+            frame_pTDiffv24ChFull->SetMaximum(0.15);
+            frame_pTDiffv24ChFull->SetMinimum(0.);
+            frame_pTDiffv24ChFull->Draw("AXIS");
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* h_pTDiffv24ChFull = (TH1D*)resultsFiles_pTDiffv24ChFull[j][i]->Get(Form("pTDiffv24ChFull"));
+                SetMarkerAndLine(h_pTDiffv24ChFull,GetColor(index),kFullCircle,kSolid,1.0);
+                h_pTDiffv24ChFull->Draw("ESAMES");
+                leg_pTDiffv24ChFull->AddEntry(h_pTDiffv24ChFull,Form("v_{2}{4} (p_{T}) Cent:%d~%d%% (%s)",(int)pTDiffCent[j],(int)pTDiffCent[j+1],legendNames[i].c_str()),"lp");
+                index+=1;
+            }
+
+            TGraphAsymmErrors* g_pTDiffv24ChFull = nullptr;
+            if (j<PubTable_pTDiffv2.size()) {
+                g_pTDiffv24ChFull = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable_pTDiffv2[j]));
+                if(!g_pTDiffv24ChFull) continue;
+                SetMarkerAndLine(g_pTDiffv24ChFull,kBlack,kOpenSquare,kSolid,1.0);
+                g_pTDiffv24ChFull->Draw("PE");
+                leg_pTDiffv24ChFull->AddEntry(g_pTDiffv24ChFull,Form("v2{2}(p_{T}) JHEP 07 (2018) 103"));
+            }
+            leg_pTDiffv24ChFull->Draw();
+
+            if(!g_pTDiffv24ChFull) continue;
+            TH1D* pub_pTDiffv24ChFull = new TH1D(Form("pub_pTDiffv24ChFull_%d",j),Form("pub_pTDiffv24ChFull_%d",j),20,x_pTDiff);
+            for(int i=0;i<28;i++){
+                pub_pTDiffv24ChFull->SetBinContent(i+1,g_pTDiffv24ChFull->GetPointY(i));
+                pub_pTDiffv24ChFull->SetBinError(i+1,g_pTDiffv24ChFull->GetErrorY(i));
+            }
+
+            cpTDiffv24ChFull->cd(2);
+            gPad->SetTopMargin(0.05);
+            TH1D* frame_ratio_pTDiffv24ChFull = new TH1D(Form("frame_ratio_pTDiffv24ChFull_%d",j), Form("frame_ratio_pTDiffv24ChFull_%d",j),50,0.,3.);
+            frame_ratio_pTDiffv24ChFull->SetMaximum(1.4);
+            frame_ratio_pTDiffv24ChFull->SetMinimum(0.6);
+            frame_ratio_pTDiffv24ChFull->SetYTitle("Ratio to Run 2");
+            frame_ratio_pTDiffv24ChFull->Draw("AXIS");
+            One->Draw("sames");
+            index=0;
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* ratio_pTDiffv24ChFull = GetRatio(28,(TH1D*)resultsFiles_pTDiffv24ChFull[j][i]->Get(Form("pTDiffv24ChFull")),pub_pTDiffv24ChFull,true);
+                SetMarkerAndLine(ratio_pTDiffv24ChFull,GetColor(index),kFullCircle,kSolid,1.0);
+                ratio_pTDiffv24ChFull->Draw("ESAMES");
+                index++;
+            }
+            cpTDiffv24ChFull->SaveAs(Form("./OutputPDF/pTDiffv24ChFullCent%dTo%d_RatioToRun2.pdf",(int)pTDiffCent[j],(int)pTDiffCent[j+1]));
+        }
+    }
+
+    // =================
+    // pTDiffv24Ch10Gap
+    // =================
+    if (IfCheckObservable[kpTDiffv24Ch10Gap]) {
+        for (uint j=0;j<pTDiffCent.size()-1;j++) {
+            index = 0;
+            TCanvas* cpTDiffv24Ch10Gap = new TCanvas(Form("cpTDiffv24Ch10Gap_%d",j), Form("cpTDiffv24Ch10Gap_%d",j), 800, 1200);
+            cpTDiffv24Ch10Gap->Divide(1,2);
+            cpTDiffv24Ch10Gap->cd(1);
+            gPad->SetBottomMargin(0.05);
+            TLegend* leg_pTDiffv24Ch10Gap = new TLegend(0.2,0.7,0.9,0.9);
+            TH1D* frame_pTDiffv24Ch10Gap = new TH1D(Form("frame_pTDiffv24Ch10Gap_%d",j), Form("frame_pTDiffv24Ch10Gap_%d",j), 50,0,3.);
+            frame_pTDiffv24Ch10Gap->SetMaximum(0.15);
+            frame_pTDiffv24Ch10Gap->SetMinimum(0.);
+            frame_pTDiffv24Ch10Gap->Draw("AXIS");
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* h_pTDiffv24Ch10Gap = (TH1D*)resultsFiles_pTDiffv24Ch10Gap[j][i]->Get(Form("pTDiffv24Ch10Gap"));
+                SetMarkerAndLine(h_pTDiffv24Ch10Gap,GetColor(index),kFullCircle,kSolid,1.0);
+                h_pTDiffv24Ch10Gap->Draw("ESAMES");
+                leg_pTDiffv24Ch10Gap->AddEntry(h_pTDiffv24Ch10Gap,Form("v_{2}{4, |#Delta#eta|>1.0} (p_{T}) Cent:%d~%d%% (%s)",(int)pTDiffCent[j],(int)pTDiffCent[j+1],legendNames[i].c_str()),"lp");
+                index+=1;
+            }
+
+            TGraphAsymmErrors* g_pTDiffv24Ch10Gap = nullptr;
+            if (j<PubTable_pTDiffv2.size()) {
+                g_pTDiffv24Ch10Gap = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable_pTDiffv2[j]));
+                if(!g_pTDiffv24Ch10Gap) continue;
+                SetMarkerAndLine(g_pTDiffv24Ch10Gap,kBlack,kOpenSquare,kSolid,1.0);
+                g_pTDiffv24Ch10Gap->Draw("PE");
+                leg_pTDiffv24Ch10Gap->AddEntry(g_pTDiffv24Ch10Gap,Form("v2{2}(p_{T}) JHEP 07 (2018) 103"));
+            }
+            leg_pTDiffv24Ch10Gap->Draw();
+
+            if(!g_pTDiffv24Ch10Gap) continue;
+            TH1D* pub_pTDiffv24Ch10Gap = new TH1D(Form("pub_pTDiffv24Ch10Gap_%d",j),Form("pub_pTDiffv24Ch10Gap_%d",j),20,x_pTDiff);
+            for(int i=0;i<28;i++){
+                pub_pTDiffv24Ch10Gap->SetBinContent(i+1,g_pTDiffv24Ch10Gap->GetPointY(i));
+                pub_pTDiffv24Ch10Gap->SetBinError(i+1,g_pTDiffv24Ch10Gap->GetErrorY(i));
+            }
+
+            cpTDiffv24Ch10Gap->cd(2);
+            gPad->SetTopMargin(0.05);
+            TH1D* frame_ratio_pTDiffv24Ch10Gap = new TH1D(Form("frame_ratio_pTDiffv24Ch10Gap_%d",j), Form("frame_ratio_pTDiffv24Ch10Gap_%d",j),50,0.,3.);
+            frame_ratio_pTDiffv24Ch10Gap->SetMaximum(1.4);
+            frame_ratio_pTDiffv24Ch10Gap->SetMinimum(0.6);
+            frame_ratio_pTDiffv24Ch10Gap->SetYTitle("Ratio to Run 2");
+            frame_ratio_pTDiffv24Ch10Gap->Draw("AXIS");
+            One->Draw("sames");
+            index=0;
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* ratio_pTDiffv24Ch10Gap = GetRatio(28,(TH1D*)resultsFiles_pTDiffv24Ch10Gap[j][i]->Get(Form("pTDiffv24Ch10Gap")),pub_pTDiffv24Ch10Gap,true);
+                SetMarkerAndLine(ratio_pTDiffv24Ch10Gap,GetColor(index),kFullCircle,kSolid,1.0);
+                ratio_pTDiffv24Ch10Gap->Draw("ESAMES");
+                index++;
+            }
+            cpTDiffv24Ch10Gap->SaveAs(Form("./OutputPDF/pTDiffv24Ch10GapCent%dTo%d_RatioToRun2.pdf",(int)pTDiffCent[j],(int)pTDiffCent[j+1]));
+        }
+    }
+
+
+    // =================
+    // pTDiffv26ChFull
+    // =================
+    if (IfCheckObservable[kpTDiffv26ChFull]) {
+        for (uint j=0;j<pTDiffCent.size()-1;j++) {
+            index = 0;
+            TCanvas* cpTDiffv26ChFull = new TCanvas(Form("cpTDiffv26ChFull_%d",j), Form("cpTDiffv26ChFull_%d",j), 800, 1200);
+            cpTDiffv26ChFull->Divide(1,2);
+            cpTDiffv26ChFull->cd(1);
+            gPad->SetBottomMargin(0.05);
+            TLegend* leg_pTDiffv26ChFull = new TLegend(0.2,0.7,0.9,0.9);
+            TH1D* frame_pTDiffv26ChFull = new TH1D(Form("frame_pTDiffv26ChFull_%d",j), Form("frame_pTDiffv26ChFull_%d",j), 50,0,3.);
+            frame_pTDiffv26ChFull->SetMaximum(0.15);
+            frame_pTDiffv26ChFull->SetMinimum(0.);
+            frame_pTDiffv26ChFull->Draw("AXIS");
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* h_pTDiffv26ChFull = (TH1D*)resultsFiles_pTDiffv26ChFull[j][i]->Get(Form("pTDiffv26ChFull"));
+                SetMarkerAndLine(h_pTDiffv26ChFull,GetColor(index),kFullCircle,kSolid,1.0);
+                h_pTDiffv26ChFull->Draw("ESAMES");
+                leg_pTDiffv26ChFull->AddEntry(h_pTDiffv26ChFull,Form("v_{2}{6} (p_{T}) Cent:%d~%d%% (%s)",(int)pTDiffCent[j],(int)pTDiffCent[j+1],legendNames[i].c_str()),"lp");
+                index+=1;
+            }
+
+            TGraphAsymmErrors* g_pTDiffv26ChFull = nullptr;
+            if (j<PubTable_pTDiffv2.size()) {
+                g_pTDiffv26ChFull = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y2",PubTable_pTDiffv2[j]));
+                if(!g_pTDiffv26ChFull) continue;
+                SetMarkerAndLine(g_pTDiffv26ChFull,kBlack,kOpenSquare,kSolid,1.0);
+                g_pTDiffv26ChFull->Draw("PE");
+                leg_pTDiffv26ChFull->AddEntry(g_pTDiffv26ChFull,Form("v2{2}(p_{T}) JHEP 07 (2018) 103"));
+            }
+            leg_pTDiffv26ChFull->Draw();
+
+            if(!g_pTDiffv26ChFull) continue;
+            TH1D* pub_pTDiffv26ChFull = new TH1D(Form("pub_pTDiffv26ChFull_%d",j),Form("pub_pTDiffv26ChFull_%d",j),20,x_pTDiff);
+            for(int i=0;i<28;i++){
+                pub_pTDiffv26ChFull->SetBinContent(i+1,g_pTDiffv26ChFull->GetPointY(i));
+                pub_pTDiffv26ChFull->SetBinError(i+1,g_pTDiffv26ChFull->GetErrorY(i));
+            }
+
+            cpTDiffv26ChFull->cd(2);
+            gPad->SetTopMargin(0.05);
+            TH1D* frame_ratio_pTDiffv26ChFull = new TH1D(Form("frame_ratio_pTDiffv26ChFull_%d",j), Form("frame_ratio_pTDiffv26ChFull_%d",j),50,0.,3.);
+            frame_ratio_pTDiffv26ChFull->SetMaximum(1.4);
+            frame_ratio_pTDiffv26ChFull->SetMinimum(0.6);
+            frame_ratio_pTDiffv26ChFull->SetYTitle("Ratio to Run 2");
+            frame_ratio_pTDiffv26ChFull->Draw("AXIS");
+            One->Draw("sames");
+            index=0;
+            for(int i=0;i<FileNameSuffixs.size();i++){
+                TH1D* ratio_pTDiffv26ChFull = GetRatio(28,(TH1D*)resultsFiles_pTDiffv26ChFull[j][i]->Get(Form("pTDiffv26ChFull")),pub_pTDiffv26ChFull,true);
+                SetMarkerAndLine(ratio_pTDiffv26ChFull,GetColor(index),kFullCircle,kSolid,1.0);
+                ratio_pTDiffv26ChFull->Draw("ESAMES");
+                index++;
+            }
+            cpTDiffv26ChFull->SaveAs(Form("./OutputPDF/pTDiffv26ChFullCent%dTo%d_RatioToRun2.pdf",(int)pTDiffCent[j],(int)pTDiffCent[j+1]));
         }
     }
 

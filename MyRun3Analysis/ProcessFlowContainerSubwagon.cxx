@@ -18,11 +18,11 @@
 #include "include/ErrorPropagation.h"
 #include "include/FlowContainerCalculation.h"
 
-void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_327815"){
+void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_340440"){
     // Produce flow results in root file for each subwagon
 
     TFile* f = new TFile(Form("./AnalysisResults/AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
-    vector<string> SubwagonNames = {"","_kIsGoodITSLayersAll"};
+    vector<string> SubwagonNames = {"","_FT0M"};
     vector<double> pTDiffCent={0,5,10,20,30,40,50,60,70,80};
 
     for(uint i=0; i < SubwagonNames.size(); i++){
@@ -51,6 +51,18 @@ void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_
         for (uint j=0; j<pTDiffCent.size()-1; j++) {
             fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
             Output_ptDiffvn(FileNameSuffix, fc, 4, pTDiffCent[j], pTDiffCent[j+1], SubwagonNames[i]);
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+            Output_PtDiffVnm(FileNameSuffix, fc, "ChFull", 2, 4, pTDiffCent[j], pTDiffCent[j+1], SubwagonNames[i]);
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+            Output_PtDiffVnm(FileNameSuffix, fc, "Ch10Gap", 2, 4, pTDiffCent[j], pTDiffCent[j+1], SubwagonNames[i]);
+        }
+        for (uint j=0; j<pTDiffCent.size()-1; j++) {
+            fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
+            Output_PtDiffVnm(FileNameSuffix, fc, "ChFull", 2, 6, pTDiffCent[j], pTDiffCent[j+1], SubwagonNames[i]);
         }
         fc = (FlowContainer*)f->Get(Form("flow-task%s/FlowContainer",SubwagonNames[i].c_str()));
         Output_Nonlinear(FileNameSuffix, fc, v422, SubwagonNames[i]);
