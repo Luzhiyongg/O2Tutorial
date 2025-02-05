@@ -155,8 +155,8 @@ struct FlowPtEfficiency {
       double* ptBins = &(axis.binEdges)[0];
       fPtAxis = new TAxis(nPtBins, ptBins);
 
-      fWeights->SetPtBins(nPtBins, ptBins);
-      fWeights->Init(true, false);
+      fWeights->setPtBins(nPtBins, ptBins);
+      fWeights->init(true, false);
 
       TObjArray* oba = new TObjArray();
       oba->Add(new TNamed("ChFull22", "ChFull22"));
@@ -326,7 +326,7 @@ struct FlowPtEfficiency {
       return false;
     weight_nue = 1. / eff;
     if (mAcceptance)
-      weight_nua = mAcceptance->GetNUA(phi, eta, vtxz);
+      weight_nua = mAcceptance->getNUA(phi, eta, vtxz);
     else
       weight_nua = 1;
     return true;
@@ -387,15 +387,15 @@ struct FlowPtEfficiency {
             bool withinPtPOI = (cfgFlowCutPtPOIMin < track.pt()) && (track.pt() < cfgFlowCutPtPOIMax); // within POI pT range
             bool withinPtRef = (cfgFlowCutPtRefMin < track.pt()) && (track.pt() < cfgFlowCutPtRefMax); // within RF pT range
             if (withinPtRef)
-              fWeights->Fill(track.phi(), track.eta(), vtxz, track.pt(), centrality, 0);
+              fWeights->fill(track.phi(), track.eta(), vtxz, track.pt(), centrality, 0);
             if (!setCurrentParticleWeights(weff, wacc, track.phi(), track.eta(), track.pt(), vtxz))
               continue;
             if (withinPtRef)
-              fGFWReco->Fill(track.eta(), fPtAxis->FindBin(track.pt()) - 1, track.phi(), wacc * weff, 1);
+              fGFWReco->fill(track.eta(), fPtAxis->FindBin(track.pt()) - 1, track.phi(), wacc * weff, 1);
             if (withinPtPOI)
-              fGFWReco->Fill(track.eta(), fPtAxis->FindBin(track.pt()) - 1, track.phi(), wacc * weff, 2);
+              fGFWReco->fill(track.eta(), fPtAxis->FindBin(track.pt()) - 1, track.phi(), wacc * weff, 2);
             if (withinPtPOI && withinPtRef)
-              fGFWReco->Fill(track.eta(), fPtAxis->FindBin(track.pt()) - 1, track.phi(), wacc * weff, 4);
+              fGFWReco->fill(track.eta(), fPtAxis->FindBin(track.pt()) - 1, track.phi(), wacc * weff, 4);
           }
         }
       }
