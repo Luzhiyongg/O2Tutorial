@@ -250,10 +250,18 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // legendNames.push_back("default+NoColl+ITSclu");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_340172_kColl");
     // legendNames.push_back("default+NoColl+ITSclu");
-    FileNameSuffixs.push_back("LHC23zzh_pass4_small_340440");
-    legendNames.push_back("centrality estimator: FT0C");
-    FileNameSuffixs.push_back("LHC23zzh_pass4_small_340440_FT0M");
-    legendNames.push_back("centrality estimator: FT0M");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_340440");
+    // legendNames.push_back("centrality estimator: FT0C");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_340440_FT0M");
+    // legendNames.push_back("centrality estimator: FT0M");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_340440");
+    // legendNames.push_back("default (small dataset)");
+    FileNameSuffixs.push_back("LHC23_PbPb_pass4_341269");
+    legendNames.push_back("default (full 2023, NUA not fitted)");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_341269_kColl");
+    // legendNames.push_back("add kColl cuts");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_332826_kIsGoodITSLayersAll");
+    // legendNames.push_back("Max occupancy 3k (full 2023, NUA not fitted)");
 
 
 
@@ -1436,7 +1444,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
 
             TGraphAsymmErrors* g_pTDiffv26ChFull = nullptr;
             if (j<PubTable_pTDiffv2.size()) {
-                g_pTDiffv26ChFull = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y2",PubTable_pTDiffv2[j]));
+                g_pTDiffv26ChFull = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable_pTDiffv2[j]));
                 if(!g_pTDiffv26ChFull) continue;
                 SetMarkerAndLine(g_pTDiffv26ChFull,kBlack,kOpenSquare,kSolid,1.0);
                 g_pTDiffv26ChFull->Draw("PE");

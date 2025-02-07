@@ -28,20 +28,22 @@ void CentDepV2(){
     TFile* f = new TFile("./AnalysisResults_LHC24k2_David_327409.root","READ");
     TH1D* fCentIP = GetCentVsIP(f,"flow-test/hImpactParameter");
 
+    double CentAxis[] = {0.,5.,10.,20.,30.,40.,50.,60.,70.,80.,90.,100.};
+
     TH3D* hBVsPtVsPhiGenerated = (TH3D*)f->Get("flow-test/hBVsPtVsPhiGenerated");
     if (!hBVsPtVsPhiGenerated) {
         std::cerr << "Error: hBVsPtVsPhiGenerated not found in file." << std::endl;
         return;
     }
     // hBVsPtVsPhiGenerated->Draw("colz");
-    double ptmin = 0.2;
+    double ptmin = 0.5;
     double ptmax = 3;
     hBVsPtVsPhiGenerated->GetZaxis()->SetRangeUser(ptmin,ptmax);
     TH2D* hBVsPhiGenerated = (TH2D*)hBVsPtVsPhiGenerated->Project3D("xy");
     // hBVsPhiGenerated->GetXaxis()->SetRangeUser(0,3);
     // hBVsPhiGenerated->Draw("col");
 
-    TH1D* hV2Generated = new TH1D("hV2Generated","hV2Generated",10,0.,100.);
+    TH1D* hV2Generated = new TH1D("hV2Generated","hV2Generated", 11, CentAxis);
     // At every B, calculate average phi;
     for (int i=1; i<=hBVsPhiGenerated->GetNbinsY(); ++i) {
         double b = hBVsPhiGenerated->GetYaxis()->GetBinCenter(i);
@@ -73,7 +75,7 @@ void CentDepV2(){
     // hBVsPhiGlobal->GetXaxis()->SetRangeUser(0,3);
     // hBVsPhiGlobal->Draw("col");
 
-    TH1D* hV2Global = new TH1D("hV2Global","hV2Global",10,0.,100.);
+    TH1D* hV2Global = new TH1D("hV2Global","hV2Global", 11, CentAxis);
     // At every B, calculate average phi;
     for (int i=1; i<=hBVsPhiGlobal->GetNbinsY(); ++i) {
         double b = hBVsPhiGlobal->GetYaxis()->GetBinCenter(i);
