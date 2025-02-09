@@ -331,6 +331,32 @@ void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_p
     }
 }
 
+void NonclosureCorrection(TH1D* hV22pt,Double_t CentMin,Double_t CentMax) {
+    TFile* nonclosure = nullptr;
+    if (CentMax <= 10){
+        nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_2.0_3.0.root","READ");
+    }
+    else if (CentMax > 10 && CentMax <= 50) {
+        nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_5.0_6.0.root","READ");
+    }
+    else {
+        nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_9.0_10.0.root","READ");
+    }
+    if (!nonclosure){
+        Printf("Can't find nonclosure curve");
+        return;
+    }
+    TH1D* nonclosureCurves = (TH1D*)nonclosure->Get("hRatio");
+    
+    for (int i = 1; i <= hV22pt->GetNbinsX(); i++) {
+        double pt = hV22pt->GetBinCenter(i);
+        double correction = nonclosureCurves->GetBinContent(nonclosureCurves->FindBin(pt));
+        if (correction > 0.){
+            hV22pt->SetBinContent(i, hV22pt->GetBinContent(i)/correction);
+        }
+    }
+}
+
 void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double_t CentMin=0., Double_t CentMax=5., string Subwagon=""){
     TCanvas* canvas2 = nullptr;
     bool anotherCanvas = false;
@@ -353,6 +379,8 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double
         Printf("Can't get hV22");
         return;
     }
+    if (ApplynonclosureCorrection)
+        NonclosureCorrection(hV22pt,CentMin,CentMax);
 
     std::vector<std::vector<std::vector<double>>> ValueArray;
     std::vector<std::vector<std::vector<double>>> ValueErrorArray;
@@ -368,6 +396,8 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double
         for(int i=0;i<Nobs;i++){
             TH1D* temp = (TH1D*)fc->GetVN2VsPt(n,CentMin,CentMax);
             temp->SetName(Form("pTDiffv2_%d",sample));
+            if (ApplynonclosureCorrection)
+                NonclosureCorrection(temp,CentMin,CentMax);
             if(!temp){
                 Printf("Can't get pTDiffv2_%d",sample);
                 return;
@@ -394,7 +424,10 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double
     legend2->Draw();
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv%dCent%dTo%d_%s%s.root",n,(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        string iscorrected = "";
+        if (ApplynonclosureCorrection)
+            iscorrected = "nonclosurecorrected";
+        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv%dCent%dTo%d_%s%s%s.root",n,(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str(),iscorrected.c_str()),"RECREATE");
         hV22pt->Write();
         fout->Close();
     }
