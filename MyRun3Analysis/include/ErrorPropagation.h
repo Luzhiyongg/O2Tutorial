@@ -123,4 +123,53 @@ double Error_CN10(double cor10, double cor10e, double cor8, double cor8e, double
     return TMath::Sqrt(retval);
 }
 
+//实际上Default和Sys之间是存在关联的，因此这两个误差传递公式并不准确
+double Error_PercentSys(double x, double ex, double y, double ey, double rho){
+    //z=100*|x-y|/|x|
+    //rho is correlation term, which is sqrt(N_y/N_x)
+    //Cov(x,y) = rho*ex*ey
+    // if(kDebug)printf("x=%f, ex=%f, y=%f, ey=%f, rho=%f\n",x,ex,y,ey,rho);
+    double k = abs(x-y)/abs(x);
+    // if(kDebug)printf("k=%f\n",k);
+    // if(kDebug)printf("Cov term of PercentSys Error: %f\n",2*50.*(((2*y/(x*x))-(2*y*y/(x*x*x)))/k)*50.*(((-2./x)+(2*y/(x*x)))/k)*rho*ex*ey);
+    // return sqrt(
+    //     pow(50.*ex*((2*y/(x*x))-(2*y*y/(x*x*x)))/k,2)
+    //     +pow(50.*ey*((-2./x)+(2*y/(x*x)))/k,2)
+    //     +2*50.*(((2*y/(x*x))-(2*y*y/(x*x*x)))/k)*50.*(((-2./x)+(2*y/(x*x)))/k)*rho*ex*ey
+    // );
+
+    //z=100*(x-y)/(x)
+    double cov = rho*ex*ey;
+    // if(kDebug)Printf("cov = %f",cov);
+    double dF2 = pow(100.*y*ex/(x*x),2)
+    +pow(100.*ey/x,2)
+    +2.*cov*100.*(-100.)*y/(x*x*x);
+    // if(kDebug)Printf("dF^2 = %f",dF2);
+    if(dF2<0){
+        return sqrt(
+        pow(100.*y*ex/(x*x),2)
+        +pow(100.*ey/x,2)
+        );
+    }
+    return sqrt(
+        pow(100.*y*ex/(x*x),2)
+        +pow(100.*ey/x,2)
+        +2.*cov*100.*(-100.)*y/(x*x*x)
+    );
+
+}
+
+double Error_Substraction(double x, double ex, double y, double ey, double rho){
+    //Cov(x,y) = rho*ex*ey
+    double cov = rho*ex*ey;
+    double correlated = sqrt(ex*ex+ey*ey-2*x*y*cov);
+    Printf("No correlated: %f",sqrt(ex*ex+ey*ey));
+    Printf("Correalted: %f",correlated);
+    if(correlated!=correlated){
+        Printf("Correlated is nan, return no correlated result");
+        return sqrt(ex*ex+ey*ey);
+    }
+    return sqrt(ex*ex+ey*ey-2*x*y*cov);
+}
+
 #endif

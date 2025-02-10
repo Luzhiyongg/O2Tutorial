@@ -17,6 +17,7 @@
 #include <map>
 #include <array>
 #include "include/ErrorPropagation.h"
+#include "include/ProcessDefine.h"
 
 using namespace std;
 
@@ -115,36 +116,12 @@ TH1D* GetAbsValue(Int_t NBin, TH1D* h1, TH1D* h2, Bool_t ispTDiff=false){
     return AbsValue;
 }
 
-vector<double> pTDiffCent={0,5,10,20,30,40,50,60,70};
-
-enum kObservable{
-    kVn,
-    kV24,
-    kV26,
-    kV28,
-    kV210,
-    kV422,
-    kChi422,
-    kRho422,
-    kNSC23,
-    kNSC24,
-    kNSC234,
-    kNSC345,
-    kpTDiffv2,
-    kpTDiffv3,
-    kpTDiffv4,
-    kpTDiffv24ChFull,
-    kpTDiffv24Ch10Gap,
-    kpTDiffv26ChFull,
-    kNObservable
-};
-
 std::map<kObservable,bool> IfCheckObservable = {
     {kVn,true},
     {kV24,true},
     {kV26,true},
     {kV28,true},
-    {kV210,false},
+    {kV210,true},
     {kV422,true},
     {kChi422,true},
     {kRho422,true},
@@ -272,12 +249,14 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // legendNames.push_back("centrality estimator: FT0M");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_small_340440");
     // legendNames.push_back("default (small dataset)");
-    FileNameSuffixs.push_back("LHC23_PbPb_pass4_341269");
-    legendNames.push_back("default (full 2023, NUA not fitted)");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_341269");
+    // legendNames.push_back("default (full 2023, NUA not fitted)");
     // FileNameSuffixs.push_back("LHC23_PbPb_pass4_341269_kColl");
     // legendNames.push_back("add kColl cuts");
     // FileNameSuffixs.push_back("LHC23_PbPb_pass4_332826_kIsGoodITSLayersAll");
     // legendNames.push_back("Max occupancy 3k (full 2023, NUA not fitted)");
+    FileNameSuffixs.push_back("LHC23_PbPb_pass4_344339");
+    legendNames.push_back("default (full 2023)");
 
 
 
@@ -1147,7 +1126,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
             cpTDiffv2->cd(1);
             gPad->SetBottomMargin(0.05);
             TLegend* leg_pTDiffv2 = new TLegend(0.2,0.7,0.9,0.9);
-            TH1D* frame_pTDiffv2 = new TH1D(Form("frame_pTDiffv2_%d",j), Form("frame_pTDiffv2_%d",j), 50,0,5.);
+            TH1D* frame_pTDiffv2 = new TH1D(Form("frame_pTDiffv2_%d",j), Form("frame_pTDiffv2_%d",j),100,0.,100.);
             frame_pTDiffv2->SetMaximum(0.3);
             frame_pTDiffv2->SetMinimum(0.);
             frame_pTDiffv2->Draw("AXIS");
@@ -1178,7 +1157,7 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
 
             cpTDiffv2->cd(2);
             gPad->SetTopMargin(0.05);
-            TH1D* frame_ratio_pTDiffv2 = new TH1D(Form("frame_ratio_pTDiffv2_%d",j), Form("frame_ratio_pTDiffv2_%d",j),50,0.,5.);
+            TH1D* frame_ratio_pTDiffv2 = new TH1D(Form("frame_ratio_pTDiffv2_%d",j), Form("frame_ratio_pTDiffv2_%d",j),100,0.,100.);
             frame_ratio_pTDiffv2->SetMaximum(1.4);
             frame_ratio_pTDiffv2->SetMinimum(0.6);
             frame_ratio_pTDiffv2->SetYTitle("Ratio to Run 2");
