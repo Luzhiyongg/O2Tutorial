@@ -333,15 +333,16 @@ void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_p
 
 void NonclosureCorrection(TH1D* hV22pt,Double_t CentMin,Double_t CentMax) {
     TFile* nonclosure = nullptr;
-    if (CentMax <= 10){
-        nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_2.0_3.0.root","READ");
-    }
-    else if (CentMax > 10 && CentMax <= 50) {
-        nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_5.0_6.0.root","READ");
-    }
-    else {
-        nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_9.0_10.0.root","READ");
-    }
+    // if (CentMax <= 10){
+    //     nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_2.0_3.0.root","READ");
+    // }
+    // else if (CentMax > 10 && CentMax <= 50) {
+    //     nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_5.0_6.0.root","READ");
+    // }
+    // else {
+    //     nonclosure = new TFile("./nonclosurecurves/syntheflow_nonclosure_b_9.0_10.0.root","READ");
+    // }
+    nonclosure = new TFile(Form("../flowMC/MCcorrection/CorrectionFactor_Cent%dTo%d_LHC24k2_David_327409.root",(int)CentMin,(int)CentMax),"READ");
     if (!nonclosure){
         Printf("Can't find nonclosure curve");
         return;
