@@ -36,11 +36,11 @@ std::map<int,bool> IfCheckObservable = {
     {kNSC234,true},
     {kNSC345,true},
     {kpTDiffv2,true},
-    {kpTDiffv3,false},
-    {kpTDiffv4,false},
-    {kpTDiffv24ChFull,false},
+    {kpTDiffv3,true},
+    {kpTDiffv4,true},
+    {kpTDiffv24ChFull,true},
     {kpTDiffv24Ch10Gap,false},
-    {kpTDiffv26ChFull,false}
+    {kpTDiffv26ChFull,true}
 };
 
 void CalculateSystematic(int kobs, string obsName, string DefaultFileNameSuffix, string SysFileNameSuffix, string SysDescription, int pTDiffCentMin=-1, int pTDiffCentMax=-1) {
@@ -235,10 +235,11 @@ void ProcessSingleObsSystematics(bool kSummaryTable, bool kRootFile, int kobs, i
     tabUncertAndDecision.resize(SysFileNameSuffixs.size());
     for(auto& row: tabUncertAndDecision) row.resize(2);
 
-    vector<int> barlowDetails(2);
+    vector<vector<int>> barlowDetails(SysFileNameSuffixs.size());
+    for(auto& row: barlowDetails) row.resize(2);
 
     for(int kSys=0; kSys<SysFileNameSuffixs.size(); kSys++) {
-        ProcessGroupSystematics(tabUncertAndDecision[kSys], barlowDetails, kobs, ObservableNamesMap[kobs][kobsName], DefaultFileNameSuffix, SysFileNameSuffixs[kSys], SysDescription[kSys], pTDiffCentMin, pTDiffCentMax);
+        ProcessGroupSystematics(tabUncertAndDecision[kSys], barlowDetails[kSys], kobs, ObservableNamesMap[kobs][kobsName], DefaultFileNameSuffix, SysFileNameSuffixs[kSys], SysDescription[kSys], pTDiffCentMin, pTDiffCentMax);
     }
 
     double SysTotalError = 0.;
@@ -255,16 +256,19 @@ void ProcessSingleObsSystematics(bool kSummaryTable, bool kRootFile, int kobs, i
         tableName += ".tex";
         ofstream ofs(tableName.c_str());
         ofs << "\\begin{table}[htbp]" << endl;
-        ofs << "\\caption{" << ObservableOutputNamesMap[kobs][kobsName] << " Systematics}" << endl;
+        ofs << "\\caption{" << "$" << ObservablePrintNamesMap[kobs][kobsName] << "$";
+        if (pTDiffCentMin >= 0 && pTDiffCentMax >= 0)
+            ofs << " (centrality: " << pTDiffCentMin << "-" << pTDiffCentMax << "\\%)";
+        ofs << " Systematics}" << endl;
         ofs << "\\label{tab:Sys_" << ObservableOutputNamesMap[kobs][kobsName] << "}" << endl;
         ofs << "\\centering" << endl;
         ofs << "\\begin{tabular}{|c|c|c|c|}" << endl;
         ofs << "\\hline" << endl;
-        ofs << "Systematic & Uncertainty & Barlow Check & Decision \\\\" << endl;
+        ofs << "Systematic & Uncertainty(\\%) & Barlow Check & Decision \\\\" << endl;
         ofs << "\\hline" << endl;
         for(int kSys=0; kSys<SysFileNameSuffixs.size(); kSys++){
             ofs << SysDescription[kSys][0] << " & " << std::fixed << std::setprecision(2) << tabUncertAndDecision[kSys][0] << " & ";
-            ofs << std::defaultfloat << barlowDetails[0] << "/" << barlowDetails[1] << "=" << (double)barlowDetails[0]/(double)barlowDetails[1] << " & " << tabUncertAndDecision[kSys][1] << " \\\\" << endl;
+            ofs << std::defaultfloat << barlowDetails[kSys][0] << "/" << barlowDetails[kSys][1] << "=" << (double)barlowDetails[kSys][0]/(double)barlowDetails[kSys][1] << " & " << tabUncertAndDecision[kSys][1] << " \\\\" << endl;
         }
         ofs << "\\hline" << endl;
         ofs << "Total Uncertainty & " << std::fixed << std::setprecision(2) << SysTotalError << " & " << "N/A" << " & " << "N/A" << " \\\\" << endl;
@@ -292,6 +296,7 @@ void ProcessSingleObsSystematics(bool kSummaryTable, bool kRootFile, int kobs, i
         }
 
         TGraphErrors* sysBox = new TGraphErrors();
+        sysBox->SetName(Form("Sys_%s", ObservableOutputNamesMap[kobs][kobsName].c_str()));
         int nbins = hDefault->GetNbinsX();
         for (int ibin=1; ibin<=nbins; ibin++) {
             double defaultBinContent = hDefault->GetBinContent(ibin);
@@ -348,8 +353,26 @@ void ProcessSystematics() {
     vector<vector<string>> SysFileNameSuffixs;
     vector<vector<string>> SysDescription;
 
+    // Event Systematics
     SysFileNameSuffixs.push_back({"LHC23zzh_pass4_small_340440_FT0M"});
     SysDescription.push_back({"Cent Estimator: FT0M"});
+    SysFileNameSuffixs.push_back({"LHC23_PbPb_pass4_341269_kColl"});
+    SysDescription.push_back({"kNoColl flags"});
+    SysFileNameSuffixs.push_back({"LHC23zzh_pass4_small_346469_NoMultCorrelation"});
+    SysDescription.push_back({"w/o Multiplicity correlation"});
+
+    // Track Systematics
+    SysFileNameSuffixs.push_back({"LHC23_PbPb_pass4_341269"});
+    SysDescription.push_back({"w/o NUA correction"});
+    SysFileNameSuffixs.push_back({"LHC23zzh_pass4_small_346469_Chi2"});
+    SysDescription.push_back({"TPC Chi2 $<$ 4."});
+    SysFileNameSuffixs.push_back({"LHC23zzh_pass4_small_346469_Vtxz8"});
+    SysDescription.push_back({"Vertex Z $<$ 8 cm"});
+    SysFileNameSuffixs.push_back({"LHC23zzh_pass4_small_346469_TPCclu90"});
+    SysDescription.push_back({"\\# of TPC clusters $>$ 90"});
+    SysFileNameSuffixs.push_back({"LHC23zzh_pass4_small_345386_DCAzPt_id24178"});
+    SysDescription.push_back({"DCAz Pt dependence cut"});
+    
     // BatchCalculateSystematics(DefaultFileNameSuffix, SysFileNameSuffixs, SysDescription);
     ProcessTotalSystematics(DefaultFileNameSuffix, SysFileNameSuffixs, SysDescription, true, true);
 }

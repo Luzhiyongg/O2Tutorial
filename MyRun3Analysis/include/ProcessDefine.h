@@ -10,6 +10,8 @@ std::vector<double> pTDiffCent={0,5,10,20,30,40,50,60,70};
 
 double BarlowRequirement = 1.;
 double MaxpT = 200.;
+bool kDrawFirstOneSystematics = true;
+bool kpTDiffLogx = true;
 
 enum kObservable{
     kVn,
@@ -94,6 +96,27 @@ map<int, vector<string>> ObservableOutputNamesMap = {
     {kpTDiffv24ChFull, {"pTDiffv24ChFull"}},
     {kpTDiffv24Ch10Gap, {"pTDiffv24Ch10Gap"}},
     {kpTDiffv26ChFull, {"pTDiffv26ChFull"}}
+};
+
+map<int, vector<string>> ObservablePrintNamesMap = {
+    {kVn, {"v_2\\{2\\}","v_3\\{2\\}","v_4\\{2\\}"}},
+    {kV24, {"v_2\\{4\\}"}},
+    {kV26, {"v_2\\{6\\}"}},
+    {kV28, {"v_2\\{8\\}"}},
+    {kV210, {"v_2\\{10\\}"}},
+    {kV422, {"v_{4,22}"}},
+    {kChi422, {"\\chi_{4,22}"}},
+    {kRho422, {"\\rho_{4,22}"}},
+    {kNSC23, {"NSC(2,3)"}},
+    {kNSC24, {"NSC(2,4)"}},
+    {kNSC234, {"NSC(2,3,4)"}},
+    {kNSC345, {"NSC(3,4,5)"}},
+    {kpTDiffv2, {"v_2\\{2\\}(p_{T})"}},
+    {kpTDiffv3, {"v_3\\{2\\}(p_{T})"}},
+    {kpTDiffv4, {"v_4\\{2\\}(p_{T})"}},
+    {kpTDiffv24ChFull, {"v_2\\{4\\}(p_{T})"}},
+    {kpTDiffv24Ch10Gap, {"v_2\\{4, |\\Delta\\eta|>1.0\\}(p_{T})"}},
+    {kpTDiffv26ChFull, {"v_2\\{6\\}(p_{T})"}}
 };
 
 #endif // PROCESS_DEFINE_H
