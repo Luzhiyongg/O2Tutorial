@@ -172,6 +172,16 @@
         "cfgCutDCAxyppPass3Enabled": "false",
         "cfgCutDCAzPtDepEnabled": "false",
         "cfgSelRunNumberEnabled": "false",
+        "cfgFlowEnabled": "true",
+        "cfgFlowNbootstrap": "30",
+        "cfgFlowCutPtPOIMin": "0.200000003",
+        "cfgFlowCutPtPOIMax": "100",
+        "cfgFlowCutPtRefMin": "0.200000003",
+        "cfgFlowCutPtRefMax": "3",
+        "cfgCentVsIPTruth": "Users\/z\/zhlu\/CentVsIP\/CentVsIP_LHC24k2_David_327409",
+        "cfgCentVsIPReco": "Users\/z\/zhlu\/CentVsIP\/CentVsIP_LHC24k2_David_327409",
+        "cfgFlowAcceptance": "",
+        "cfgFlowEfficiency": "",
         "cfgRunNumberList": {
             "values": [
                 "-1"
@@ -246,6 +256,38 @@
                 "1000"
             ]
         },
+        "axisCentrality": {
+            "values": [
+                "0",
+                "0",
+                "5",
+                "10",
+                "20",
+                "30",
+                "40",
+                "50",
+                "60",
+                "70",
+                "80",
+                "90"
+            ]
+        },
+        "axisPhi": {
+            "values": [
+                "100",
+                "0",
+                "6.2831854820251465"
+            ]
+        },
+        "axisB": {
+            "values": [
+                "100",
+                "0",
+                "20"
+            ]
+        },
+        "ccdbNoLaterThan": "1739235140572",
+        "ccdbUrl": "http:\/\/alice-ccdb.cern.ch",
         "processReco": "true",
         "processSim": "true"
     },
