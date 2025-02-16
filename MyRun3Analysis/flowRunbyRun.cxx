@@ -137,6 +137,9 @@ struct FlowRunbyRun {
   enum OutputTProfileNames {
     c22 = 0,
     c22_gap10,
+    c32,
+    c32_gap10,
+    c3232,
     kCount_TProfileNames
   };
   int mRunNumber{-1};
@@ -195,6 +198,9 @@ struct FlowRunbyRun {
     corrconfigs.resize(kCount_TProfileNames);
     corrconfigs[c22] = fGFW->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE);
     corrconfigs[c22_gap10] = fGFW->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE);
+    corrconfigs[c32] = fGFW->GetCorrelatorConfig("full {3 -3}", "ChFull32", kFALSE);
+    corrconfigs[c32_gap10] = fGFW->GetCorrelatorConfig("refN10 {3} refP10 {-3}", "Ch10Gap32", kFALSE);
+    corrconfigs[c3232] = fGFW->GetCorrelatorConfig("full {3 2 -3 -2}", "ChFull3232", kFALSE);
     if (!userDefineGFWCorr.empty() && !userDefineGFWName.empty()) {
       LOGF(info, "User adding GFW CorrelatorConfig:");
       // attentaion: here we follow the index of cfgUserDefineGFWCorr
@@ -279,6 +285,9 @@ struct FlowRunbyRun {
     std::vector<std::shared_ptr<TProfile>> profiles(kCount_TProfileNames);
     profiles[c22] = registry.add<TProfile>(Form("%d/c22", runNumber), "", {HistType::kTProfile, {axisIndependent}});
     profiles[c22_gap10] = registry.add<TProfile>(Form("%d/c22_gap10", runNumber), "", {HistType::kTProfile, {axisIndependent}});
+    profiles[c32] = registry.add<TProfile>(Form("%d/c32", runNumber), "", {HistType::kTProfile, {axisIndependent}});
+    profiles[c32_gap10] = registry.add<TProfile>(Form("%d/c32_gap10", runNumber), "", {HistType::kTProfile, {axisIndependent}});
+    profiles[c3232] = registry.add<TProfile>(Form("%d/c3232", runNumber), "", {HistType::kTProfile, {axisIndependent}});
     profilesList.insert(std::make_pair(runNumber, profiles));
 
     if (cfgOutputNUAWeights) {
