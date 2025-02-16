@@ -119,7 +119,8 @@ struct FlowPtEfficiency {
   GFW* fGFWTrue = new GFW();
   GFW* fGFWReco = new GFW();
   TAxis* fPtAxis;
-  std::vector<GFW::CorrConfig> corrconfigs;
+  std::vector<GFW::CorrConfig> corrconfigsTruth;
+  std::vector<GFW::CorrConfig> corrconfigsReco;
   TRandom3* fRndm = new TRandom3(0);
 
   bool isStable(int pdg)
@@ -183,12 +184,12 @@ struct FlowPtEfficiency {
       fGFWTrue->AddRegion("poifull", -0.8, 0.8, 1 + fPtAxis->GetNbins(), 2);
       fGFWTrue->AddRegion("olN10", -0.8, -0.5, 1, 4);
       fGFWTrue->AddRegion("olfull", -0.8, 0.8, 1 + fPtAxis->GetNbins(), 4);
-      corrconfigs.push_back(fGFWTrue->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE));
-      corrconfigs.push_back(fGFWTrue->GetCorrelatorConfig("poifull full | olfull {2 -2}", "ChFull22", kTRUE));
-      corrconfigs.push_back(fGFWTrue->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE));
-      corrconfigs.push_back(fGFWTrue->GetCorrelatorConfig("poiN10 refN10 | olN10 {2} refP10 {-2}", "Ch10Gap22", kTRUE));
+      corrconfigsTruth.push_back(fGFWTrue->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE));
+      corrconfigsTruth.push_back(fGFWTrue->GetCorrelatorConfig("poifull full | olfull {2 -2}", "ChFull22", kTRUE));
+      corrconfigsTruth.push_back(fGFWTrue->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE));
+      corrconfigsTruth.push_back(fGFWTrue->GetCorrelatorConfig("poiN10 refN10 | olN10 {2} refP10 {-2}", "Ch10Gap22", kTRUE));
       fGFWTrue->CreateRegions();
-
+      
       fGFWReco->AddRegion("full", -0.8, 0.8, 1, 1);
       fGFWReco->AddRegion("refN10", -0.8, -0.5, 1, 1);
       fGFWReco->AddRegion("refP10", 0.5, 0.8, 1, 1);
@@ -196,6 +197,10 @@ struct FlowPtEfficiency {
       fGFWReco->AddRegion("poifull", -0.8, 0.8, 1 + fPtAxis->GetNbins(), 2);
       fGFWReco->AddRegion("olN10", -0.8, -0.5, 1, 4);
       fGFWReco->AddRegion("olfull", -0.8, 0.8, 1 + fPtAxis->GetNbins(), 4);
+      corrconfigsReco.push_back(fGFWReco->GetCorrelatorConfig("full {2 -2}", "ChFull22", kFALSE));
+      corrconfigsReco.push_back(fGFWReco->GetCorrelatorConfig("poifull full | olfull {2 -2}", "ChFull22", kTRUE));
+      corrconfigsReco.push_back(fGFWReco->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE));
+      corrconfigsReco.push_back(fGFWReco->GetCorrelatorConfig("poiN10 refN10 | olN10 {2} refP10 {-2}", "Ch10Gap22", kTRUE));
       fGFWReco->CreateRegions();
     }
 
@@ -409,8 +414,8 @@ struct FlowPtEfficiency {
     }
     if (cfgFlowEnabled) {
       // Filling Flow Container
-      for (uint l_ind = 0; l_ind < corrconfigs.size(); l_ind++) {
-        fillFC(fGFWReco, false, corrconfigs.at(l_ind), centrality, lRandom);
+      for (uint l_ind = 0; l_ind < corrconfigsReco.size(); l_ind++) {
+        fillFC(fGFWReco, false, corrconfigsReco.at(l_ind), centrality, lRandom);
       }
     }
   }
@@ -456,8 +461,8 @@ struct FlowPtEfficiency {
       }
       if (cfgFlowEnabled) {
         // Filling Flow Container
-        for (uint l_ind = 0; l_ind < corrconfigs.size(); l_ind++) {
-          fillFC(fGFWTrue, true, corrconfigs.at(l_ind), centrality, lRandom);
+        for (uint l_ind = 0; l_ind < corrconfigsTruth.size(); l_ind++) {
+          fillFC(fGFWTrue, true, corrconfigsTruth.at(l_ind), centrality, lRandom);
         }
       }
     }
