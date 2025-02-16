@@ -20,7 +20,7 @@ TH1D* GetCentVsIP(TFile* f, const char* IPdistname) {
 }
 
 void ProduceCentVsIP(){
-    TFile* f = new TFile("./AnalysisResults_LHC24k2_David_327409.root","READ");
+    TFile* f = new TFile("./AnalysisResults/AnalysisResults_LHC24k2_David_327409.root","READ");
     TH1D* fCentIP = GetCentVsIP(f,"flow-test/hImpactParameter");
 
     if(!fCentIP){
