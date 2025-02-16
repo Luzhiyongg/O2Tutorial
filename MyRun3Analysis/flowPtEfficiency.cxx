@@ -144,9 +144,11 @@ struct FlowPtEfficiency {
     // create histograms
     registry.add("eventCounter", "eventCounter", kTH1F, {axisCounter});
     registry.add("hPtMCRec", "Monte Carlo Reco", {HistType::kTH1D, {axisPt}});
+    registry.add("hPtCentMCRec", "Reco production; pT (GeV/c); centrality (%)", {HistType::kTH2D, {axisPt, axisCentrality}});
 
     registry.add("mcEventCounter", "Monte Carlo Truth EventCounter", kTH1F, {axisCounter});
     registry.add("hPtMCGen", "Monte Carlo Truth", {HistType::kTH1D, {axisPt}});
+    registry.add("hPtCentMCGen", "Truth production; pT (GeV/c); centrality (%)", {HistType::kTH2D, {axisPt, axisCentrality}});
 
     if (cfgFlowEnabled) {
       registry.add("hImpactParameterReco", "hImpactParameterReco", {HistType::kTH1D, {axisB}});
@@ -390,6 +392,7 @@ struct FlowPtEfficiency {
         }
         if (isStable(mcParticle.pdgCode())) {
           registry.fill(HIST("hPtMCRec"), track.pt());
+          registry.fill(HIST("hPtCentMCRec"), track.pt(), centrality);
 
           if (cfgFlowEnabled) {
             bool withinPtPOI = (cfgFlowCutPtPOIMin < track.pt()) && (track.pt() < cfgFlowCutPtPOIMax); // within POI pT range
@@ -447,6 +450,8 @@ struct FlowPtEfficiency {
       for (const auto& mcParticle : mcParticles) {
         if (mcParticle.isPhysicalPrimary() && isStable(mcParticle.pdgCode())) {
           registry.fill(HIST("hPtMCGen"), mcParticle.pt());
+          registry.fill(HIST("hPtCentMCGen"), mcParticle.pt(), centrality);
+
           if (cfgFlowEnabled) {
             bool withinPtPOI = (cfgFlowCutPtPOIMin < mcParticle.pt()) && (mcParticle.pt() < cfgFlowCutPtPOIMax); // within POI pT range
             bool withinPtRef = (cfgFlowCutPtRefMin < mcParticle.pt()) && (mcParticle.pt() < cfgFlowCutPtRefMax); // within RF pT range
