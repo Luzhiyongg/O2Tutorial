@@ -49,7 +49,7 @@ void ProduceRunByRunWeight() {
 
     }
     
-    TFile* fout = new TFile("./AcceptanceRunByRun/Test.root","RECREATE");
+    TFile* fout = new TFile("./AcceptanceRunByRun/NUA_LHC23zzh_pass4_small_352370.root","RECREATE");
     listOfWeight->Write("ccdb_object", TObject::kSingleKey);
     fout->Close();
     f->Close();
