@@ -471,8 +471,9 @@ struct FlowPtEfficiency {
           if (cfgFlowEnabled) {
             bool withinPtPOI = (cfgFlowCutPtPOIMin < mcParticle.pt()) && (mcParticle.pt() < cfgFlowCutPtPOIMax); // within POI pT range
             bool withinPtRef = (cfgFlowCutPtRefMin < mcParticle.pt()) && (mcParticle.pt() < cfgFlowCutPtRefMax); // within RF pT range
-            if (withinPtRef)
-              registry.fill(HIST("hPhiMCTruth"), mcParticle.phi())
+            if (withinPtRef) {
+              registry.fill(HIST("hPhiMCTruth"), mcParticle.phi());
+            }
             if (withinPtRef)
               fGFWTrue->Fill(mcParticle.eta(), fPtAxis->FindBin(mcParticle.pt()) - 1, mcParticle.phi(), wacc * weff, 1);
             if (withinPtPOI)
