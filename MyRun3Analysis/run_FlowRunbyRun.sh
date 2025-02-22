@@ -1,5 +1,5 @@
 opt="-b --configuration json://configuration_flow_runbyrun.json"
-    aodfile="AO2D_LHC23zzm_apass4_544652.root"   
+    aodfile="AO2D_LHC23zzh_apass4_544122.root"   
     o2-analysis-track-propagation ${opt} |
     o2-analysis-tracks-extra-v002-converter ${opt} | 
     o2-analysis-timestamp ${opt} | 

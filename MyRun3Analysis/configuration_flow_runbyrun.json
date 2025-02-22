@@ -14,6 +14,17 @@
         "TimeFrameStartBorderMargin": "-1",
         "TimeFrameEndBorderMargin": "-1",
         "checkRunDurationLimits": "false",
+        "maxInactiveChipsPerLayer": {
+            "values": [
+                "8",
+                "8",
+                "8",
+                "111",
+                "111",
+                "195",
+                "195"
+            ]
+        },
         "processRun2": "false",
         "processRun3": "true"
     },
@@ -163,8 +174,7 @@
                 "FT0MultZeqs",
                 "FDDMultZeqs",
                 "PVMultZeqs",
-                "MultMCExtras",
-                "MFTMults"
+                "MultMCExtras"
             ],
             "labels_cols": [
                 "Enable"
@@ -192,10 +202,7 @@
                     "-1"
                 ],
                 [
-                    "-1"
-                ],
-                [
-                    "-1"
+                    "1"
                 ],
                 [
                     "-1"
@@ -229,7 +236,8 @@
         "processRun3": "true",
         "processGlobalTrackingCounters": "false",
         "processMC": "false",
-        "processMC2Mults": "false"
+        "processMC2Mults": "false",
+        "processRun3MFT": "false"
     },
     "centrality-table": {
         "enabledTables": {
@@ -244,8 +252,11 @@
                 "CentFT0Ms",
                 "CentFT0As",
                 "CentFT0Cs",
+                "CentFT0CVariant1s",
                 "CentFDDMs",
-                "CentNTPVs"
+                "CentNTPVs",
+                "CentNGlobals",
+                "CentMFTs"
             ],
             "labels_cols": [
                 "Enable"
@@ -279,7 +290,16 @@
                     "-1"
                 ],
                 [
-                    "1"
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
+                ],
+                [
+                    "-1"
                 ],
                 [
                     "-1"
@@ -673,6 +693,7 @@
             ]
         },
         "processRun2": "false",
+        "processRun3Complete": "false",
         "processRun3": "true",
         "processRun3FT0": "false"
     },
@@ -687,13 +708,39 @@
         "cfgCutEta": "0.800000012",
         "cfgCutChi2prTPCcls": "2.5",
         "cfgCutDCAz": "2",
+        "cfgCutDCAzPtDepEnabled": "false",
+        "cfgUseAdditionalEventCut": "true",
+        "cfgEvSelkNoSameBunchPileup": "false",
+        "cfgEvSelkIsGoodZvtxFT0vsPV": "false",
+        "cfgEvSelkNoCollInTimeRangeStandard": "false",
+        "cfgEvSelkIsGoodITSLayersAll": "true",
+        "cfgEvSelkNoCollInRofStandard": "false",
+        "cfgEvSelkNoHighMultCollInPrevRof": "false",
+        "cfgEvSelMultCorrelation": "true",
+        "cfgEvSelV0AT0ACut": "true",
+        "cfgEvSelOccupancy": "true",
+        "cfgCutOccupancyHigh": "500",
+        "cfgCutOccupancyLow": "0",
         "cfgUseNch": "false",
+        "cfgNbootstrap": "30",
+        "cfgOutputNUAWeights": "true",
         "cfgOutputNUAWeightsRefPt": "true",
+        "cfgEfficiency": "Users/z/zhlu/Efficiency/Eff_LHC24g3_340094",
+        "cfgAcceptanceList": "Users/z/zhlu/AcceptanceRunByRun/RunByRunNUA_LHC23zzh_pass4_small_352370",
         "cfgDynamicRunNumber": "true",
+        "cfgGetInteractionRate": "true",
+        "cfgUseInteractionRateCut": "true",
+        "cfgCutMaxIR": "1000",
+        "cfgCutMinIR": "0",
         "cfgRunNumbers": {
             "values": [
+                "544095",
+                "544098",
                 "544116",
-                "544122"
+                "544121",
+                "544122",
+                "544123",
+                "544124"
             ]
         },
         "cfgUserDefineGFWCorr": {
@@ -780,7 +827,6 @@
         "axisIndependent": {
             "values": [
                 "0",
-                "0",
                 "5",
                 "10",
                 "20",
@@ -793,8 +839,8 @@
                 "90"
             ]
         },
-        "ccdb-no-later-than": "1733187249990",
-        "ccdb-url": "http:\/\/alice-ccdb.cern.ch"
+        "ccdbNoLaterThan": "1739966093152",
+        "ccdbUrl": "http:\/\/alice-ccdb.cern.ch"
     },
     "internal-dpl-aod-writer": "",
     "internal-dpl-aod-global-analysis-file-sink": "",
