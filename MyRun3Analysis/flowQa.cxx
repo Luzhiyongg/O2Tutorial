@@ -79,8 +79,6 @@ struct FlowQa {
   O2_DEFINE_CONFIGURABLE(cfgEvSelkIsGoodITSLayersAll, bool, true, "cut time intervals with dead ITS staves")
   O2_DEFINE_CONFIGURABLE(cfgEvSelkNoCollInRofStandard, bool, false, "no other collisions in this Readout Frame with per-collision multiplicity above threshold")
   O2_DEFINE_CONFIGURABLE(cfgEvSelkNoHighMultCollInPrevRof, bool, false, "veto an event if FT0C amplitude in previous ITS ROF is above threshold")
-  O2_DEFINE_CONFIGURABLE(cfgEvSelMultCorrelation, bool, true, "Multiplicity correlation cut")
-  O2_DEFINE_CONFIGURABLE(cfgEvSelV0AT0ACut, bool, true, "V0A T0A 5 sigma cut")
   O2_DEFINE_CONFIGURABLE(cfgGetInteractionRate, bool, false, "Get interaction rate from CCDB")
   O2_DEFINE_CONFIGURABLE(cfgUseInteractionRateCut, bool, false, "Use events with low interaction rate")
   O2_DEFINE_CONFIGURABLE(cfgCutMaxIR, float, 50.0f, "maximum interaction rate (kHz)")
@@ -152,16 +150,6 @@ struct FlowQa {
 
   // Track selection
   TrackSelection myTrackSel;
-  TF1* fPhiCutLow = nullptr;
-  TF1* fPhiCutHigh = nullptr;
-  // Additional Event selection cuts - Copy from flowGenericFramework.cxx
-  TF1* fMultPVCutLow = nullptr;
-  TF1* fMultPVCutHigh = nullptr;
-  TF1* fMultCutLow = nullptr;
-  TF1* fMultCutHigh = nullptr;
-  TF1* fMultMultPVCut = nullptr;
-  TF1* fT0AV0AMean = nullptr;
-  TF1* fT0AV0ASigma = nullptr;
 
   void init(InitContext const&)
   {
@@ -184,7 +172,7 @@ struct FlowQa {
     registry.get<TH1>(HIST("hEventCount"))->GetXaxis()->SetBinLabel(3, "after supicious Runs removal");
     registry.get<TH1>(HIST("hEventCount"))->GetXaxis()->SetBinLabel(4, "after additional event cut");
     registry.get<TH1>(HIST("hEventCount"))->GetXaxis()->SetBinLabel(5, "after correction loads");
-    registry.add("hEventCountSpecific", "Number of Event;; Count", {HistType::kTH1D, {{10, 0, 10}}});
+    registry.add("hEventCountSpecific", "Number of Event;; Count", {HistType::kTH1D, {{8, 0, 8}}});
     registry.get<TH1>(HIST("hEventCountSpecific"))->GetXaxis()->SetBinLabel(1, "after sel8");
     registry.get<TH1>(HIST("hEventCountSpecific"))->GetXaxis()->SetBinLabel(2, "kNoSameBunchPileup");
     registry.get<TH1>(HIST("hEventCountSpecific"))->GetXaxis()->SetBinLabel(3, "kIsGoodZvtxFT0vsPV");
@@ -193,10 +181,8 @@ struct FlowQa {
     registry.get<TH1>(HIST("hEventCountSpecific"))->GetXaxis()->SetBinLabel(6, "kNoCollInRofStandard");
     registry.get<TH1>(HIST("hEventCountSpecific"))->GetXaxis()->SetBinLabel(7, "kNoHighMultCollInPrevRof");
     registry.get<TH1>(HIST("hEventCountSpecific"))->GetXaxis()->SetBinLabel(8, "occupancy");
-    registry.get<TH1>(HIST("hEventCountSpecific"))->GetXaxis()->SetBinLabel(9, "MultCorrelation");
-    registry.get<TH1>(HIST("hEventCountSpecific"))->GetXaxis()->SetBinLabel(10, "cfgEvSelV0AT0ACut");
     if (cfgUseTentativeEventCounter) {
-      registry.add("hEventCountTentative", "Number of Event;; Count", {HistType::kTH1D, {{10, 0, 10}}});
+      registry.add("hEventCountTentative", "Number of Event;; Count", {HistType::kTH1D, {{8, 0, 8}}});
       registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(1, "after sel8");
       registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(2, "kNoSameBunchPileup");
       registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(3, "kIsGoodZvtxFT0vsPV");
@@ -205,8 +191,6 @@ struct FlowQa {
       registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(6, "kNoCollInRofStandard");
       registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(7, "kNoHighMultCollInPrevRof");
       registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(8, "occupancy");
-      registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(9, "MultCorrelation");
-      registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(10, "cfgEvSelV0AT0ACut");
     }
     registry.add("hVtxZ", "Vexter Z distribution", {HistType::kTH1D, {axisVertex}});
     registry.add("hMult", "Multiplicity distribution", {HistType::kTH1D, {{3000, 0.5, 3000.5}}});
@@ -271,39 +255,19 @@ struct FlowQa {
       oba->Add(new TNamed(Form("ChFull24_pt_%i", i + 1), "ChFull24_pTDiff"));
     for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("ChFull26_pt_%i", i + 1), "ChFull26_pTDiff"));
-    oba->Add(new TNamed("Ch04Gap22", "Ch04Gap22"));
-    oba->Add(new TNamed("Ch06Gap22", "Ch06Gap22"));
-    oba->Add(new TNamed("Ch08Gap22", "Ch08Gap22"));
     oba->Add(new TNamed("Ch10Gap22", "Ch10Gap22"));
     for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("Ch10Gap22_pt_%i", i + 1), "Ch10Gap22_pTDiff"));
-    oba->Add(new TNamed("Ch12Gap22", "Ch12Gap22"));
-    oba->Add(new TNamed("Ch04Gap32", "Ch04Gap32"));
-    oba->Add(new TNamed("Ch06Gap32", "Ch06Gap32"));
-    oba->Add(new TNamed("Ch08Gap32", "Ch08Gap32"));
     oba->Add(new TNamed("Ch10Gap32", "Ch10Gap32"));
     for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("Ch10Gap32_pt_%i", i + 1), "Ch10Gap32_pTDiff"));
-    oba->Add(new TNamed("Ch12Gap32", "Ch12Gap32"));
-    oba->Add(new TNamed("Ch04Gap42", "Ch04Gap42"));
-    oba->Add(new TNamed("Ch06Gap42", "Ch06Gap42"));
-    oba->Add(new TNamed("Ch08Gap42", "Ch08Gap42"));
     oba->Add(new TNamed("Ch10Gap42", "Ch10Gap42"));
     for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("Ch10Gap42_pt_%i", i + 1), "Ch10Gap42_pTDiff"));
-    oba->Add(new TNamed("Ch12Gap42", "Ch12Gap42"));
-    oba->Add(new TNamed("ChFull422", "ChFull422"));
-    oba->Add(new TNamed("Ch04GapA422", "Ch04GapA422"));
-    oba->Add(new TNamed("Ch04GapB422", "Ch04GapB422"));
     oba->Add(new TNamed("Ch10GapA422", "Ch10GapA422"));
     oba->Add(new TNamed("Ch10GapB422", "Ch10GapB422"));
     oba->Add(new TNamed("ChFull3232", "ChFull3232"));
     oba->Add(new TNamed("ChFull4242", "ChFull4242"));
-    oba->Add(new TNamed("Ch04Gap3232", "Ch04Gap3232"));
-    oba->Add(new TNamed("Ch04Gap4242", "Ch04Gap4242"));
-    oba->Add(new TNamed("Ch04Gap24", "Ch04Gap24"));
-    oba->Add(new TNamed("Ch10Gap3232", "Ch10Gap3232"));
-    oba->Add(new TNamed("Ch10Gap4242", "Ch10Gap4242"));
     oba->Add(new TNamed("Ch10Gap24", "Ch10Gap24"));
     for (auto i = 0; i < fPtAxis->GetNbins(); i++)
       oba->Add(new TNamed(Form("Ch10Gap24_pt_%i", i + 1), "Ch10Gap24_pTDiff"));
@@ -352,21 +316,9 @@ struct FlowQa {
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {4 -4}", "ChFull42", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 2 -2 -2}", "ChFull24", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {2 2 2 -2 -2 -2}", "ChFull26", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {2} refP04 {-2}", "Ch04Gap22", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {2} refP06 {-2}", "Ch06Gap22", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {2} refP08 {-2}", "Ch08Gap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {2} refP10 {-2}", "Ch10Gap22", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN12 {2} refP12 {-2}", "Ch12Gap22", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {3} refP04 {-3}", "Ch04Gap32", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {3} refP06 {-3}", "Ch06Gap32", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {3} refP08 {-3}", "Ch08Gap32", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {3} refP10 {-3}", "Ch10Gap32", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN12 {3} refP12 {-3}", "Ch12Gap32", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {4} refP04 {-4}", "Ch04Gap42", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN06 {4} refP06 {-4}", "Ch06Gap42", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN08 {4} refP08 {-4}", "Ch08Gap42", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {4} refP10 {-4}", "Ch10Gap42", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN12 {4} refP12 {-4}", "Ch12Gap42", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN {2} refP {-2}", "ChGap22", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("poifull full | olfull {2 -2}", "ChFull22", kTRUE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("poifull full | olfull {2 2 -2 -2}", "ChFull24", kTRUE));
@@ -374,18 +326,10 @@ struct FlowQa {
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("poiN10 refN10 | olN10 {2} refP10 {-2}", "Ch10Gap22", kTRUE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("poiN10 refN10 | olN10 {3} refP10 {-3}", "Ch10Gap32", kTRUE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("poiN10 refN10 | olN10 {4} refP10 {-4}", "Ch10Gap42", kTRUE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {4 -2 -2}", "ChFull422", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {-2 -2} refP04 {4}", "Ch04GapA422", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {4} refP04 {-2 -2}", "Ch04GapB422", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {-2 -2} refP10 {4}", "Ch10GapA422", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {4} refP10 {-2 -2}", "Ch10GapB422", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {3 2 -3 -2}", "ChFull3232", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("full {4 2 -4 -2}", "ChFull4242", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {3 2} refP04 {-3 -2}", "Ch04Gap3232", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {4 2} refP04 {-4 -2}", "Ch04Gap4242", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN04 {2 2} refP04 {-2 -2}", "Ch04Gap24", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {3 2} refP10 {-3 -2}", "Ch10Gap3232", kFALSE));
-    corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {4 2} refP10 {-4 -2}", "Ch10Gap4242", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("refN10 {2 2} refP10 {-2 -2}", "Ch10Gap24", kFALSE));
     corrconfigs.push_back(fGFW->GetCorrelatorConfig("poiN10 refN10 | olN10 {2 2} refP10 {-2 -2}", "Ch10Gap24", kTRUE));
     if (!userDefineGFWCorr.empty() && !userDefineGFWName.empty()) {
@@ -401,23 +345,6 @@ struct FlowQa {
       }
     }
     fGFW->CreateRegions();
-
-    if (cfgUseAdditionalEventCut) {
-      fMultPVCutLow = new TF1("fMultPVCutLow", "[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x - 3.5*([5]+[6]*x+[7]*x*x+[8]*x*x*x+[9]*x*x*x*x)", 0, 100);
-      fMultPVCutLow->SetParameters(3257.29, -121.848, 1.98492, -0.0172128, 6.47528e-05, 154.756, -1.86072, -0.0274713, 0.000633499, -3.37757e-06);
-      fMultPVCutHigh = new TF1("fMultPVCutHigh", "[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x + 3.5*([5]+[6]*x+[7]*x*x+[8]*x*x*x+[9]*x*x*x*x)", 0, 100);
-      fMultPVCutHigh->SetParameters(3257.29, -121.848, 1.98492, -0.0172128, 6.47528e-05, 154.756, -1.86072, -0.0274713, 0.000633499, -3.37757e-06);
-
-      fMultCutLow = new TF1("fMultCutLow", "[0]+[1]*x+[2]*x*x+[3]*x*x*x - 2.*([4]+[5]*x+[6]*x*x+[7]*x*x*x+[8]*x*x*x*x)", 0, 100);
-      fMultCutLow->SetParameters(1654.46, -47.2379, 0.449833, -0.0014125, 150.773, -3.67334, 0.0530503, -0.000614061, 3.15956e-06);
-      fMultCutHigh = new TF1("fMultCutHigh", "[0]+[1]*x+[2]*x*x+[3]*x*x*x + 3.*([4]+[5]*x+[6]*x*x+[7]*x*x*x+[8]*x*x*x*x)", 0, 100);
-      fMultCutHigh->SetParameters(1654.46, -47.2379, 0.449833, -0.0014125, 150.773, -3.67334, 0.0530503, -0.000614061, 3.15956e-06);
-
-      fT0AV0AMean = new TF1("fT0AV0AMean", "[0]+[1]*x", 0, 200000);
-      fT0AV0AMean->SetParameters(-1601.0581, 9.417652e-01);
-      fT0AV0ASigma = new TF1("fT0AV0ASigma", "[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x", 0, 200000);
-      fT0AV0ASigma->SetParameters(463.4144, 6.796509e-02, -9.097136e-07, 7.971088e-12, -2.600581e-17);
-    }
 
     myTrackSel = getGlobalTrackSelectionRun3ITSMatch(TrackSelection::GlobalTrackRun3ITSMatching::Run3ITSibAny, TrackSelection::GlobalTrackRun3DCAxyCut::Default);
     myTrackSel.SetMinNClustersTPC(cfgCutTPCclu);
@@ -560,31 +487,11 @@ struct FlowQa {
     }
     if (cfgEvSelkNoHighMultCollInPrevRof)
       registry.fill(HIST("hEventCountSpecific"), 6.5);
-    auto multNTracksPV = collision.multNTracksPV();
     auto occupancy = collision.trackOccupancyInTimeRange();
     if (cfgEvSelOccupancy && (occupancy < cfgCutOccupancyLow || occupancy > cfgCutOccupancyHigh))
       return 0;
     if (cfgEvSelOccupancy)
       registry.fill(HIST("hEventCountSpecific"), 7.5);
-
-    if (cfgEvSelMultCorrelation) {
-      if (multNTracksPV < fMultPVCutLow->Eval(centrality))
-        return 0;
-      if (multNTracksPV > fMultPVCutHigh->Eval(centrality))
-        return 0;
-      if (multTrk < fMultCutLow->Eval(centrality))
-        return 0;
-      if (multTrk > fMultCutHigh->Eval(centrality))
-        return 0;
-    }
-    if (cfgEvSelMultCorrelation)
-      registry.fill(HIST("hEventCountSpecific"), 8.5);
-
-    // V0A T0A 5 sigma cut
-    if (cfgEvSelV0AT0ACut && (std::fabs(collision.multFV0A() - fT0AV0AMean->Eval(collision.multFT0A())) > 5 * fT0AV0ASigma->Eval(collision.multFT0A())))
-      return 0;
-    if (cfgEvSelV0AT0ACut)
-      registry.fill(HIST("hEventCountSpecific"), 9.5);
 
     return 1;
   }
@@ -606,14 +513,9 @@ struct FlowQa {
       registry.fill(HIST("hEventCountTentative"), 5.5);
     if (collision.selection_bit(o2::aod::evsel::kNoHighMultCollInPrevRof))
       registry.fill(HIST("hEventCountTentative"), 6.5);
-    auto multNTracksPV = collision.multNTracksPV();
     auto occupancy = collision.trackOccupancyInTimeRange();
     if (!(occupancy < cfgCutOccupancyLow || occupancy > cfgCutOccupancyHigh))
       registry.fill(HIST("hEventCountTentative"), 7.5);
-    if (!((multNTracksPV < fMultPVCutLow->Eval(centrality)) || (multNTracksPV > fMultPVCutHigh->Eval(centrality)) || (multTrk < fMultCutLow->Eval(centrality)) || (multTrk > fMultCutHigh->Eval(centrality))))
-      registry.fill(HIST("hEventCountTentative"), 8.5);
-    if (!(std::fabs(collision.multFV0A() - fT0AV0AMean->Eval(collision.multFT0A())) > 5 * fT0AV0ASigma->Eval(collision.multFT0A())))
-      registry.fill(HIST("hEventCountTentative"), 9.5);
   }
 
   template <typename TTrack>
