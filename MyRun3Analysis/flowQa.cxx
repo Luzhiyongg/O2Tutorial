@@ -64,13 +64,13 @@ struct FlowQa {
   O2_DEFINE_CONFIGURABLE(cfgCutPtMin, float, 0.2f, "Minimal pT for all tracks")
   O2_DEFINE_CONFIGURABLE(cfgCutPtMax, float, 10.0f, "Maximal pT for all tracks")
   O2_DEFINE_CONFIGURABLE(cfgCutEta, float, 0.8f, "Eta range for tracks")
-  O2_DEFINE_CONFIGURABLE(cfgCutChi2prTPCcls, float, 2.5f, "max chi2 per TPC clusters")
-  O2_DEFINE_CONFIGURABLE(cfgCutTPCclu, float, 70.0f, "minimum TPC clusters")
+  O2_DEFINE_CONFIGURABLE(cfgCutTPCclu, float, 30.0f, "minimum TPC clusters")
   O2_DEFINE_CONFIGURABLE(cfgCutITSclu, float, 5.0f, "minimum ITS clusters")
+  O2_DEFINE_CONFIGURABLE(cfgCutITSTPCcluEnabled, bool, false, "switch of minimum ITS/TPC clusters")
   O2_DEFINE_CONFIGURABLE(cfgCutDCAz, float, 2.0f, "max DCA to vertex z")
   O2_DEFINE_CONFIGURABLE(cfgCutDCAxyppPass3Enabled, bool, false, "switch of ppPass3 DCAxy pt dependent cut")
   O2_DEFINE_CONFIGURABLE(cfgCutDCAzPtDepEnabled, bool, false, "switch of DCAz pt dependent cut")
-  O2_DEFINE_CONFIGURABLE(cfgTrkSelSwitch, bool, false, "switch for self-defined track selection")
+  O2_DEFINE_CONFIGURABLE(cfgTrackType, int, 0, "0:Global; 1:GlobalSDD; 2:QualityITS; 3:QualityTPC; 4:ITS; 5: TPC; 6:GloalorITS; 7: GlobalorTPC")
   O2_DEFINE_CONFIGURABLE(cfgUseAdditionalEventCut, bool, false, "Use additional event cut on mult correlations")
   O2_DEFINE_CONFIGURABLE(cfgUseTentativeEventCounter, bool, false, "After sel8(), count events regardless of real event selection")
   O2_DEFINE_CONFIGURABLE(cfgEvSelkNoSameBunchPileup, bool, false, "rejects collisions which are associated with the same found-by-T0 bunch crossing")
@@ -107,7 +107,7 @@ struct FlowQa {
   ConfigurableAxis axisDCAxy{"axisDCAxy", {200, -1, 1}, "DCA_{xy} (cm)"};
 
   Filter collisionFilter = (nabs(aod::collision::posZ) < cfgCutVertex) && (aod::cent::centFT0C > cfgCentFT0CMin) && (aod::cent::centFT0C < cfgCentFT0CMax);
-  Filter trackFilter = ((requireGlobalTrackInFilter()) || (aod::track::isGlobalTrackSDD == (uint8_t) true)) && (nabs(aod::track::eta) < cfgCutEta) && (aod::track::pt > cfgCutPtMin) && (aod::track::pt < cfgCutPtMax) && (aod::track::tpcChi2NCl < cfgCutChi2prTPCcls) && (nabs(aod::track::dcaZ) < cfgCutDCAz);
+  Filter trackFilter = (nabs(aod::track::eta) < cfgCutEta) && (aod::track::pt > cfgCutPtMin) && (aod::track::pt < cfgCutPtMax) && (nabs(aod::track::dcaZ) < cfgCutDCAz);
 
   // Corrections
   TH1D* mEfficiency = nullptr;
@@ -138,6 +138,18 @@ struct FlowQa {
     // Count the total number of enum
     kCount_CentEstimators
   };
+  enum TrackType {
+    kGlobalTrack = 0,
+    kGlobalTrackSDD,
+    kQualityTracksITS,
+    kQualityTracksTPC,
+    kITSTracks,
+    kTPCTracks,
+    kGlobalOrITSTracks,
+    kGlobalOrTPCTracks,
+    // Count the total number of enum
+    kCount_TrackType
+  };
   int mRunNumber{-1};
   uint64_t mSOR{0};
   double mMinSeconds{-1.};
@@ -147,9 +159,6 @@ struct FlowQa {
 
   using AodCollisions = soa::Filtered<soa::Join<aod::Collisions, aod::EvSels, aod::CentFT0Cs, aod::CentFT0CVariant1s, aod::CentFT0Ms, aod::CentFV0As, aod::Mults>>;
   using AodTracks = soa::Filtered<soa::Join<aod::Tracks, aod::TrackSelection, aod::TracksExtra, aod::TracksDCA>>;
-
-  // Track selection
-  TrackSelection myTrackSel;
 
   void init(InitContext const&)
   {
@@ -193,23 +202,24 @@ struct FlowQa {
       registry.get<TH1>(HIST("hEventCountTentative"))->GetXaxis()->SetBinLabel(8, "occupancy");
     }
     registry.add("hVtxZ", "Vexter Z distribution", {HistType::kTH1D, {axisVertex}});
-    registry.add("hMult", "Multiplicity distribution", {HistType::kTH1D, {{3000, 0.5, 3000.5}}});
+    std::string hMultTitle = "Multiplicity distribution, TrackType " + std::to_string(cfgTrackType);
+    registry.add("hMult", hMultTitle.c_str(), {HistType::kTH1D, {{6000, 0, 6000}}});
     std::string hCentTitle = "Centrality distribution, Estimator " + std::to_string(cfgCentEstimator);
     registry.add("hCent", hCentTitle.c_str(), {HistType::kTH1D, {{90, 0, 90}}});
     if (!cfgUseSmallMemory) {
-      registry.add("BeforeSel8_globalTracks_centT0C", "before sel8;Centrality T0C;mulplicity global tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
-      registry.add("BeforeCut_globalTracks_centT0C", "before cut;Centrality T0C;mulplicity global tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
+      registry.add("BeforeSel8_Tracks_centT0C", "before sel8;Centrality T0C;mulplicity  tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
+      registry.add("BeforeCut_Tracks_centT0C", "before cut;Centrality T0C;mulplicity  tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
       registry.add("BeforeCut_PVTracks_centT0C", "before cut;Centrality T0C;mulplicity PV tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
-      registry.add("BeforeCut_globalTracks_PVTracks", "before cut;mulplicity PV tracks;mulplicity global tracks", {HistType::kTH2D, {axisNch, axisNch}});
-      registry.add("BeforeCut_globalTracks_multT0A", "before cut;mulplicity T0A;mulplicity global tracks", {HistType::kTH2D, {axisT0A, axisNch}});
-      registry.add("BeforeCut_globalTracks_multV0A", "before cut;mulplicity V0A;mulplicity global tracks", {HistType::kTH2D, {axisT0A, axisNch}});
+      registry.add("BeforeCut_Tracks_PVTracks", "before cut;mulplicity PV tracks;mulplicity  tracks", {HistType::kTH2D, {axisNch, axisNch}});
+      registry.add("BeforeCut_Tracks_multT0A", "before cut;mulplicity T0A;mulplicity  tracks", {HistType::kTH2D, {axisT0A, axisNch}});
+      registry.add("BeforeCut_Tracks_multV0A", "before cut;mulplicity V0A;mulplicity  tracks", {HistType::kTH2D, {axisT0A, axisNch}});
       registry.add("BeforeCut_multV0A_multT0A", "before cut;mulplicity T0A;mulplicity V0A", {HistType::kTH2D, {axisT0A, axisT0A}});
       registry.add("BeforeCut_multT0C_centT0C", "before cut;Centrality T0C;mulplicity T0C", {HistType::kTH2D, {axisCentForQA, axisT0C}});
-      registry.add("globalTracks_centT0C", "after cut;Centrality T0C;mulplicity global tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
+      registry.add("Tracks_centT0C", "after cut;Centrality T0C;mulplicity  tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
       registry.add("PVTracks_centT0C", "after cut;Centrality T0C;mulplicity PV tracks", {HistType::kTH2D, {axisCentForQA, axisNch}});
-      registry.add("globalTracks_PVTracks", "after cut;mulplicity PV tracks;mulplicity global tracks", {HistType::kTH2D, {axisNch, axisNch}});
-      registry.add("globalTracks_multT0A", "after cut;mulplicity T0A;mulplicity global tracks", {HistType::kTH2D, {axisT0A, axisNch}});
-      registry.add("globalTracks_multV0A", "after cut;mulplicity V0A;mulplicity global tracks", {HistType::kTH2D, {axisT0A, axisNch}});
+      registry.add("Tracks_PVTracks", "after cut;mulplicity PV tracks;mulplicity  tracks", {HistType::kTH2D, {axisNch, axisNch}});
+      registry.add("Tracks_multT0A", "after cut;mulplicity T0A;mulplicity  tracks", {HistType::kTH2D, {axisT0A, axisNch}});
+      registry.add("Tracks_multV0A", "after cut;mulplicity V0A;mulplicity  tracks", {HistType::kTH2D, {axisT0A, axisNch}});
       registry.add("multV0A_multT0A", "after cut;mulplicity T0A;mulplicity V0A", {HistType::kTH2D, {axisT0A, axisT0A}});
       registry.add("multT0C_centT0C", "after cut;Centrality T0C;mulplicity T0C", {HistType::kTH2D, {axisCentForQA, axisT0C}});
       registry.add("centFT0CVar_centFT0C", "after cut;Centrality T0C;Centrality T0C Var", {HistType::kTH2D, {axisCentForQA, axisCentForQA}});
@@ -346,11 +356,6 @@ struct FlowQa {
     }
     fGFW->CreateRegions();
 
-    myTrackSel = getGlobalTrackSelectionRun3ITSMatch(TrackSelection::GlobalTrackRun3ITSMatching::Run3ITSibAny, TrackSelection::GlobalTrackRun3DCAxyCut::Default);
-    myTrackSel.SetMinNClustersTPC(cfgCutTPCclu);
-    myTrackSel.SetMinNClustersITS(cfgCutITSclu);
-    if (cfgCutDCAxyppPass3Enabled)
-      myTrackSel.SetMaxDcaXYPtDep([](float pt) { return 0.004f + 0.013f / pt; }); // Tuned on the LHC22f anchored MC LHC23d1d on primary pions. 7 Sigmas of the resolution
   }
 
   template <char... chars>
@@ -445,7 +450,7 @@ struct FlowQa {
   }
 
   template <typename TCollision>
-  bool eventSelected(TCollision collision, const int multTrk, const float centrality)
+  bool eventSelected(TCollision collision)
   {
     registry.fill(HIST("hEventCountSpecific"), 0.5);
     if (cfgEvSelkNoSameBunchPileup && !collision.selection_bit(o2::aod::evsel::kNoSameBunchPileup)) {
@@ -497,7 +502,7 @@ struct FlowQa {
   }
 
   template <typename TCollision>
-  void eventCounterQA(TCollision collision, const int multTrk, const float centrality)
+  void eventCounterQA(TCollision collision)
   {
     registry.fill(HIST("hEventCountTentative"), 0.5);
     // Regradless of the event selection, fill the event counter histograms
@@ -521,14 +526,44 @@ struct FlowQa {
   template <typename TTrack>
   bool trackSelected(TTrack track)
   {
+    // track type selection
+    bool passTrackTypeSelection = false;
+    switch (cfgTrackType) {
+      case kGlobalTrack:
+        passTrackTypeSelection = track.isGlobalTrack();
+        break;
+      case kGlobalTrackSDD:
+        passTrackTypeSelection = track.isGlobalTrackSDD();
+        break;
+      case kQualityTracksITS:
+        passTrackTypeSelection = track.isQualityTrackITS();
+        break;
+      case kQualityTracksTPC:
+        passTrackTypeSelection = track.isQualityTrackTPC();
+        break;
+      case kITSTracks:
+        passTrackTypeSelection = (track.isQualityTrackITS() && track.isPrimaryTrack() && track.isInAcceptanceTrack());
+        break;
+      case kTPCTracks:
+        passTrackTypeSelection = (track.isQualityTrackTPC() && track.isPrimaryTrack() && track.isInAcceptanceTrack());
+        break;
+      case kGlobalOrITSTracks:
+        passTrackTypeSelection = (track.isGlobalTrack() || (track.isQualityTrackITS() && track.isPrimaryTrack() && track.isInAcceptanceTrack()));
+        break;
+      case kGlobalOrTPCTracks:
+        passTrackTypeSelection = (track.isGlobalTrack() || (track.isQualityTrackTPC() && track.isPrimaryTrack() && track.isInAcceptanceTrack()));
+        break;
+    }
+    if (!passTrackTypeSelection)
+      return false;
+
     if (cfgCutDCAzPtDepEnabled && (std::fabs(track.dcaZ()) > (0.004f + 0.013f / track.pt())))
       return false;
 
-    if (cfgTrkSelSwitch) {
-      return myTrackSel.IsSelected(track);
-    } else {
-      return ((track.tpcNClsFound() >= cfgCutTPCclu) && (track.itsNCls() >= cfgCutITSclu));
-    }
+    if (cfgCutITSTPCcluEnabled && (track.tpcNClsFound() < cfgCutTPCclu || track.itsNCls() < cfgCutITSclu))
+      return false;
+
+    return true;
   }
 
   void initHadronicRate(aod::BCsWithTimestamps::iterator const& bc)
@@ -552,7 +587,7 @@ struct FlowQa {
   {
     registry.fill(HIST("hEventCount"), 0.5);
     if (!cfgUseSmallMemory && tracks.size() >= 1) {
-      registry.fill(HIST("BeforeSel8_globalTracks_centT0C"), collision.centFT0C(), tracks.size());
+      registry.fill(HIST("BeforeSel8_Tracks_centT0C"), collision.centFT0C(), tracks.size());
     }
     if (!collision.sel8())
       return;
@@ -568,11 +603,11 @@ struct FlowQa {
     }
     registry.fill(HIST("hEventCount"), 2.5);
     if (!cfgUseSmallMemory) {
-      registry.fill(HIST("BeforeCut_globalTracks_centT0C"), collision.centFT0C(), tracks.size());
+      registry.fill(HIST("BeforeCut_Tracks_centT0C"), collision.centFT0C(), tracks.size());
       registry.fill(HIST("BeforeCut_PVTracks_centT0C"), collision.centFT0C(), collision.multNTracksPV());
-      registry.fill(HIST("BeforeCut_globalTracks_PVTracks"), collision.multNTracksPV(), tracks.size());
-      registry.fill(HIST("BeforeCut_globalTracks_multT0A"), collision.multFT0A(), tracks.size());
-      registry.fill(HIST("BeforeCut_globalTracks_multV0A"), collision.multFV0A(), tracks.size());
+      registry.fill(HIST("BeforeCut_Tracks_PVTracks"), collision.multNTracksPV(), tracks.size());
+      registry.fill(HIST("BeforeCut_Tracks_multT0A"), collision.multFT0A(), tracks.size());
+      registry.fill(HIST("BeforeCut_Tracks_multV0A"), collision.multFV0A(), tracks.size());
       registry.fill(HIST("BeforeCut_multV0A_multT0A"), collision.multFT0A(), collision.multFV0A());
       registry.fill(HIST("BeforeCut_multT0C_centT0C"), collision.centFT0C(), collision.multFT0C());
     }
@@ -594,8 +629,8 @@ struct FlowQa {
         cent = collision.centFT0C();
     }
     if (cfgUseTentativeEventCounter)
-      eventCounterQA(collision, tracks.size(), cent);
-    if (cfgUseAdditionalEventCut && !eventSelected(collision, tracks.size(), cent))
+      eventCounterQA(collision);
+    if (cfgUseAdditionalEventCut && !eventSelected(collision))
       return;
     registry.fill(HIST("hEventCount"), 3.5);
     float lRandom = fRndm->Rndm();
@@ -617,11 +652,11 @@ struct FlowQa {
 
     // fill event QA
     if (!cfgUseSmallMemory) {
-      registry.fill(HIST("globalTracks_centT0C"), collision.centFT0C(), tracks.size());
+      registry.fill(HIST("Tracks_centT0C"), collision.centFT0C(), tracks.size());
       registry.fill(HIST("PVTracks_centT0C"), collision.centFT0C(), collision.multNTracksPV());
-      registry.fill(HIST("globalTracks_PVTracks"), collision.multNTracksPV(), tracks.size());
-      registry.fill(HIST("globalTracks_multT0A"), collision.multFT0A(), tracks.size());
-      registry.fill(HIST("globalTracks_multV0A"), collision.multFV0A(), tracks.size());
+      registry.fill(HIST("Tracks_PVTracks"), collision.multNTracksPV(), tracks.size());
+      registry.fill(HIST("Tracks_multT0A"), collision.multFT0A(), tracks.size());
+      registry.fill(HIST("Tracks_multV0A"), collision.multFV0A(), tracks.size());
       registry.fill(HIST("multV0A_multT0A"), collision.multFT0A(), collision.multFV0A());
       registry.fill(HIST("multT0C_centT0C"), collision.centFT0C(), collision.multFT0C());
       registry.fill(HIST("centFT0CVar_centFT0C"), collision.centFT0C(), collision.centFT0CVariant1());
