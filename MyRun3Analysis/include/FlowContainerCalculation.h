@@ -196,12 +196,11 @@ void Output_vn(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     }
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/vn_%s%s.root",FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("%s/vn_%s%s.root",outputDir.c_str(),FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         hVn[0]->Write();
         hVn[1]->Write();
         hVn[2]->Write();
         fout->Close();
-        // canvas1->SaveAs("./ProcessOutput/vn.png");
     }
 }
 
@@ -325,7 +324,7 @@ void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_p
     }
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/v%d%d_%s%s.root", n, m_particle, FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("%s/v%d%d_%s%s.root",outputDir.c_str(), n, m_particle, FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         hVn[0]->Write();
         fout->Close();
     }
@@ -396,7 +395,7 @@ void Output_VnmWithID(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int
     }
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/v%d%d%s_%s%s.root", n, m_particle, IDName.c_str(), FileNameSuffix.c_str(), Subwagon.c_str()), "RECREATE");
+        TFile* fout = new TFile(Form("%s/v%d%d%s_%s%s.root",outputDir.c_str(), n, m_particle, IDName.c_str(), FileNameSuffix.c_str(), Subwagon.c_str()), "RECREATE");
         hVn[0]->Write();
         fout->Close();
     }
@@ -499,7 +498,7 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double
         string iscorrected = "";
         if (ApplynonclosureCorrection)
             iscorrected = "nonclosurecorrected";
-        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv%dCent%dTo%d_%s%s%s.root",n,(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str(),iscorrected.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("%s/pTDiffv%dCent%dTo%d_%s%s%s.root",outputDir.c_str(),n,(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str(),iscorrected.c_str()),"RECREATE");
         hV22pt->Write();
         fout->Close();
     }
@@ -578,7 +577,7 @@ void Output_PtDiffVnm(string FileNameSuffix, FlowContainer* fc, string EtaGap, I
     legend2->Draw();
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/pTDiffv%d%d%sCent%dTo%d_%s%s.root",n,m_particle,EtaGap.c_str(),(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("%s/pTDiffv%d%d%sCent%dTo%d_%s%s.root",outputDir.c_str(),n,m_particle,EtaGap.c_str(),(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         hVnmPt->Write();
         fout->Close();
     }
@@ -742,10 +741,9 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, nonlinearObserva
     }
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/%s_%s%s.root",nonlinearOutputObservableName[observable],FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("%s/%s_%s%s.root",outputDir.c_str(),nonlinearOutputObservableName[observable],FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         hv422->Write();
         fout->Close();
-        // canvas1->SaveAs(Form("./ProcessOutput/%s.png",nonlinearOutputObservableName[observable]));
     }
 
 }
@@ -824,10 +822,9 @@ void Output_Nonlinear(string FileNameSuffix, FlowContainer* fc, FlowContainer* f
     }
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/%s_%s.root",nonlinearOutputObservableName[observable],FileNameSuffix.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("%s/%s_%s.root",outputDir.c_str(),nonlinearOutputObservableName[observable],FileNameSuffix.c_str()),"RECREATE");
         hv422->Write();
         fout->Close();
-        // canvas1->SaveAs(Form("./ProcessOutput/%s.png",nonlinearOutputObservableName[observable]));
     }
 
 }
@@ -959,10 +956,9 @@ void Output_NSC(string FileNameSuffix, FlowContainer* fc, string Subwagon=""){
     }
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("./ProcessOutput/NSC_%s%s.root",FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        TFile* fout = new TFile(Form("%s/NSC_%s%s.root",outputDir.c_str(),FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         NSC32->Write();
         fout->Close();
-        // canvas1->SaveAs(Form("./ProcessOutput/NSC.png"));
     }
 }
 
@@ -1097,8 +1093,8 @@ void Output_SCklm(string FileNameSuffix, FlowContainer* fc, Int_t k, Int_t l, In
 
     if(OutputRoot){
         TFile* fout = nullptr;
-        if (m < 0) fout = new TFile(Form("./ProcessOutput/SC%d%d_%s%s.root",k,l,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
-        else fout = new TFile(Form("./ProcessOutput/SC%d%d%d_%s%s.root",k,l,m,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        if (m < 0) fout = new TFile(Form("%s/SC%d%d_%s%s.root",outputDir.c_str(),k,l,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        else fout = new TFile(Form("%s/SC%d%d%d_%s%s.root",outputDir.c_str(),k,l,m,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         SCklm->Write();
         fout->Close();
     }
@@ -1285,8 +1281,8 @@ void Output_NSCklm(string FileNameSuffix, FlowContainer* fc, Int_t k, Int_t l, I
 
     if(OutputRoot){
         TFile* fout = nullptr;
-        if (m < 0) fout = new TFile(Form("./ProcessOutput/NSC%d%d_%s%s.root",k,l,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
-        else fout = new TFile(Form("./ProcessOutput/NSC%d%d%d_%s%s.root",k,l,m,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        if (m < 0) fout = new TFile(Form("%s/NSC%d%d_%s%s.root",outputDir.c_str(),k,l,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        else fout = new TFile(Form("%s/NSC%d%d%d_%s%s.root",outputDir.c_str(),k,l,m,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
         NSCklm->Write();
         fout->Close();
     }
