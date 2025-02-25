@@ -331,6 +331,77 @@ void Output_Vnm(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_p
     }
 }
 
+void Output_VnmWithID(string FileNameSuffix, FlowContainer* fc, Int_t n = 2, Int_t m_particle = 4, string IDName = "ChFull", string Subwagon=""){
+    TCanvas* canvas1 = new TCanvas(Form("Canvas_Vnm_%d_%d", n, m_particle),Form("Canvas_Vnm_%d_%d", n, m_particle),900,900);
+    TH1D* Hist  = new TH1D(Form("v_{%d}{%d} in %s", n, m_particle, FileNameSuffix.c_str()), Form("v_{%d}{%d} in %s", n, m_particle, FileNameSuffix.c_str()),8,0,80);
+    Hist->SetMinimum(0.);
+    Hist->SetMaximum(0.15);
+    Hist->SetXTitle("Centrality (%)");
+    Hist->SetYTitle(Form("v_{%d}{%d}", n, m_particle));
+    Hist->Draw();
+    fc->SetIDName(IDName.c_str());
+    fc->SetPropagateErrors(kTRUE);
+    TH1D* hVn[3] = {nullptr};
+    hVn[0] = GetVnm(fc, n, m_particle);
+    hVn[0] = mergeCentralityToTargetBin(hVn[0],targetCentralityBins);
+    if (hVn[0] == nullptr){
+        Printf("Can't get v_{%d}{%d}",n, m_particle);
+        return;
+    }
+
+    std::vector<std::vector<std::vector<double>>> ValueArray;
+    std::vector<std::vector<std::vector<double>>> ValueErrorArray;
+    std::vector<std::vector<double>> ErrorArray;
+    int Nobs=1;//v24
+    TObjArray* subsamples = fc->GetSubProfiles();
+    int NofSample = subsamples->GetEntries();
+    int Nbin = hVn[0]->GetNbinsX();
+    ResizeValueArray(ValueArray,ValueErrorArray,ErrorArray,Nobs,NofSample,Nbin);
+    
+    for(int sample=0;sample<NofSample;sample++){
+        fc->OverrideMainWithSub(sample,false);
+        for(int i=0;i<Nobs;i++){
+            TH1D* temp = GetVnm(fc, n, m_particle);
+            temp = mergeCentralityToTargetBin(temp,targetCentralityBins);
+            if(!temp){
+                Printf("Can't get v_{%d}{%d}", n, m_particle);
+                return;
+            }
+            for(int j=0;j<temp->GetNbinsX();j++){
+                ValueArray[i][sample][j] = temp->GetBinContent(j+1);
+                ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
+            }
+        }
+    }
+    for(int i=0;i<Nobs;i++){
+        CalculateBootstrapError(ValueArray[i],ValueErrorArray[i],ErrorArray[i]);
+    }
+    for(int i=0;i<Nbin;i++){
+        hVn[0]->SetBinError(i+1, ErrorArray[0][i]);
+    }
+
+    SetMarkerAndLine(hVn[0],kBlack,kFullCircle,kSolid,1.0);
+    gStyle->SetOptStat("");
+    for(int i=0;i<Nobs;i++)hVn[i]->Draw("ESames");
+    TLegend* legend = new TLegend(0.2,0.8,0.5,0.9);
+    for(int i=0;i<Nobs;i++)legend->AddEntry(hVn[i],Form("v_{%d}{%d}", n, m_particle));
+    legend->Draw();
+
+    if(ComparewithPublish){
+        TFile* publish = new TFile("./HEPData-ins1666817-v1-root.root","READ");
+        TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish->Get("Table 2/Graph1D_y1");
+        SetMarkerAndLine(g_v2,kRed,kOpenSquare,kSolid,1.0);
+        g_v2->Draw("PE");
+        legend->AddEntry(g_v2,Form("v_{2}{4} JHEP 07 (2018) 103"));
+    }
+
+    if(OutputRoot){
+        TFile* fout = new TFile(Form("./ProcessOutput/v%d%d%s_%s%s.root", n, m_particle, IDName.c_str(), FileNameSuffix.c_str(), Subwagon.c_str()), "RECREATE");
+        hVn[0]->Write();
+        fout->Close();
+    }
+}
+
 void NonclosureCorrection(TH1D* hV22pt,Double_t CentMin,Double_t CentMax) {
     TFile* nonclosure = nullptr;
     // if (CentMax <= 10){
