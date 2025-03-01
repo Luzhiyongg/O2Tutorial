@@ -34,7 +34,7 @@ void UploadCCDBRunByRun()
     ccdb_api.init("https://alice-ccdb.cern.ch");
     std::map<std::string, std::string> metadataRCT, headers;
 
-    for (int iObj = 0; iObj < 2; iObj++){
+    for (int iObj = 0; iObj < nObj; iObj++){
         TString runName = runsList->At(iObj)->GetName();
         int runNumber = runName.Atoi();
         if (!(runNumber > 0)) {
