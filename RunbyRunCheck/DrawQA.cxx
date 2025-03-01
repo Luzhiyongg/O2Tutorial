@@ -28,7 +28,7 @@ vector<EMarkerStyle> markerStylesList = {kFullCircle, kFullSquare, kFullTriangle
 vector<ELineStyle> lineStylesList = {kSolid, kDashed, kDotted};
 
 void DrawQA(){
-    TFile *file = TFile::Open("./AnalysisResults/AnalysisResults_LHC23_PbPb_pass4_288089.root");
+    TFile *file = TFile::Open("./AnalysisResults/AnalysisResults_LHC23zzo_pass4_QC1_sampling_359365.root");
     if (!file) {
         std::cout << "Cannot open file" << std::endl;
         return;
@@ -37,7 +37,10 @@ void DrawQA(){
     // get the list of runs
     TList *runsList = gDirectory->GetListOfKeys();
     int nRuns = runsList->GetEntries(); // number of runs
-    vector<int> IgnoreRuns = {544640, 544913, 545117, 545295, 545311, 544091, 544652, 544694}; 
+    // vector<int> IgnoreRuns = {544640, 544913, 545117, 545295, 545311, 544091, 544652, 544694}; 
+    vector<int> IgnoreRuns = {-1}; 
+    // vector<int> SelectedRuns = {545367, 545291, 545223, 544917}; // Good ITS Runs
+    vector<int> SelectedRuns = {}; 
     
     for(string histName : histNamesList){
         // create a canvas
@@ -53,11 +56,20 @@ void DrawQA(){
             // get the run number
             TString runName = runsList->At(iRun)->GetName();
             int runNumber = runName.Atoi();
+            if (!(runNumber > 0))
+                continue;
             if (find(IgnoreRuns.begin(), IgnoreRuns.end(), runNumber) != IgnoreRuns.end()) {
                 Printf("Skipping run %d", runNumber);
                 continue;
             }
-            Printf("Processing run %d", runNumber);
+            if (!SelectedRuns.empty()) {
+                if (find(SelectedRuns.begin(), SelectedRuns.end(), runNumber) == SelectedRuns.end()) {
+                    Printf("Skipping run %d", runNumber);
+                    continue;
+                }
+            } 
+            // Printf("Processing run %d", runNumber);
+            printf("%d, ", runNumber);
             // get the histogram
             TH1D *hist = (TH1D*)gDirectory->Get(Form("%d/%s", runNumber, histName.c_str()));
             if (!hist) {
