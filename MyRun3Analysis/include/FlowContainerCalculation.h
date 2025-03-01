@@ -3,6 +3,7 @@
 
 #include "./BasicSetting.h"
 #include "./GraphSetting.h"
+#include "./ErrorPropagation.h"
 
 TH1D* mergeCentralityToTargetBin(TH1D* h, const std::vector<float>& targetCentralityBins){
     // merge from fine binning to wide binning
