@@ -422,11 +422,9 @@ struct FlowMc {
           fillFC(fGFWReco, false, corrconfigsReco.at(l_ind), centrality, lRandom);
         }
       }
-
     }
     histos.fill(HIST("hNchVsImpactParameter"), imp, nCh);
   }
-
 };
 
 WorkflowSpec defineDataProcessing(ConfigContext const& cfgc)
