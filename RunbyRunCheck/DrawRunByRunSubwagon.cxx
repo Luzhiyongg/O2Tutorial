@@ -16,15 +16,9 @@
 #include <map>
 #include <array>
 #include "../MyRun3Analysis/include/FlowContainerCalculation.h"
+#include "./include/RunByRunCommon.h"
 
 std::vector<std::string> histNamesList = {"hPhiWeighted","hEta","hVtxZ","hMult","hCent","c22_gap10"};
-
-std::vector<Color_t> colorsList = {kBlack, kRed, kBlue, kGreen, kMagenta, kCyan, kYellow, kOrange, kViolet, kPink};
-
-std::vector<EMarkerStyle> markerStylesList = {kFullCircle, kFullSquare, kFullTriangleUp, kFullTriangleDown, kFullStar, kFullDiamond, kFullCross, kFullCrossX, kFullThreeTriangles,
- kOpenCircle, kOpenSquare, kOpenTriangleUp, kOpenTriangleDown, kOpenStar, kOpenDiamond, kOpenCross, kOpenCrossX, kOpenThreeTriangles};
-
-std::vector<ELineStyle> lineStylesList = {kSolid, kDashed, kDotted};
 
 void DrawRunByRunSubwagon() {
     // Compare different subwagons for each run
@@ -42,7 +36,7 @@ void DrawRunByRunSubwagon() {
     }
     TList *runsList = SubwagonDirs[0]->GetListOfKeys(); // list of runs
     int nRuns = runsList->GetEntries(); // number of runs
-    std::vector<int> IgnoreRuns = {544653,544742,544091}; 
+    // std::vector<int> IgnoreRuns = {544653,544742,544091}; 
 
     for (int iRun = 0; iRun < nRuns; iRun++) {
         TString runName = runsList->At(iRun)->GetName();

@@ -16,17 +16,11 @@
 #include <map>
 #include <array>
 #include "../MyRun3Analysis/include/FlowContainerCalculation.h"
+#include "./include/RunByRunCommon.h"
 
 using namespace std;
 
 vector<string> cumulnatList = {"c22","c22_gap10","c32","c32_gap10"};
-
-vector<Color_t> colorsList = {kBlack, kRed, kBlue, kGreen, kMagenta, kCyan, kYellow, kOrange, kViolet, kPink};
-
-vector<EMarkerStyle> markerStylesList = {kFullCircle, kFullSquare, kFullTriangleUp, kFullTriangleDown, kFullStar, kFullDiamond, kFullCross, kFullCrossX, kFullThreeTriangles,
- kOpenCircle, kOpenSquare, kOpenTriangleUp, kOpenTriangleDown, kOpenStar, kOpenDiamond, kOpenCross, kOpenCrossX, kOpenThreeTriangles};
-
-vector<ELineStyle> lineStylesList = {kSolid, kDashed, kDotted};
 
 double MySqrt(double x) {
     if (x <= 0)
@@ -74,7 +68,8 @@ TH1D* RunbyRunCalculateNSC32(TH1D* hCorr22_Full, TH1D* hCorr22_Gap, TH1D* hCorr3
 }
 
 void DrawRunByRunFlow(){
-    TFile *file = TFile::Open("./AnalysisResults/AnalysisResults_LHC23zzo_pass4_QC1_sampling_359365.root");
+    // TFile *file = TFile::Open("./AnalysisResults/AnalysisResults_LHC23zzo_pass4_QC1_sampling_359365.root");
+    TFile *file = TFile::Open("./AnalysisResults/AnalysisResults_LHC23_PbPb_pass4_356235.root");
     if (!file) {
         std::cout << "Cannot open file" << std::endl;
         return;
@@ -84,19 +79,24 @@ void DrawRunByRunFlow(){
     TList *runsList = gDirectory->GetListOfKeys();
     TDirectory* runDir = gDirectory;
     int nRuns = runsList->GetEntries(); // number of runs
-    // vector<int> IgnoreRuns = {544640, 544913, 545117, 545295, 545311, 544091, 544652, 544694}; 
-    vector<int> IgnoreRuns = {544116,544122,544653,544742}; // LHCzzh
-    vector<int> SelectedRuns = {545367, 545291, 545223, 544917}; // Good ITS Runs
-    
+    TDirectory* HadronicRate = (TDirectory*)gDirectory->Get("HadronicRate");
+    if (!HadronicRate) {
+        std::cout << "Cannot find HadronicRate directory" << std::endl;
+        return;
+    }
     TFile* publish_Run2pass2 = new TFile("./PublicData/PbPb_Run2Pass2.root","READ");
     if (!publish_Run2pass2) {
         std::cout << "Cannot open file" << std::endl;
         return;
     }
     TGraphAsymmErrors* g_v2 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v2{2}_Gap10_TPCPileUp");
-    SetMarkerAndLine(g_v2,kBlack,kOpenSquare,kSolid,1.0);
+    SetMarkerAndLine(g_v2,kBlack,kFullSquare,kSolid,1.5);
     TGraphAsymmErrors* g_v32 = (TGraphAsymmErrors*)publish_Run2pass2->Get("v3{2}_Gap10_TPCPileUp");
-    SetMarkerAndLine(g_v32,kBlack,kOpenSquare,kSolid,1.0);
+    SetMarkerAndLine(g_v32,kBlack,kFullSquare,kSolid,1.5);
+    TGraphAsymmErrors* g_NSC32 = (TGraphAsymmErrors*)publish_Run2pass2->Get("NSC3232_Gap10_TPCPileUp");
+    SetMarkerAndLine(g_NSC32,kBlack,kFullSquare,kSolid,1.5);
+
+    gStyle->SetOptStat(0);
 
     // Vn
     for(string histName : cumulnatList){
@@ -104,6 +104,7 @@ void DrawRunByRunFlow(){
         TCanvas *canvas = new TCanvas(Form("canvas_%s", histName.c_str()), Form("canvas_%s", histName.c_str()), 800, 600);
         vector<TLegend*> legends;
         legends.push_back(new TLegend());
+        bool isFirst = false;
         int iColor = 0;
         int iMarkerStyle = 0;
         int iLineStyle = 0;
@@ -133,6 +134,12 @@ void DrawRunByRunFlow(){
                 Printf("Histogram %s not found for run %d", histName.c_str(), runNumber);
                 continue;
             }
+
+            double meanHadronicRate = GetHadronicRate(runNumber, HadronicRate);
+            if (cutHadronicRate && (meanHadronicRate < minHadronicRate || meanHadronicRate > maxHadronicRate)) {
+                Printf("Skipping run %d, hadronic rate %0.1f kHz", runNumber, meanHadronicRate);
+                continue;
+            }
             
             TH1D* hist = mergeCentralityToTargetBin(FromCumulantToVn(cumulant),targetCentralityBins);
 
@@ -141,19 +148,20 @@ void DrawRunByRunFlow(){
             hist->SetMarkerStyle(markerStylesList[iMarkerStyle]);
             hist->SetMarkerColor(colorsList[iColor]);
             hist->SetLineColor(colorsList[iColor]);
-            legends[iLegend]->AddEntry(hist, Form("%d", runNumber), "p");
+            legends[iLegend]->AddEntry(hist, Form("%d, %0.1f kHz", runNumber, meanHadronicRate), "p");
             // draw the histogram
-            if(iRun == 0){
+            if(!isFirst){
                 hist->SetTitle(Form("%s", hist->GetName()));
                 hist->Draw("HIST");
-                hist->GetYaxis()->SetRangeUser(0, 0.05);
+                // hist->GetYaxis()->SetRangeUser(0, 0.05);
                 hist->Draw("p");
+                isFirst = true;
             }
             else{
                 hist->Draw("p same");
             }
 
-            if (SelectedRuns.empty()) {
+            if (SelectedRuns.empty() && !meanHadronicRate) {
                 iMarkerStyle++;
                 if (iMarkerStyle == markerStylesList.size()) {
                     iMarkerStyle = 0;
@@ -178,12 +186,16 @@ void DrawRunByRunFlow(){
         }
         if (histName.find("c22") != string::npos || histName.find("c22_gap10") != string::npos) {
             g_v2->Draw("p same");
-            legends[0]->AddEntry(g_v2, "Pb-Pb Run2 Pass2", "p");
+            TLegend* leg_Pub = new TLegend();
+            leg_Pub->AddEntry(g_v2, "Pb-Pb Run2 Pass2", "p");
+            leg_Pub->Draw();
         }
 
         if (histName.find("c32") != string::npos || histName.find("c32_gap10") != string::npos) {
             g_v32->Draw("p same");
-            legends[0]->AddEntry(g_v32, "Pb-Pb Run2 Pass2", "p");
+            TLegend* leg_Pub = new TLegend();
+            leg_Pub->AddEntry(g_v32, "Pb-Pb Run2 Pass2", "p");
+            leg_Pub->Draw();
         }
         // add the legends to the canvas
         for(TLegend* legend : legends){
@@ -196,6 +208,7 @@ void DrawRunByRunFlow(){
         TCanvas *canvas = new TCanvas(Form("canvas_NSC"), Form("canvas_NSC"), 800, 600);
         vector<TLegend*> legends;
         legends.push_back(new TLegend());
+        bool isFirst = false;
         int iColor = 0;
         int iMarkerStyle = 0;
         int iLineStyle = 0;
@@ -228,6 +241,12 @@ void DrawRunByRunFlow(){
                 return;
             }
 
+            double meanHadronicRate = GetHadronicRate(runNumber, HadronicRate);
+            if (cutHadronicRate && (meanHadronicRate < minHadronicRate || meanHadronicRate > maxHadronicRate)) {
+                Printf("Skipping run %d, hadronic rate %0.1f kHz", runNumber, meanHadronicRate);
+                continue;
+            }
+
             // hCorr22_Full = mergeCentralityToTargetBin(hCorr22_Full, targetCentralityBins);
             // hCorr22_Gap = mergeCentralityToTargetBin(hCorr22_Gap, targetCentralityBins);
             // hCorr32_Full = mergeCentralityToTargetBin(hCorr32_Full, targetCentralityBins);
@@ -242,19 +261,20 @@ void DrawRunByRunFlow(){
             hist->SetMarkerStyle(markerStylesList[iMarkerStyle]);
             hist->SetMarkerColor(colorsList[iColor]);
             hist->SetLineColor(colorsList[iColor]);
-            legends[iLegend]->AddEntry(hist, Form("%d", runNumber), "p");
+            legends[iLegend]->AddEntry(hist, Form("%d, %0.1f kHz", runNumber, meanHadronicRate), "p");
             // draw the histogram
-            if(iRun == 0){
+            if(!isFirst){
                 hist->SetTitle(Form("%s", hist->GetName()));
                 hist->Draw("HIST");
-                hist->GetYaxis()->SetRangeUser(0, 0.05);
+                // hist->GetYaxis()->SetRangeUser(0, 0.05);
                 hist->Draw("p");
+                isFirst = true;
             }
             else{
                 hist->Draw("p same");
             }
 
-            if (SelectedRuns.empty()) {
+            if (SelectedRuns.empty() && !meanHadronicRate) {
                 iMarkerStyle++;
                 if (iMarkerStyle == markerStylesList.size()) {
                     iMarkerStyle = 0;
@@ -278,6 +298,10 @@ void DrawRunByRunFlow(){
                 legends.push_back(new TLegend());
             }
         }
+        g_NSC32->Draw("p same");
+        TLegend* leg_Pub = new TLegend();
+        leg_Pub->AddEntry(g_NSC32, "Pb-Pb Run2 Pass2", "p");
+        leg_Pub->Draw();
         // add the legends to the canvas
         for(TLegend* legend : legends){
             legend->Draw();
