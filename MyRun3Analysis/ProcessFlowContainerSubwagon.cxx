@@ -1,3 +1,9 @@
+/*
+ * @Author: Zhiyong Lu (zhiyong.lu@cern.ch) 
+ * @Date: 2024-02-01
+ * @Last Modified by: Zhiyong Lu
+ * @Last Modified time: 2025-03-05 22:01:25
+ */
 //put in the first lines to ignore the warning message
 #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #pragma GCC diagnostic ignored "-Wwritable-strings"
@@ -18,11 +24,11 @@
 #include "include/ErrorPropagation.h"
 #include "include/FlowContainerCalculation.h"
 
-void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23zzh_pass4_small_340440"){
+void ProcessFlowContainerSubwagon(string FileNameSuffix = "LHC23_PbPb_pass4_344339"){
     // Produce flow results in root file for each subwagon
 
     TFile* f = new TFile(Form("./AnalysisResults/AnalysisResults_%s.root",FileNameSuffix.c_str()),"READ");
-    vector<string> SubwagonNames = {"","_FT0M"};
+    vector<string> SubwagonNames = {""};
     vector<double> pTDiffCent={0,5,10,20,30,40,50,60,70,80};
 
     for(uint i=0; i < SubwagonNames.size(); i++){

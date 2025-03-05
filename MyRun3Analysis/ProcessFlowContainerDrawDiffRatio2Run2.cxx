@@ -1,3 +1,9 @@
+/*
+ * @Author: Zhiyong Lu (zhiyong.lu@cern.ch) 
+ * @Date: 2025-03-05 22:01:48 
+ * @Last Modified by:   Zhiyong Lu 
+ * @Last Modified time: 2025-03-05 22:01:48 
+ */
 //put in the first lines to ignore the warning message
 #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #pragma GCC diagnostic ignored "-Wwritable-strings"
@@ -116,22 +122,22 @@ TH1D* GetAbsValue(Int_t NBin, TH1D* h1, TH1D* h2, Bool_t ispTDiff=false){
 }
 
 std::map<kObservable,bool> IfCheckObservable = {
-    {kVn,true},
-    {kV24,true},
-    {kV26,true},
-    {kV28,true},
-    {kV210,true},
-    {kV422,true},
-    {kChi422,true},
-    {kRho422,true},
-    {kNSC23,true},
-    {kNSC24,true},
-    {kNSC234,true},
-    {kNSC345,true},
-    {kpTDiffv2,true},
+    {kVn,false},
+    {kV24,false},
+    {kV26,false},
+    {kV28,false},
+    {kV210,false},
+    {kV422,false},
+    {kChi422,false},
+    {kRho422,false},
+    {kNSC23,false},
+    {kNSC24,false},
+    {kNSC234,false},
+    {kNSC345,false},
+    {kpTDiffv2,false},
     {kpTDiffv3,false},
     {kpTDiffv4,false},
-    {kpTDiffv24ChFull,false},
+    {kpTDiffv24ChFull,true},
     {kpTDiffv24Ch10Gap,false},
     {kpTDiffv26ChFull,false}
 };
@@ -256,8 +262,41 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // legendNames.push_back("Max occupancy 3k (full 2023, NUA not fitted)");
     FileNameSuffixs.push_back("LHC23_PbPb_pass4_344339");
     legendNames.push_back("default (full 2023)");
-    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_344339nonclosurecorrected"); //only for pTDiffv22
-    // legendNames.push_back("with MC non-closure corrected");
+    // legendNames.push_back("default maxInactiveChips:{8,8,8,111,111,195,195}");
+    // legendNames.push_back("Global track");
+    FileNameSuffixs.push_back("LHC23_PbPb_pass4_344339nonclosurecorrected"); //only for pTDiffv22
+    legendNames.push_back("with MC non-closure corrected");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_355881_AverageNUA");
+    // legendNames.push_back("average NUA");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_355881_RunByRunNUA");
+    // legendNames.push_back("run-by-run NUA");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_356028");
+    // legendNames.push_back("default");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_356028_ITSclu0");
+    // legendNames.push_back("ITSclu>0");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_356028_occupancy5k");
+    // legendNames.push_back("occupancy<5k");
+    // FileNameSuffixs.push_back("LHC24ar_pass2_QC4_360475");
+    // legendNames.push_back("LHC24ar_pass2_QC4");
+
+    // FileNameSuffixs.push_back("LHC23zzm_pass4_calo_359360_QualityITS");
+    // legendNames.push_back("isQualityTrackITS");
+    // FileNameSuffixs.push_back("LHC23zzm_pass4_calo_359360_ITS");
+    // legendNames.push_back("isQualityTrackITS+Primary+Acceptance");
+
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_359613_ITSclu0");
+    // legendNames.push_back("LHC23zzh_pass4");
+    // legendNames.push_back("# of ITS clusters > 0");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_359613_NokIsGoodITSLayersAll");
+    // legendNames.push_back("without kIsGoodITSLayersAll");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_359613_occupancy1w");
+    // legendNames.push_back("occupancy < 10k");
+    
+
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_361919");
+    // legendNames.push_back("maxInactiveChips:{8,8,8,80,80,150,150}");
+    // FileNameSuffixs.push_back("LHC23zzh_pass4_small_361917");
+    // legendNames.push_back("maxInactiveChips:{8,8,8,50,50,100,100}");
 
 
 
@@ -1406,11 +1445,11 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
 
             TGraphAsymmErrors* g_pTDiffv24Ch10Gap = nullptr;
             if (j<PubTable_pTDiffv2.size()) {
-                g_pTDiffv24Ch10Gap = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable_pTDiffv2[j]));
+                g_pTDiffv24Ch10Gap = (TGraphAsymmErrors*)publish_ins1666817->Get(Form("Table %d/Graph1D_y1",PubTable_pTDiffv24[j]));
                 if(!g_pTDiffv24Ch10Gap) continue;
                 SetMarkerAndLine(g_pTDiffv24Ch10Gap,kBlack,kOpenSquare,kSolid,1.0);
                 g_pTDiffv24Ch10Gap->Draw("PE");
-                leg_pTDiffv24Ch10Gap->AddEntry(g_pTDiffv24Ch10Gap,Form("v2{2}(p_{T}) JHEP 07 (2018) 103"));
+                leg_pTDiffv24Ch10Gap->AddEntry(g_pTDiffv24Ch10Gap,Form("v2{4}(p_{T}) JHEP 07 (2018) 103"));
             }
             leg_pTDiffv24Ch10Gap->Draw();
 
