@@ -1,3 +1,9 @@
+/*
+ * @Author: Zhiyong Lu (zhiyong.lu@cern.ch) 
+ * @Date: 2024-02-01
+ * @Last Modified by:   Zhiyong Lu 
+ * @Last Modified time: 2025-03-05 22:02:34 
+ */
 #ifndef FlowContainerCalculation_h
 #define FlowContainerCalculation_h
 
@@ -422,6 +428,8 @@ void NonclosureCorrection(TH1D* hV22pt,Double_t CentMin,Double_t CentMax) {
     
     for (int i = 1; i <= hV22pt->GetNbinsX(); i++) {
         double pt = hV22pt->GetBinCenter(i);
+        if (pt > 3.)
+            continue;
         double correction = nonclosureCurves->GetBinContent(nonclosureCurves->FindBin(pt));
         if (correction > 0.){
             hV22pt->SetBinContent(i, hV22pt->GetBinContent(i)/correction);
@@ -468,12 +476,12 @@ void Output_ptDiffvn(string FileNameSuffix, FlowContainer* fc, Int_t n=2, Double
         for(int i=0;i<Nobs;i++){
             TH1D* temp = (TH1D*)fc->GetVN2VsPt(n,CentMin,CentMax);
             temp->SetName(Form("pTDiffv2_%d",sample));
-            if (ApplynonclosureCorrection)
-                NonclosureCorrection(temp,CentMin,CentMax);
             if(!temp){
                 Printf("Can't get pTDiffv2_%d",sample);
                 return;
             }
+            if (ApplynonclosureCorrection)
+                NonclosureCorrection(temp,CentMin,CentMax);
             for(int j=0;j<temp->GetNbinsX();j++){
                 ValueArray[i][sample][j] = temp->GetBinContent(j+1);
                 ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
@@ -537,6 +545,8 @@ void Output_PtDiffVnm(string FileNameSuffix, FlowContainer* fc, string EtaGap, I
         Printf("Can't get hV%d%d",n,m_particle);
         return;
     }
+    if (ApplynonclosureCorrection && n==2)
+        NonclosureCorrection(hVnmPt,CentMin,CentMax);
 
     std::vector<std::vector<std::vector<double>>> ValueArray;
     std::vector<std::vector<std::vector<double>>> ValueErrorArray;
@@ -556,6 +566,8 @@ void Output_PtDiffVnm(string FileNameSuffix, FlowContainer* fc, string EtaGap, I
                 Printf("Can't get pTDiffv%d%d_%d",n,m_particle,sample);
                 return;
             }
+            if (ApplynonclosureCorrection && n==2)
+                NonclosureCorrection(temp,CentMin,CentMax);
             for(int j=0;j<temp->GetNbinsX();j++){
                 ValueArray[i][sample][j] = temp->GetBinContent(j+1);
                 ValueErrorArray[i][sample][j] = temp->GetBinError(j+1);
@@ -578,7 +590,10 @@ void Output_PtDiffVnm(string FileNameSuffix, FlowContainer* fc, string EtaGap, I
     legend2->Draw();
 
     if(OutputRoot){
-        TFile* fout = new TFile(Form("%s/pTDiffv%d%d%sCent%dTo%d_%s%s.root",outputDir.c_str(),n,m_particle,EtaGap.c_str(),(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str()),"RECREATE");
+        string iscorrected = "";
+        if (ApplynonclosureCorrection && n==2)
+            iscorrected = "nonclosurecorrected";
+        TFile* fout = new TFile(Form("%s/pTDiffv%d%d%sCent%dTo%d_%s%s%s.root",outputDir.c_str(),n,m_particle,EtaGap.c_str(),(int)CentMin,(int)CentMax,FileNameSuffix.c_str(),Subwagon.c_str(),iscorrected.c_str()),"RECREATE");
         hVnmPt->Write();
         fout->Close();
     }

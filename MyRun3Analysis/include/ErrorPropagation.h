@@ -1,3 +1,9 @@
+/*
+ * @Author: Zhiyong Lu (zhiyong.lu@cern.ch) 
+ * @Date: 2024-02-01
+ * @Last Modified by: Zhiyong Lu
+ * @Last Modified time: 2025-03-05 22:04:09
+ */
 #ifndef ERROTPROGATION
 #define ERROTPROGATION
 #include "math.h"
