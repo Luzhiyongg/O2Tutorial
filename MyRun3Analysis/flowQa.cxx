@@ -373,7 +373,7 @@ struct FlowQa {
       funcEff[2] = new TF1("funcEff2", "chebyshev4", 0, 3000);
       funcEff[2]->SetParameters(0.7933082148, -2.24092e-05, -2.55079e-09, -8.59327e-13, 3.1966e-16);
       funcEff[3] = new TF1("funcEff3", "chebyshev4", 0, 3000);
-      funcEff[3]->SetParameters(0.8084143879, -1.88185e-05, -3.26378e-09, -6.57021e-13, 2.92597e-16 );
+      funcEff[3]->SetParameters(0.8084143879, -1.88185e-05, -3.26378e-09, -6.57021e-13, 2.92597e-16);
       funcEff[4] = new TF1("funcEff4", "chebyshev4", 0, 3000);
       funcEff[4]->SetParameters(0.8160584679, -4.0401e-06, -1.5118e-08, 3.22423e-12, -1.21729e-16);
       funcEff[5] = new TF1("funcEff5", "chebyshev4", 0, 3000);
@@ -386,7 +386,6 @@ struct FlowQa {
       funcV3->SetParameters(0.0174056, 0.000703329, -1.45044e-05, 1.91991e-07, -1.62137e-09);
       funcV4 = new TF1("funcV4", "[0]+[1]*x+[2]*x*x+[3]*x*x*x+[4]*x*x*x*x", 0, 100);
       funcV4->SetParameters(0.008845, 0.000259668, -3.24435e-06, 4.54837e-08, -6.01825e-10);
-
     }
   }
 
@@ -749,7 +748,7 @@ struct FlowQa {
         fphi = (1 + 2 * fphi);
         int pTBinForEff = hFindPtBin->FindBin(track.pt());
         if (pTBinForEff >= 1 && pTBinForEff <= 7) {
-          wEPeff = funcEff[pTBinForEff-1]->Eval(fphi * tracks.size());
+          wEPeff = funcEff[pTBinForEff - 1]->Eval(fphi * tracks.size());
           weff *= wEPeff;
         }
       }
