@@ -1,3 +1,9 @@
+/*
+ * @Author: Zhiyong Lu (zhiyong.lu@cern.ch) 
+ * @Date: 2025-03-05 22:05:29 
+ * @Last Modified by:   Zhiyong Lu 
+ * @Last Modified time: 2025-03-05 22:05:29 
+ */
 //put in the first lines to ignore the warning message
 #pragma GCC diagnostic ignored "-Winconsistent-missing-override"
 #pragma GCC diagnostic ignored "-Wwritable-strings"
@@ -88,14 +94,14 @@ void CalculateSystematic(int kobs, string obsName, string DefaultFileNameSuffix,
             hUncertainty->SetBinContent(ibin, -1);
             hUncertainty->SetBinError(ibin, 10);
             hBarlow->SetBinContent(ibin, -1);
-            Printf("skip pT at %f GeV/c", hDefault->GetBinCenter(ibin));
+            // Printf("skip pT at %f GeV/c", hDefault->GetBinCenter(ibin));
             continue;
         }
         if (defaultBinContent==-1 || sysBinContent==-1 || defaultBinContent!=defaultBinContent || sysBinContent!=sysBinContent || isZero(defaultBinContent) || isZero(sysBinContent)) {
             hUncertainty->SetBinContent(ibin, -1);
             hUncertainty->SetBinError(ibin, 10);
             hBarlow->SetBinContent(ibin, -1);
-            Printf("obs: %s, default: %s, sys: %s, bin: %d, Set failed point to -1", obsName.c_str(), DefaultFile.c_str(), SysFile.c_str(), ibin);
+            // Printf("obs: %s, default: %s, sys: %s, bin: %d, Set failed point to -1", obsName.c_str(), DefaultFile.c_str(), SysFile.c_str(), ibin);
             continue;
         }
         double defaultBinError = hDefault->GetBinError(ibin);
@@ -360,6 +366,10 @@ void ProcessSystematics() {
     SysDescription.push_back({"kNoColl flags"});
     SysFileNameSuffixs.push_back({"LHC23zzh_pass4_small_346469_NoMultCorrelation"});
     SysDescription.push_back({"w/o Multiplicity correlation"});
+    SysFileNameSuffixs.push_back({"LHC23zzh_pass4_359613_ITSclu0"});
+    SysDescription.push_back({"\\# of ITS clusters $>$ 0"});
+    SysFileNameSuffixs.push_back({"LHC23zzh_pass4_small_356028_occupancy5k","LHC23zzh_pass4_359613_occupancy1w"});
+    SysDescription.push_back({"occupancy $<=$ 5k", "occupancy $<=$ 10k"});
 
     // Track Systematics
     SysFileNameSuffixs.push_back({"LHC23_PbPb_pass4_341269"});
