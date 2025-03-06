@@ -122,22 +122,22 @@ TH1D* GetAbsValue(Int_t NBin, TH1D* h1, TH1D* h2, Bool_t ispTDiff=false){
 }
 
 std::map<kObservable,bool> IfCheckObservable = {
-    {kVn,false},
+    {kVn,true},
     {kV24,false},
     {kV26,false},
     {kV28,false},
     {kV210,false},
     {kV422,false},
-    {kChi422,false},
-    {kRho422,false},
-    {kNSC23,false},
-    {kNSC24,false},
+    {kChi422,true},
+    {kRho422,true},
+    {kNSC23,true},
+    {kNSC24,true},
     {kNSC234,false},
     {kNSC345,false},
-    {kpTDiffv2,false},
+    {kpTDiffv2,true},
     {kpTDiffv3,false},
     {kpTDiffv4,false},
-    {kpTDiffv24ChFull,true},
+    {kpTDiffv24ChFull,false},
     {kpTDiffv24Ch10Gap,false},
     {kpTDiffv26ChFull,false}
 };
@@ -261,11 +261,12 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // FileNameSuffixs.push_back("LHC23_PbPb_pass4_332826_kIsGoodITSLayersAll");
     // legendNames.push_back("Max occupancy 3k (full 2023, NUA not fitted)");
     FileNameSuffixs.push_back("LHC23_PbPb_pass4_344339");
-    legendNames.push_back("default (full 2023)");
+    // legendNames.push_back("default (full 2023)");
     // legendNames.push_back("default maxInactiveChips:{8,8,8,111,111,195,195}");
     // legendNames.push_back("Global track");
-    FileNameSuffixs.push_back("LHC23_PbPb_pass4_344339nonclosurecorrected"); //only for pTDiffv22
-    legendNames.push_back("with MC non-closure corrected");
+    legendNames.push_back("w kIsGoodITSLayersAll");
+    // FileNameSuffixs.push_back("LHC23_PbPb_pass4_344339nonclosurecorrected"); //only for pTDiffv22
+    // legendNames.push_back("with MC non-closure corrected");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_355881_AverageNUA");
     // legendNames.push_back("average NUA");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_355881_RunByRunNUA");
@@ -287,8 +288,8 @@ void ProcessFlowContainerDrawDiffRatio2Run2(){
     // FileNameSuffixs.push_back("LHC23zzh_pass4_359613_ITSclu0");
     // legendNames.push_back("LHC23zzh_pass4");
     // legendNames.push_back("# of ITS clusters > 0");
-    // FileNameSuffixs.push_back("LHC23zzh_pass4_359613_NokIsGoodITSLayersAll");
-    // legendNames.push_back("without kIsGoodITSLayersAll");
+    FileNameSuffixs.push_back("LHC23zzh_pass4_359613_NokIsGoodITSLayersAll");
+    legendNames.push_back("without kIsGoodITSLayersAll");
     // FileNameSuffixs.push_back("LHC23zzh_pass4_359613_occupancy1w");
     // legendNames.push_back("occupancy < 10k");
     
