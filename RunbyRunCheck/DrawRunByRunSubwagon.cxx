@@ -11,6 +11,7 @@
 #include "TCanvas.h"
 #include "TObjArray.h"
 #include "TGraphAsymmErrors.h"
+#include "TLatex.h"
 #include <cstring>
 #include <vector>
 #include <map>
@@ -23,6 +24,7 @@ std::vector<std::string> histNamesList = {"hPhiWeighted","hEta","hVtxZ","hMult",
 void DrawRunByRunSubwagon() {
     // Compare different subwagons for each run
     TFile *file = TFile::Open("./AnalysisResults/AnalysisResults_LHC23zzh_pass4_361386.root");
+    //LHC23zzm_pass4_calo_361088
     if (!file) {
         std::cout << "Cannot open file" << std::endl;
         return;
@@ -54,8 +56,28 @@ void DrawRunByRunSubwagon() {
         int nRows = nHists / nCols + (nHists % nCols > 0);
         //set canvas size based on the number of histNamesList
         TCanvas *canvas = new TCanvas(Form("c%d", runNumber), Form("Run %d", runNumber), 1000., 250.*nRows);
-        //Divide canvas based on the number of histNamesList
-        canvas->Divide(nCols, nRows);
+        // ========================
+        // 1. 主标题（画布顶部）
+        // ========================
+        // 创建标题专用Pad（占据画布顶部5%空间）
+        TPad* titlePad = new TPad("titlePad", "", 0, 0.95, 1, 1); // (x1,y1,x2,y2) 单位归一化
+        titlePad->Draw();
+        titlePad->cd(); // 进入标题Pad
+
+        // 在标题Pad中央绘制主标题
+        TLatex* mainTitle = new TLatex(0.5, 0.5, Form("Run %d", runNumber));
+        mainTitle->SetTextAlign(22);   // 中心对齐
+        mainTitle->SetTextSize(0.6);   // 文字大小（相对Pad高度）
+        mainTitle->SetTextColor(kBlack); // 可自定义颜色
+        mainTitle->Draw();
+
+        // ========================
+        // 2. 子图区域（带分割）
+        // ========================
+        canvas->cd(); // 返回主画布
+        TPad* mainContent = new TPad("mainContent", "", 0, 0, 1, 0.95); // 占据剩余95%空间
+        mainContent->Draw();
+        mainContent->Divide(nCols, nRows); // 分割为子图
 
         // turn off statistics box
         gStyle->SetOptStat(0);
@@ -63,7 +85,7 @@ void DrawRunByRunSubwagon() {
 
         for(int iHist = 0; iHist < nHists; iHist++) {
             std::string histName = histNamesList[iHist];
-            canvas->cd(iHist+1);
+            mainContent->cd(iHist+1);
             TLegend *legend = new TLegend(0.6, 0.6, 0.9, 0.9);
             bool isFirst = false;
             int iColor = 0;
